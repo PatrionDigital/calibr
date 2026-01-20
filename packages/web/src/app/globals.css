@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Terminal Theme (Default) */
+    --background: 0 0% 0%;
+    --foreground: 120 100% 50%;
+    --primary: 120 100% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 120 100% 33%;
+    --secondary-foreground: 120 100% 50%;
+    --muted: 120 100% 25%;
+    --muted-foreground: 120 100% 40%;
+    --accent: 120 100% 10%;
+    --accent-foreground: 120 100% 50%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 120 100% 25%;
+    --input: 120 100% 25%;
+    --ring: 120 100% 50%;
+    --radius: 0rem; /* Sharp corners for terminal aesthetic */
+
+    /* Card backgrounds */
+    --card: 0 0% 4%;
+    --card-foreground: 120 100% 50%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 120 100% 50%;
+
+    /* Chart colors */
+    --chart-1: 120 100% 50%;
+    --chart-2: 180 100% 50%;
+    --chart-3: 60 100% 50%;
+    --chart-4: 300 100% 50%;
+    --chart-5: 0 100% 50%;
+
+    /* Prediction market semantic colors */
+    --bullish: 120 100% 50%;
+    --bearish: 0 100% 50%;
+    --neutral: 0 0% 53%;
+
+    /* Confidence level colors */
+    --confidence-high: 120 100% 50%;
+    --confidence-medium: 60 100% 50%;
+    --confidence-low: 39 100% 50%;
+    --confidence-vlow: 0 100% 50%;
+
+    /* Kelly criterion colors */
+    --kelly-optimal: 180 100% 50%;
+    --kelly-conservative: 120 100% 33%;
+    --kelly-aggressive: 33 100% 50%;
+    --kelly-warning: 0 100% 50%;
+
+    /* Superforecaster tier colors */
+    --tier-apprentice: 0 0% 53%;
+    --tier-journeyman: 30 56% 50%;
+    --tier-expert: 0 0% 75%;
+    --tier-master: 51 100% 50%;
+    --tier-grandmaster: 180 100% 50%;
+
+    /* Status colors */
+    --success: 120 100% 50%;
+    --warning: 45 100% 50%;
+    --error: 0 100% 50%;
+    --info: 180 100% 50%;
+  }
+
+  [data-theme="amber"] {
+    --background: 0 0% 4%;
+    --foreground: 40 100% 50%;
+    --primary: 40 100% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 40 100% 40%;
+    --muted: 40 100% 30%;
+    --border: 40 100% 40%;
+  }
+
+  [data-theme="ibm-blue"] {
+    --background: 240 100% 25%;
+    --foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 240 100% 25%;
+    --secondary: 180 100% 50%;
+    --muted: 0 0% 60%;
+    --border: 0 0% 80%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-mono antialiased;
+    font-feature-settings: "liga" off; /* Disable ligatures for terminal look */
+  }
+
+  /* Custom scrollbar for terminal aesthetic */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 0;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary));
+  }
+
+  /* Selection colors */
+  ::selection {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+}
+
+@layer utilities {
+  /* Terminal glow effect */
+  .terminal-glow {
+    text-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+  }
+
+  /* Scanline effect for CRT look */
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      hsl(var(--foreground) / 0.03) 2px,
+      hsl(var(--foreground) / 0.03) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* ASCII box drawing helper */
+  .ascii-box {
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--card));
+  }
+
+  /* Cursor blink animation */
+  .cursor-blink::after {
+    content: "_";
+    animation: cursor-blink 1s step-end infinite;
+  }
+
+  @keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+}

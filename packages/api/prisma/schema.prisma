@@ -1,0 +1,906 @@
+// =============================================================================
+// Calibr.ly Prisma Schema v5.0
+// Prediction Market Portfolio Manager & Aggregation Layer
+// Database: PostgreSQL (Supabase) | Blockchain: Base (EAS), Polygon (Polymarket)
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// =============================================================================
+// Core Entities
+// =============================================================================
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Profile
+  displayName String? @map("display_name")
+  email       String? @unique
+  avatarUrl   String? @map("avatar_url")
+
+  // Settings
+  defaultKellyFraction Float   @default(0.5) @map("default_kelly_fraction")
+  notifyEmail          Boolean @default(true) @map("notify_email")
+  notifyWebhook        Boolean @default(false) @map("notify_webhook")
+  webhookUrl           String? @map("webhook_url")
+
+  // Privacy settings (quick flags)
+  publicProfile     Boolean @default(true) @map("public_profile")
+  showOnLeaderboard Boolean @default(true) @map("show_on_leaderboard")
+  shareForecasts    Boolean @default(true) @map("share_forecasts")
+
+  // Relations
+  walletConnections WalletConnection[]
+  apiCredentials    ApiCredential[]
+  positions         Position[]
+  forecasts         Forecast[]
+  alerts            Alert[]
+  transactions      Transaction[]
+  crossChainTxs     CrossChainTransaction[]
+  easAttestations   EASAttestation[]
+  privacySettings   UserPrivacySettings?
+  calibration       UserCalibration?
+
+  @@index([email])
+  @@map("users")
+}
+
+model WalletConnection {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Wallet info
+  address String  @unique
+  chainId Int     @default(8453) @map("chain_id")
+  label   String?
+
+  // Verification
+  verifiedAt DateTime? @map("verified_at")
+  nonce      String?
+
+  // Polymarket Safe (on Polygon)
+  polymarketSafeAddress    String?   @map("polymarket_safe_address")
+  polymarketSafeDeployed   Boolean   @default(false) @map("polymarket_safe_deployed")
+  polymarketSafeDeployedAt DateTime? @map("polymarket_safe_deployed_at")
+
+  // CLOB API Credentials (encrypted)
+  clobApiKey     String? @map("clob_api_key")
+  clobApiSecret  String? @map("clob_api_secret")
+  clobPassphrase String? @map("clob_passphrase")
+
+  // Sync state
+  lastSyncAt DateTime?  @map("last_sync_at")
+  syncStatus SyncStatus @default(PENDING) @map("sync_status")
+  syncError  String?    @map("sync_error")
+
+  // Relations
+  userId        String                  @map("user_id")
+  user          User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  positions     Position[]
+  transactions  Transaction[]
+  crossChainTxs CrossChainTransaction[]
+
+  @@unique([userId, address])
+  @@index([address])
+  @@index([polymarketSafeAddress])
+  @@map("wallet_connections")
+}
+
+model ApiCredential {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Platform
+  platform Platform
+
+  // Credentials (encrypted at rest)
+  encryptedApiKey String?   @map("encrypted_api_key")
+  encryptedSecret String?   @map("encrypted_secret")
+  encryptedToken  String?   @map("encrypted_token")
+  tokenExpiresAt  DateTime? @map("token_expires_at")
+
+  // Sync state
+  lastSyncAt DateTime?  @map("last_sync_at")
+  syncStatus SyncStatus @default(PENDING) @map("sync_status")
+  syncError  String?    @map("sync_error")
+
+  // Relations
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform])
+  @@map("api_credentials")
+}
+
+// =============================================================================
+// Market Entities
+// =============================================================================
+
+model PlatformConfig {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Platform identity
+  name        String @unique
+  slug        String @unique
+  displayName String @map("display_name")
+
+  // Configuration
+  apiBaseUrl String? @map("api_base_url")
+  wsUrl      String? @map("ws_url")
+  chainId    Int?    @map("chain_id")
+
+  // Capabilities
+  supportsTrades   Boolean @default(false) @map("supports_trades")
+  supportsRealTime Boolean @default(false) @map("supports_real_time")
+  requiresKyc      Boolean @default(false) @map("requires_kyc")
+
+  // Status
+  isActive        Boolean      @default(true) @map("is_active")
+  healthStatus    HealthStatus @default(UNKNOWN) @map("health_status")
+  lastHealthCheck DateTime?    @map("last_health_check")
+
+  // Relations
+  platformMarkets PlatformMarket[]
+
+  @@index([slug])
+  @@map("platform_configs")
+}
+
+model UnifiedMarket {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Market identity
+  question    String  @db.Text
+  description String? @db.Text
+  slug        String  @unique
+
+  // Categorization
+  category MarketCategory?
+  tags     Json?
+
+  // Aggregate data
+  bestYesPrice    Float?  @map("best_yes_price")
+  bestNoPrice     Float?  @map("best_no_price")
+  bestYesPlatform String? @map("best_yes_platform")
+  bestNoPlatform  String? @map("best_no_platform")
+  totalVolume     Float   @default(0) @map("total_volume")
+  totalLiquidity  Float   @default(0) @map("total_liquidity")
+
+  // Spread tracking
+  currentSpread Float? @map("current_spread")
+  spreadHistory Json?  @map("spread_history")
+
+  // Status
+  isActive       Boolean   @default(true) @map("is_active")
+  resolutionDate DateTime? @map("resolution_date")
+  resolvedAt     DateTime? @map("resolved_at")
+  resolution     String?
+
+  // Relations
+  platformMarkets PlatformMarket[]
+  positions       Position[]
+  forecasts       Forecast[]
+  marketMatches   MarketMatch[]
+
+  @@index([slug])
+  @@index([category])
+  @@index([isActive])
+  @@map("unified_markets")
+}
+
+model PlatformMarket {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  syncedAt  DateTime @default(now()) @map("synced_at")
+
+  // Platform reference
+  platformConfigId String         @map("platform_config_id")
+  platformConfig   PlatformConfig @relation(fields: [platformConfigId], references: [id])
+  externalId       String         @map("external_id")
+
+  // Market data
+  question    String  @db.Text
+  description String? @db.Text
+  url         String?
+
+  // Current prices
+  yesPrice  Float? @map("yes_price")
+  noPrice   Float? @map("no_price")
+  lastPrice Float? @map("last_price")
+
+  // Liquidity & volume
+  volume    Float @default(0)
+  liquidity Float @default(0)
+
+  // Order book snapshot
+  bestBid Float? @map("best_bid")
+  bestAsk Float? @map("best_ask")
+  spread  Float?
+
+  // Status
+  isActive   Boolean   @default(true) @map("is_active")
+  closesAt   DateTime? @map("closes_at")
+  resolvedAt DateTime? @map("resolved_at")
+  resolution String?
+
+  // Unified market link
+  unifiedMarketId String?        @map("unified_market_id")
+  unifiedMarket   UnifiedMarket? @relation(fields: [unifiedMarketId], references: [id])
+
+  // Platform-specific data
+  platformData Json? @map("platform_data")
+
+  // Relations
+  priceSnapshots PriceSnapshot[]
+  positions      Position[]
+
+  @@unique([platformConfigId, externalId])
+  @@index([externalId])
+  @@index([unifiedMarketId])
+  @@map("platform_markets")
+}
+
+model PriceSnapshot {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Snapshot data
+  yesPrice  Float  @map("yes_price")
+  noPrice   Float  @map("no_price")
+  volume    Float  @default(0)
+  liquidity Float  @default(0)
+  bestBid   Float? @map("best_bid")
+  bestAsk   Float? @map("best_ask")
+
+  // Relations
+  platformMarketId String         @map("platform_market_id")
+  platformMarket   PlatformMarket @relation(fields: [platformMarketId], references: [id], onDelete: Cascade)
+
+  @@index([platformMarketId, createdAt])
+  @@map("price_snapshots")
+}
+
+model MarketMatch {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Match details
+  sourceMarketId  String      @map("source_market_id")
+  targetMarketId  String      @map("target_market_id")
+  matchMethod     MatchMethod @map("match_method")
+  matchConfidence Float       @map("match_confidence")
+  matchStatus     MatchStatus @default(PENDING) @map("match_status")
+
+  // Relations
+  unifiedMarketId String        @map("unified_market_id")
+  unifiedMarket   UnifiedMarket @relation(fields: [unifiedMarketId], references: [id])
+
+  @@index([unifiedMarketId])
+  @@map("market_matches")
+}
+
+// =============================================================================
+// Portfolio Entities
+// =============================================================================
+
+model Position {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Position details
+  outcome      String
+  shares       Float
+  avgCostBasis Float  @map("avg_cost_basis")
+
+  // Current valuation
+  currentPrice     Float? @map("current_price")
+  currentValue     Float? @map("current_value")
+  unrealizedPnl    Float? @map("unrealized_pnl")
+  unrealizedPnlPct Float? @map("unrealized_pnl_pct")
+
+  // Platform tracking
+  platform Platform
+
+  // User & wallet
+  userId             String            @map("user_id")
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletConnectionId String?           @map("wallet_connection_id")
+  walletConnection   WalletConnection? @relation(fields: [walletConnectionId], references: [id])
+
+  // Market links
+  platformMarketId String         @map("platform_market_id")
+  platformMarket   PlatformMarket @relation(fields: [platformMarketId], references: [id])
+  unifiedMarketId  String?        @map("unified_market_id")
+  unifiedMarket    UnifiedMarket? @relation(fields: [unifiedMarketId], references: [id])
+
+  // Relations
+  transactions  Transaction[]
+  crossChainTxs CrossChainTransaction[]
+
+  @@unique([userId, platformMarketId, outcome])
+  @@index([userId])
+  @@index([platformMarketId])
+  @@map("positions")
+}
+
+// =============================================================================
+// Forecast Entities
+// =============================================================================
+
+model Forecast {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Forecast data
+  probability Float
+  confidence  Float @default(0.5)
+
+  // Kelly integration
+  kellyFraction   Float  @default(0.5) @map("kelly_fraction")
+  recommendedSize Float? @map("recommended_size")
+
+  // Reasoning (git-style commits)
+  commitMessage String? @map("commit_message") @db.Text
+
+  // Market context at time of forecast
+  marketYesPrice Float? @map("market_yes_price")
+  marketNoPrice  Float? @map("market_no_price")
+
+  // Execution
+  executeRebalance Boolean   @default(false) @map("execute_rebalance")
+  executedAt       DateTime? @map("executed_at")
+
+  // Privacy control
+  isPublic Boolean @default(true) @map("is_public")
+
+  // EAS attestation
+  easAttestationUid String?   @map("eas_attestation_uid")
+  easAttestedAt     DateTime? @map("eas_attested_at")
+
+  // Relations
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  unifiedMarketId String        @map("unified_market_id")
+  unifiedMarket   UnifiedMarket @relation(fields: [unifiedMarketId], references: [id])
+
+  transactions  Transaction[]
+  crossChainTxs CrossChainTransaction[]
+
+  // Previous version (for update tracking)
+  previousForecastId String?    @map("previous_forecast_id")
+  previousForecast   Forecast?  @relation("ForecastHistory", fields: [previousForecastId], references: [id])
+  nextForecasts      Forecast[] @relation("ForecastHistory")
+
+  @@index([userId])
+  @@index([unifiedMarketId])
+  @@index([createdAt])
+  @@index([easAttestationUid])
+  @@map("forecasts")
+}
+
+model ForecastScore {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Score data
+  rawBrierScore     Float  @map("raw_brier_score")
+  timeWeightedBrier Float  @map("time_weighted_brier")
+  logScore          Float? @map("log_score")
+
+  // Context
+  forecastCount Int   @map("forecast_count")
+  avgUpdateSize Float @map("avg_update_size")
+  updateQuality Float @map("update_quality")
+
+  // Duration
+  totalDurationDays Float @map("total_duration_days")
+
+  // EAS attestation
+  easAttestationUid String?   @map("eas_attestation_uid")
+  easAttestedAt     DateTime? @map("eas_attested_at")
+
+  // References
+  userId          String @map("user_id")
+  unifiedMarketId String @map("unified_market_id")
+
+  @@unique([userId, unifiedMarketId])
+  @@index([userId])
+  @@index([easAttestationUid])
+  @@map("forecast_scores")
+}
+
+model UserCalibration {
+  id        String   @id @default(cuid())
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Aggregated scores
+  avgBrierScore        Float? @map("avg_brier_score")
+  avgTimeWeightedBrier Float? @map("avg_time_weighted_brier")
+  totalForecasts       Int    @default(0) @map("total_forecasts")
+  resolvedForecasts    Int    @default(0) @map("resolved_forecasts")
+
+  // Calibration buckets
+  calibrationData Json @map("calibration_data")
+
+  // Rank
+  globalRank Int?   @map("global_rank")
+  percentile Float?
+
+  // Superforecaster tier
+  currentTier    SuperforecasterTier @default(APPRENTICE) @map("current_tier")
+  tierPromotedAt DateTime?           @map("tier_promoted_at")
+  tierEasUid     String?             @map("tier_eas_uid")
+
+  // Relations
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([globalRank])
+  @@index([currentTier])
+  @@map("user_calibrations")
+}
+
+// =============================================================================
+// Execution Entities
+// =============================================================================
+
+model Transaction {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Transaction type
+  type TransactionType
+
+  // Order details
+  platform         Platform
+  platformMarketId String    @map("platform_market_id")
+  outcome          String
+  outcomeIndex     Int       @map("outcome_index")
+  side             OrderSide
+
+  // Amounts
+  shares        Float
+  pricePerShare Float @map("price_per_share")
+  totalCost     Float @map("total_cost")
+  fees          Float @default(0)
+
+  // Execution
+  status        TransactionStatus @default(PENDING)
+  submittedAt   DateTime?         @map("submitted_at")
+  confirmedAt   DateTime?         @map("confirmed_at")
+  failedAt      DateTime?         @map("failed_at")
+  failureReason String?           @map("failure_reason")
+
+  // Blockchain (for on-chain transactions)
+  chainId     Int?    @map("chain_id")
+  txHash      String? @map("tx_hash")
+  blockNumber Int?    @map("block_number")
+  gasUsed     Float?  @map("gas_used")
+  gasCost     Float?  @map("gas_cost")
+
+  // Relations
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  walletConnectionId String?           @map("wallet_connection_id")
+  walletConnection   WalletConnection? @relation(fields: [walletConnectionId], references: [id])
+
+  positionId String?   @map("position_id")
+  position   Position? @relation(fields: [positionId], references: [id])
+
+  forecastId String?   @map("forecast_id")
+  forecast   Forecast? @relation(fields: [forecastId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([txHash])
+  @@map("transactions")
+}
+
+model CrossChainTransaction {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Overall status
+  status CrossChainStatus @default(PENDING)
+
+  // Input
+  calibrAmount Float @map("calibr_amount")
+  calibrPrice  Float @map("calibr_price")
+
+  // Step 1: Swap ($CALIBR -> USDC on Base)
+  swapStatus       StepStatus @default(PENDING) @map("swap_status")
+  swapTxHash       String?    @map("swap_tx_hash")
+  swapUsdcReceived Float?     @map("swap_usdc_received")
+  swapCompletedAt  DateTime?  @map("swap_completed_at")
+  swapError        String?    @map("swap_error")
+
+  // Step 2: Bridge (USDC Base -> Polygon via CCTP)
+  bridgeStatus       StepStatus @default(PENDING) @map("bridge_status")
+  bridgeBurnTxHash   String?    @map("bridge_burn_tx_hash")
+  bridgeMessageHash  String?    @map("bridge_message_hash")
+  bridgeAttestation  String?    @map("bridge_attestation")
+  bridgeMintTxHash   String?    @map("bridge_mint_tx_hash")
+  bridgeUsdcReceived Float?     @map("bridge_usdc_received")
+  bridgeCompletedAt  DateTime?  @map("bridge_completed_at")
+  bridgeError        String?    @map("bridge_error")
+
+  // Step 3: Deposit (USDC -> Safe on Polygon)
+  depositStatus      StepStatus @default(PENDING) @map("deposit_status")
+  depositTxHash      String?    @map("deposit_tx_hash")
+  depositCompletedAt DateTime?  @map("deposit_completed_at")
+  depositError       String?    @map("deposit_error")
+
+  // Step 4: Trade (Buy position via CLOB)
+  tradeStatus         StepStatus @default(PENDING) @map("trade_status")
+  tradeOrderId        String?    @map("trade_order_id")
+  tradeSharesReceived Float?     @map("trade_shares_received")
+  tradePricePerShare  Float?     @map("trade_price_per_share")
+  tradeCompletedAt    DateTime?  @map("trade_completed_at")
+  tradeError          String?    @map("trade_error")
+
+  // Target position
+  marketId     String @map("market_id")
+  outcome      String
+  targetShares Float  @map("target_shares")
+
+  // Fees
+  swapFee   Float @default(0) @map("swap_fee")
+  bridgeFee Float @default(0) @map("bridge_fee")
+  slippage  Float @default(0)
+  totalFees Float @default(0) @map("total_fees")
+
+  // Timing
+  startedAt       DateTime  @default(now()) @map("started_at")
+  completedAt     DateTime? @map("completed_at")
+  totalDurationMs Int?      @map("total_duration_ms")
+
+  // Relations
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  walletConnectionId String           @map("wallet_connection_id")
+  walletConnection   WalletConnection @relation(fields: [walletConnectionId], references: [id])
+
+  forecastId String?   @map("forecast_id")
+  forecast   Forecast? @relation(fields: [forecastId], references: [id])
+
+  positionId String?   @map("position_id")
+  position   Position? @relation(fields: [positionId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([bridgeMessageHash])
+  @@map("cross_chain_transactions")
+}
+
+// =============================================================================
+// System Entities
+// =============================================================================
+
+model Alert {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Alert type
+  type AlertType
+
+  // Configuration
+  config Json
+
+  // Delivery
+  deliveryMethods DeliveryMethod[] @map("delivery_methods")
+
+  // Status
+  isActive        Boolean   @default(true) @map("is_active")
+  lastTriggeredAt DateTime? @map("last_triggered_at")
+  triggerCount    Int       @default(0) @map("trigger_count")
+
+  // Relations
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  unifiedMarketId String? @map("unified_market_id")
+
+  @@index([userId])
+  @@index([type])
+  @@map("alerts")
+}
+
+model SyncLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Sync details
+  platform String
+  syncType SyncType @map("sync_type")
+
+  // Results
+  status         SyncStatus
+  marketsUpdated Int        @default(0) @map("markets_updated")
+  pricesUpdated  Int        @default(0) @map("prices_updated")
+  errors         Int        @default(0)
+
+  // Timing
+  startedAt   DateTime  @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  durationMs  Int?      @map("duration_ms")
+
+  // Error details
+  errorDetails Json? @map("error_details")
+
+  @@index([platform, createdAt])
+  @@index([status])
+  @@map("sync_logs")
+}
+
+// =============================================================================
+// EAS Attestation Entity
+// =============================================================================
+
+model EASAttestation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // EAS identifiers
+  uid        String @unique
+  schemaUid  String @map("schema_uid")
+  schemaName String @map("schema_name")
+
+  // Chain info
+  chainId     Int     @default(8453) @map("chain_id")
+  txHash      String? @map("tx_hash")
+  blockNumber Int?    @map("block_number")
+
+  // Attestation data
+  attester  String
+  recipient String
+  refUid    String? @map("ref_uid")
+  data      Json
+
+  // Status
+  revoked          Boolean   @default(false)
+  revokedAt        DateTime? @map("revoked_at")
+  revocationTxHash String?   @map("revocation_tx_hash")
+
+  // Privacy flags
+  isOffchain Boolean @default(false) @map("is_offchain")
+  isPrivate  Boolean @default(false) @map("is_private")
+  merkleRoot String? @map("merkle_root")
+
+  // Relations
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([uid])
+  @@index([schemaUid])
+  @@index([recipient])
+  @@index([userId])
+  @@map("eas_attestations")
+}
+
+// =============================================================================
+// Privacy & Personal Data Entities
+// =============================================================================
+
+model UserPrivacySettings {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Profile visibility
+  profileVisibility ProfileVisibility @default(PUBLIC) @map("profile_visibility")
+  showOnLeaderboard Boolean           @default(true) @map("show_on_leaderboard")
+  showWalletAddress Boolean           @default(false) @map("show_wallet_address")
+
+  // Forecast privacy
+  defaultForecastPrivacy ForecastPrivacy @default(PUBLIC) @map("default_forecast_privacy")
+  shareReasoningPublicly Boolean         @default(false) @map("share_reasoning_publicly")
+
+  // Data retention
+  retainForecastHistory    Boolean @default(true) @map("retain_forecast_history")
+  deleteDataOnAccountClose Boolean @default(true) @map("delete_data_on_account_close")
+
+  // Third-party sharing
+  allowReputationExport Boolean @default(true) @map("allow_reputation_export")
+  allowDataAggregation  Boolean @default(true) @map("allow_data_aggregation")
+
+  // Attestation preferences
+  useOffchainAttestations    Boolean @default(false) @map("use_offchain_attestations")
+  usePrivateDataAttestations Boolean @default(false) @map("use_private_data_attestations")
+
+  // Relations
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_privacy_settings")
+}
+
+model DataDeletionRequest {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Request details
+  userId      String       @map("user_id")
+  requestType DeletionType @map("request_type")
+  reason      String?
+
+  // Status
+  status      DeletionStatus @default(PENDING)
+  processedAt DateTime?      @map("processed_at")
+  completedAt DateTime?      @map("completed_at")
+
+  // Audit
+  attestationsRevoked Int     @default(0) @map("attestations_revoked")
+  offchainDataDeleted Boolean @default(false) @map("offchain_data_deleted")
+
+  @@index([userId])
+  @@index([status])
+  @@map("data_deletion_requests")
+}
+
+// =============================================================================
+// Enums
+// =============================================================================
+
+enum Platform {
+  POLYMARKET
+  KALSHI
+  IEM
+  METACULUS
+  MANIFOLD
+}
+
+enum MarketCategory {
+  POLITICS
+  SPORTS
+  CRYPTO
+  ECONOMICS
+  SCIENCE
+  ENTERTAINMENT
+  TECHNOLOGY
+  OTHER
+}
+
+enum SyncStatus {
+  PENDING
+  IN_PROGRESS
+  SUCCESS
+  FAILED
+}
+
+enum HealthStatus {
+  HEALTHY
+  DEGRADED
+  DOWN
+  UNKNOWN
+}
+
+enum MatchMethod {
+  AUTO
+  MANUAL
+}
+
+enum MatchStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+}
+
+enum TransactionType {
+  BUY
+  SELL
+  MINT
+  MERGE
+}
+
+enum OrderSide {
+  BUY
+  SELL
+}
+
+enum TransactionStatus {
+  PENDING
+  SUBMITTED
+  CONFIRMED
+  FAILED
+  CANCELLED
+}
+
+enum CrossChainStatus {
+  PENDING
+  SWAPPING
+  BRIDGING
+  DEPOSITING
+  TRADING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum StepStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+enum AlertType {
+  SPREAD_ALERT
+  PRICE_ALERT
+  RESOLUTION_ALERT
+  POSITION_ALERT
+  TIER_PROMOTION
+}
+
+enum DeliveryMethod {
+  EMAIL
+  WEBHOOK
+  PUSH
+  IN_APP
+}
+
+enum SyncType {
+  MARKETS
+  POSITIONS
+  PRICES
+}
+
+enum SuperforecasterTier {
+  APPRENTICE
+  JOURNEYMAN
+  EXPERT
+  MASTER
+  GRANDMASTER
+}
+
+enum ProfileVisibility {
+  PUBLIC
+  AUTHENTICATED
+  PRIVATE
+}
+
+enum ForecastPrivacy {
+  PUBLIC
+  PROBABILITY_ONLY
+  PRIVATE
+  MERKLE
+}
+
+enum DeletionType {
+  FULL_ACCOUNT
+  FORECASTS_ONLY
+  PII_ONLY
+}
+
+enum DeletionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}

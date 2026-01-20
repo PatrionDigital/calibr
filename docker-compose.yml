@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: calibr-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: calibr
+      POSTGRES_PASSWORD: calibr_dev_password
+      POSTGRES_DB: calibr
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U calibr -d calibr']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: calibr-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Local Anvil Node (for development)
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    container_name: calibr-anvil
+    restart: unless-stopped
+    ports:
+      - '8545:8545'
+    entrypoint: anvil
+    command:
+      - --host
+      - '0.0.0.0'
+      - --fork-url
+      - ${BASE_SEPOLIA_RPC_URL:-https://sepolia.base.org}
+      - --chain-id
+      - '84532'
+    profiles:
+      - blockchain
+
+  # API Service (for production-like local testing)
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: calibr-api
+    restart: unless-stopped
+    ports:
+      - '3001:3001'
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://calibr:calibr_dev_password@postgres:5432/calibr
+      REDIS_URL: redis://redis:6379
+      PORT: 3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+      - full
+
+  # Web Frontend (for production-like local testing)
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    container_name: calibr-web
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+    depends_on:
+      - api
+    profiles:
+      - full
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: calibr-network
