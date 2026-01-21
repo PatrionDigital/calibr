@@ -8,7 +8,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsup src/index.ts src/server.ts --format esm --dts",
+    "build": "prisma generate && tsup src/index.ts src/server.ts --format esm --dts",
     "start": "node dist/server.js",
     "lint": "eslint src --ext .ts",
     "typecheck": "prisma generate && tsc --noEmit",
