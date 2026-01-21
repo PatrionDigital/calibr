@@ -10,6 +10,9 @@ import type { RateLimitConfig, RateLimitState, CacheConfig, CacheEntry } from '.
 // Gamma API Response Schemas
 // =============================================================================
 
+// Helper for fields that can be string or number (API returns both)
+const stringOrNumber = z.union([z.string(), z.number()]).transform(String).optional();
+
 export const GammaMarketSchema = z.object({
   id: z.string(),
   question: z.string(),
@@ -17,14 +20,14 @@ export const GammaMarketSchema = z.object({
   slug: z.string(),
   resolutionSource: z.string().optional(),
   endDate: z.string().optional(),
-  liquidity: z.string().optional(),
+  liquidity: stringOrNumber,
   startDate: z.string().optional(),
   image: z.string().optional(),
   icon: z.string().optional(),
   description: z.string().optional(),
   outcomes: z.string().optional(),
   outcomePrices: z.string().optional(),
-  volume: z.string().optional(),
+  volume: stringOrNumber,
   active: z.boolean().optional(),
   closed: z.boolean().optional(),
   marketMakerAddress: z.string().optional(),
@@ -34,13 +37,13 @@ export const GammaMarketSchema = z.object({
   featured: z.boolean().optional(),
   submitted_by: z.string().optional(),
   category: z.string().optional(),
-  volume24hr: z.string().optional(),
+  volume24hr: stringOrNumber,
   clobTokenIds: z.string().optional(),
-  umaBond: z.string().optional(),
-  umaReward: z.string().optional(),
-  volume24hrClob: z.string().optional(),
-  volumeClob: z.string().optional(),
-  liquidityClob: z.string().optional(),
+  umaBond: stringOrNumber,
+  umaReward: stringOrNumber,
+  volume24hrClob: stringOrNumber,
+  volumeClob: stringOrNumber,
+  liquidityClob: stringOrNumber,
   acceptingOrders: z.boolean().optional(),
   negRisk: z.boolean().optional(),
   negRiskMarketId: z.string().optional(),
@@ -66,9 +69,9 @@ export const GammaEventSchema = z.object({
   new: z.boolean().optional(),
   featured: z.boolean().optional(),
   restricted: z.boolean().optional(),
-  liquidity: z.string().optional(),
-  volume: z.string().optional(),
-  openInterest: z.string().optional(),
+  liquidity: stringOrNumber,
+  volume: stringOrNumber,
+  openInterest: stringOrNumber,
   competitionId: z.string().optional(),
   markets: z.array(GammaMarketSchema).optional(),
 });
