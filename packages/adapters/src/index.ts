@@ -13,3 +13,12 @@ export * from './sync';
 
 // Market matching
 export * from './matching';
+
+// Cache
+export * from './cache';
+
+// Price feeds
+export * from './feeds';
+
+// Resolution detection
+export * from './resolution';
