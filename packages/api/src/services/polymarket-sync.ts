@@ -242,14 +242,14 @@ export class PolymarketSyncService {
       question: market.question,
       description: market.description,
       url: market.url,
-      yesPrice: market.yesPrice,
-      noPrice: market.noPrice,
-      lastPrice: market.lastPrice,
-      volume: market.volume,
-      liquidity: market.liquidity,
-      bestBid: market.bestBid,
-      bestAsk: market.bestAsk,
-      spread: market.spread,
+      yesPrice: this.toFloat(market.yesPrice),
+      noPrice: this.toFloat(market.noPrice),
+      lastPrice: this.toFloat(market.lastPrice),
+      volume: this.toFloat(market.volume) ?? 0,
+      liquidity: this.toFloat(market.liquidity) ?? 0,
+      bestBid: this.toFloat(market.bestBid),
+      bestAsk: this.toFloat(market.bestAsk),
+      spread: this.toFloat(market.spread),
       isActive: market.status === 'ACTIVE',
       closesAt: market.closesAt,
       resolvedAt: market.resolvedAt,
@@ -294,19 +294,22 @@ export class PolymarketSyncService {
     platformMarketId: string,
     market: PlatformMarket
   ): Promise<void> {
-    if (market.yesPrice === undefined || market.noPrice === undefined) {
+    const yesPrice = this.toFloat(market.yesPrice);
+    const noPrice = this.toFloat(market.noPrice);
+
+    if (yesPrice === null || noPrice === null) {
       return;
     }
 
     await prisma.priceSnapshot.create({
       data: {
         platformMarketId,
-        yesPrice: market.yesPrice,
-        noPrice: market.noPrice,
-        volume: market.volume,
-        liquidity: market.liquidity,
-        bestBid: market.bestBid,
-        bestAsk: market.bestAsk,
+        yesPrice,
+        noPrice,
+        volume: this.toFloat(market.volume) ?? 0,
+        liquidity: this.toFloat(market.liquidity) ?? 0,
+        bestBid: this.toFloat(market.bestBid),
+        bestAsk: this.toFloat(market.bestAsk),
       },
     });
   }
@@ -335,13 +338,13 @@ export class PolymarketSyncService {
           slug,
           category: market.category as MarketCategory | undefined,
           tags: market.tags,
-          bestYesPrice: market.yesPrice,
-          bestNoPrice: market.noPrice,
+          bestYesPrice: this.toFloat(market.yesPrice),
+          bestNoPrice: this.toFloat(market.noPrice),
           bestYesPlatform: 'POLYMARKET',
           bestNoPlatform: 'POLYMARKET',
-          totalVolume: market.volume,
-          totalLiquidity: market.liquidity,
-          currentSpread: market.spread,
+          totalVolume: this.toFloat(market.volume) ?? 0,
+          totalLiquidity: this.toFloat(market.liquidity) ?? 0,
+          currentSpread: this.toFloat(market.spread),
           isActive: market.status === 'ACTIVE',
           resolutionDate: market.closesAt,
         },
@@ -626,6 +629,12 @@ export class PolymarketSyncService {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .slice(0, 100);
+  }
+
+  private toFloat(val: unknown): number | null {
+    if (val === undefined || val === null) return null;
+    const num = typeof val === 'string' ? parseFloat(val) : Number(val);
+    return isNaN(num) ? null : num;
   }
 
   private sleep(ms: number): Promise<void> {
