@@ -29,7 +29,7 @@ export interface KellyResult {
 export function calculateKelly(
   probability: number,
   marketProbability: number,
-  bankroll?: number
+  _bankroll?: number
 ): KellyResult {
   // Clamp probability to valid range
   const p = Math.max(0.01, Math.min(0.99, probability));

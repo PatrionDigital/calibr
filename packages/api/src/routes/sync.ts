@@ -79,8 +79,8 @@ syncRoutes.post('/markets', async (c) => {
     );
   }
 
-  // Run sync in background
-  const resultPromise = syncScheduler.runMarketSync();
+  // Run sync in background (fire and forget)
+  syncScheduler.runMarketSync();
 
   // Return immediately with accepted status
   return c.json({

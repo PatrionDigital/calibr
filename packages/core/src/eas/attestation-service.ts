@@ -7,7 +7,6 @@ import { EAS, SchemaRegistry } from '@ethereum-attestation-service/eas-sdk';
 import type { Signer } from 'ethers';
 import type {
   AttestationData,
-  AttestationRequest,
   ForecastAttestationData,
   CalibrationAttestationData,
   IdentityAttestationData,
@@ -23,7 +22,7 @@ import {
   encodeSuperforecasterData,
   encodePrivateData,
 } from './schema-encoder';
-import { createMerkleTree, generateMultiProof } from './privacy';
+import { createMerkleTree } from './privacy';
 
 // =============================================================================
 // Types

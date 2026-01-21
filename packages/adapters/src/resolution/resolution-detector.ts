@@ -4,7 +4,7 @@
  */
 
 import type { IPlatformAdapter, PlatformMarket, MarketStatus } from '../types';
-import { RedisCache, CacheKeys } from '../cache';
+import { RedisCache } from '../cache';
 
 // =============================================================================
 // Types

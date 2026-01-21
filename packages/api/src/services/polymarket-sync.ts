@@ -5,8 +5,8 @@
 
 import { prisma } from '../lib/prisma';
 import { PolymarketAdapter } from '@calibr/adapters';
-import type { PlatformMarket, PlatformPosition } from '@calibr/adapters';
-import type { Platform, SyncStatus, MarketCategory } from '@prisma/client';
+import type { PlatformMarket } from '@calibr/adapters';
+import type { MarketCategory } from '@prisma/client';
 
 // =============================================================================
 // Types
@@ -517,8 +517,8 @@ export class PolymarketSyncService {
    */
   async syncUserPositions(userId: string): Promise<PositionSyncResult> {
     const errors: string[] = [];
-    let positionsCreated = 0;
-    let positionsUpdated = 0;
+    const positionsCreated = 0;
+    const positionsUpdated = 0;
 
     try {
       // Get user's wallet connections with CLOB credentials

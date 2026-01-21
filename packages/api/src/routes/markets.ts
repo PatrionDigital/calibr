@@ -23,9 +23,9 @@ marketRoutes.get('/', async (c) => {
   const limit = Math.min(parseInt(query.limit || '50'), 100);
   const offset = parseInt(query.offset || '0');
   const category = query.category as MarketCategory | undefined;
-  const platform = query.platform;
   const search = query.search;
   const active = query.active !== 'false';
+  // TODO: Add platform filtering using query.platform
 
   const where: Record<string, unknown> = {
     isActive: active,

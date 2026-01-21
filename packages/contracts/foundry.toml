@@ -26,3 +26,8 @@ base-sepolia = "${BASE_SEPOLIA_RPC_URL}"
 [etherscan]
 base = { key = "${BASESCAN_API_KEY}", chain = 8453, url = "https://api.basescan.org/api" }
 base-sepolia = { key = "${BASESCAN_API_KEY}", chain = 84532, url = "https://api-sepolia.basescan.org/api" }
+
+# CI profile - inherits from default
+[profile.ci]
+fuzz = { runs = 256 }
+invariant = { runs = 256 }
