@@ -1,0 +1,62 @@
+{
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "supabase@claude-plugins-official": true,
+    "vercel@claude-plugins-official": true,
+    "frontend-developer@cc-marketplace": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "audit@cc-marketplace": true
+  },
+  "mcpServers": {
+    "foundry": {
+      "command": "npx",
+      "args": ["@pranesh.asp/foundry-mcp-server"],
+      "env": {
+        "RPC_URL": "https://mainnet.base.org",
+        "PRIVATE_KEY": "${DEPLOYER_PRIVATE_KEY}"
+      }
+    },
+    "web3": {
+      "command": "npx",
+      "args": ["-y", "web3-mcp-server"],
+      "env": {
+        "DEFAULT_CHAIN": "base"
+      }
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@context7/mcp-server"],
+      "description": "Library documentation lookup"
+    },
+    "openzeppelin": {
+      "command": "npx",
+      "args": ["-y", "@openzeppelin/mcp-server"],
+      "description": "Solidity contract generation"
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server"],
+      "env": {
+        "SUPABASE_URL": "${SUPABASE_URL}",
+        "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_SERVICE_ROLE_KEY}"
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@anthropic-ai/mcp-server-filesystem",
+        "/Users/patrick/calibr"
+      ]
+    }
+  }
+}

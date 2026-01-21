@@ -1,0 +1,794 @@
+# Calibr.ly Project Tasks
+
+## Prediction Market Portfolio Manager & Aggregation Layer
+
+**Version:** 5.0  
+**Last Updated:** January 2026  
+**Status:** Development Phase  
+**Major Updates:** EAS Foundation, Privacy & Compliance, Superforecaster Leaderboards
+
+---
+
+## Table of Contents
+
+1. [Project Phases Overview](#1-project-phases-overview)
+2. [Phase 0: EAS Foundation & Digital Identity](#2-phase-0-eas-foundation--digital-identity)
+3. [Phase 1: Core Infrastructure](#3-phase-1-core-infrastructure)
+4. [Phase 2: Polymarket Data Integration](#4-phase-2-polymarket-data-integration)
+5. [Phase 3: Polymarket Trading](#5-phase-3-polymarket-trading)
+6. [Phase 4: Core App Features](#6-phase-4-core-app-features)
+7. [Phase 5: Cross-Chain Execution](#7-phase-5-cross-chain-execution)
+8. [Phase 6: Advanced Features & Superforecaster System](#8-phase-6-advanced-features--superforecaster-system)
+9. [Phase 7: Polish & Launch](#9-phase-7-polish--launch)
+
+---
+
+## 1. Project Phases Overview
+
+### Task Summary
+
+| Phase                          | Focus                                                           |
+| ------------------------------ | --------------------------------------------------------------- |
+| **Phase 0: EAS Foundation**    | EAS Schemas, Resolvers, Identity, **Privacy Architecture**      |
+| Phase 1: Core Infrastructure   | Monorepo, DB, Auth, Core Utils, **Privacy Tables**              |
+| Phase 2: Polymarket Data       | Gamma API, CLOB (read-only), Sync                               |
+| Phase 3: Polymarket Trading    | Builder Program, Auth, Gasless                                  |
+| Phase 4: Core App Features     | Markets, Portfolio, Kelly, Forecasting, **Privacy Settings UI** |
+| Phase 5: Cross-Chain Execution | $CALIBR Flow, Bridge, CTF                                       |
+| Phase 6: Advanced Features     | Leaderboards, Reputation, Celebrations                          |
+| Phase 7: Polish & Launch       | Testing, Docs, Infrastructure, **GDPR Compliance**              |
+
+### Phase Diagram
+
+```
++-----------------------------------------------------------------------------+
+|                         CALIBR.LY DEVELOPMENT PHASES                         |
++-----------------------------------------------------------------------------+
+|                                                                             |
+|  * PHASE 0: EAS FOUNDATION *                                                |
+|  |-- EAS Schema Registry & Resolvers                                        |
+|  |-- Cross-platform identity integration                                    |
+|  |-- Superforecaster tier system foundation                                 |
+|  |-- Privacy architecture design                                            |
+|  +-- Off-chain attestation schema                                           |
+|                                                                             |
+|  PHASE 1: CORE INFRASTRUCTURE                                               |
+|  |-- Monorepo setup (Next.js + TypeScript)                                  |
+|  |-- PostgreSQL + Prisma schema                                             |
+|  |-- UserPrivacySettings & DataDeletionRequest tables                       |
+|  |-- EASAttestation tracking table                                          |
+|  |-- Foundry smart contract setup                                           |
+|  +-- Base network integration                                               |
+|                                                                             |
+|  PHASE 2: POLYMARKET DATA INTEGRATION                                       |
+|  |-- Gamma API integration                                                  |
+|  |-- CLOB read-only integration                                             |
+|  +-- Real-time price feeds                                                  |
+|                                                                             |
+|  PHASE 3: POLYMARKET TRADING                                                |
+|  |-- Builder Program integration                                            |
+|  |-- Safe wallet deployment & management                                    |
+|  +-- Gasless trading via RelayClient                                        |
+|                                                                             |
+|  PHASE 4: CORE APP FEATURES                                                 |
+|  |-- Markets aggregation & portfolio view                                   |
+|  |-- Kelly Criterion optimization                                           |
+|  |-- Forecast journaling with EAS attestations                              |
+|  |-- Privacy settings UI & attestation mode selection                       |
+|  +-- Calibration scoring engine                                             |
+|                                                                             |
+|  PHASE 5: CROSS-CHAIN EXECUTION                                             |
+|  |-- $CALIBR -> USDC -> Polygon flow                                        |
+|  |-- CCTP bridge integration                                                |
+|  +-- Smart contract execution layer                                         |
+|                                                                             |
+|  * PHASE 6: SUPERFORECASTER SYSTEM *                                        |
+|  |-- Leaderboards with cross-platform reputation                            |
+|  |-- Superforecaster tier promotions & celebrations                         |
+|  |-- Badge system & achievement unlocks                                     |
+|  +-- Community recognition features                                         |
+|                                                                             |
+|  PHASE 7: POLISH & LAUNCH                                                   |
+|  |-- Testing, security audits                                               |
+|  |-- Documentation & infrastructure                                         |
+|  |-- GDPR data export/deletion implementation                               |
+|  +-- Public launch preparation                                              |
+|                                                                             |
++-----------------------------------------------------------------------------+
+```
+
+---
+
+## 2. Phase 0: EAS Foundation & Digital Identity
+
+**Goal:** Establish the attestation, identity, and privacy infrastructure that forms the bedrock of the entire platform.
+
+### 0.1 EAS Schema Design & Deployment
+
+| ID    | Task                            | Description                                       | Dependencies |
+| ----- | ------------------------------- | ------------------------------------------------- | ------------ |
+| 0.1.1 | Design Forecast Schema          | Define attestation structure for forecasts        | -            |
+| 0.1.2 | Design Calibration Score Schema | Define attestation structure for scoring          | 0.1.1        |
+| 0.1.3 | Design Identity Schema          | Cross-platform identity linking structure         | -            |
+| 0.1.4 | Design Superforecaster Schema   | Badge and tier system structure                   | 0.1.1, 0.1.2 |
+| 0.1.5 | Design Reputation Schema        | Platform reputation aggregation                   | 0.1.3        |
+| 0.1.6 | Design Private Data Schema      | Merkle tree root storage for selective disclosure | 0.1.3        |
+| 0.1.7 | Deploy schemas to Base testnet  | Register all schemas via EAS                      | 0.1.1-0.1.6  |
+| 0.1.8 | Deploy schemas to Base mainnet  | Production schema deployment                      | 0.1.7        |
+| 0.1.9 | Create schema documentation     | Document all schemas with examples                | 0.1.8        |
+
+**Schema Specifications:**
+
+```typescript
+// Forecast Schema
+"uint256 probability,string marketId,string platform,uint256 confidence,string reasoning,bool isPublic";
+
+// Calibration Score Schema
+"uint256 brierScore,uint256 totalForecasts,uint256 timeWeightedScore,uint256 period,string category";
+
+// Cross-Platform Identity Schema
+"string platform,string platformUserId,bytes32 proofHash,bool verified,uint256 verifiedAt";
+
+// Superforecaster Badge Schema
+"string tier,uint256 score,uint256 period,string category,uint256 rank";
+
+// Platform Reputation Schema
+"string platform,uint256 totalVolume,uint256 winRate,uint256 profitLoss,string verificationLevel";
+
+// Private Data Schema (Merkle Root)
+"bytes32 merkleRoot,string dataType,uint256 fieldCount,uint256 createdAt";
+```
+
+### 0.2 EAS Resolver Contracts
+
+| ID    | Task                               | Description                                     | Dependencies |
+| ----- | ---------------------------------- | ----------------------------------------------- | ------------ |
+| 0.2.1 | Create CaliberEASResolver contract | Core resolver with validation logic             | 0.1.1-0.1.6  |
+| 0.2.2 | Implement forecast validation      | Validate probability bounds, market existence   | 0.2.1        |
+| 0.2.3 | Implement identity verification    | Verify cross-platform proofs                    | 0.2.1        |
+| 0.2.4 | Implement calibration calculation  | Onchain Brier score and calibration math        | 0.2.1        |
+| 0.2.5 | Implement superforecaster logic    | Tier calculation and promotion logic            | 0.2.1, 0.2.4 |
+| 0.2.6 | Implement private data resolver    | Merkle root validation for selective disclosure | 0.2.1        |
+| 0.2.7 | Write comprehensive tests          | Unit tests for all resolver functions           | 0.2.1-0.2.6  |
+| 0.2.8 | Deploy resolver to testnet         | Test deployment and validation                  | 0.2.7        |
+| 0.2.9 | Deploy resolver to mainnet         | Production deployment                           | 0.2.8        |
+
+### 0.3 Cross-Platform Identity Integration
+
+| ID    | Task                                   | Description                                  | Dependencies        |
+| ----- | -------------------------------------- | -------------------------------------------- | ------------------- |
+| 0.3.1 | Research Optimism Collective EAS usage | Understand RetroFunding attestation patterns | -                   |
+| 0.3.2 | Implement Optimism reputation import   | Query OP attestations for reputation         | 0.3.1               |
+| 0.3.3 | Research Coinbase Verifications        | Understand Base verification attestations    | -                   |
+| 0.3.4 | Implement Coinbase verification import | Import verification level from Base          | 0.3.3               |
+| 0.3.5 | Research Gitcoin Passport integration  | Understand passport score attestations       | -                   |
+| 0.3.6 | Implement Gitcoin score import         | Import passport scores and stamps            | 0.3.5               |
+| 0.3.7 | Create composite scoring algorithm     | Combine Calibr + external reputation         | 0.3.2, 0.3.4, 0.3.6 |
+| 0.3.8 | Test cross-platform integrations       | Verify all import mechanisms work            | 0.3.2-0.3.7         |
+
+### 0.4 EAS SDK Integration
+
+| ID    | Task                            | Description                             | Dependencies |
+| ----- | ------------------------------- | --------------------------------------- | ------------ |
+| 0.4.1 | Install and configure EAS SDK   | Set up EAS client for Base network      | -            |
+| 0.4.2 | Create attestation service      | Service layer for creating attestations | 0.4.1, 0.2.1 |
+| 0.4.3 | Create query service            | Service layer for querying attestations | 0.4.1        |
+| 0.4.4 | Implement batch attestations    | Optimize for multiple attestations      | 0.4.2        |
+| 0.4.5 | Add offline attestation support | Support for off-chain attestations      | 0.4.2        |
+| 0.4.6 | Create EAS utilities package    | Reusable EAS interaction utilities      | 0.4.2, 0.4.3 |
+| 0.4.7 | Write integration tests         | Test EAS SDK integration                | 0.4.1-0.4.6  |
+
+### 0.5 Privacy Architecture Design
+
+| ID    | Task                                  | Description                              | Dependencies |
+| ----- | ------------------------------------- | ---------------------------------------- | ------------ |
+| 0.5.1 | Design privacy data model             | Define public vs private data boundaries | 0.1.1-0.1.6  |
+| 0.5.2 | Design off-chain storage architecture | IPFS and backend storage strategy        | 0.5.1        |
+| 0.5.3 | Design Merkle tree implementation     | Private data attestation structure       | 0.5.1        |
+| 0.5.4 | Design selective disclosure flow      | User-controlled field revelation         | 0.5.3        |
+| 0.5.5 | Design attestation mode selection     | On-chain, off-chain, private modes       | 0.5.1-0.5.4  |
+| 0.5.6 | Document privacy architecture         | Technical specification document         | 0.5.1-0.5.5  |
+
+**Deliverables for Phase 0:**
+
+- [x] Complete EAS schema registry deployed on Base
+- [x] CaliberEASResolver contract deployed and operational
+- [x] Cross-platform identity import system working
+- [x] EAS SDK fully integrated with services layer
+- [x] Privacy architecture designed and documented
+- [x] All attestation infrastructure tested and documented
+
+---
+
+## 3. Phase 1: Core Infrastructure
+
+**Goal:** Set up project infrastructure, database, and smart contracts building on the EAS foundation.
+
+### 1.1 Project Setup (Next.js + TypeScript)
+
+| ID    | Task                            | Description                                    | Dependencies |
+| ----- | ------------------------------- | ---------------------------------------------- | ------------ |
+| 1.1.1 | Initialize Next.js monorepo     | Set up pnpm workspaces, Next.js 14, TypeScript | 0.4.7        |
+| 1.1.2 | Create package structure        | Create core, adapters, api, web packages       | 1.1.1        |
+| 1.1.3 | Configure Foundry workspace     | Set up smart contract development environment  | 1.1.1        |
+| 1.1.4 | Set up Anvil local blockchain   | Local development blockchain with EAS deployed | 1.1.3        |
+| 1.1.5 | Configure CI/CD                 | GitHub Actions for lint, test, build, deploy   | 1.1.1        |
+| 1.1.6 | Set up development environment  | Docker Compose for Postgres, Redis, Anvil      | 1.1.4        |
+| 1.1.7 | Configure environment variables | Create .env templates with EAS addresses       | 1.1.6        |
+
+### 1.2 Database Schema (Enhanced for EAS & Privacy)
+
+| ID     | Task                                 | Description                                             | Dependencies |
+| ------ | ------------------------------------ | ------------------------------------------------------- | ------------ |
+| 1.2.1  | Set up PostgreSQL                    | Provision database (local + staging)                    | 1.1.6        |
+| 1.2.2  | Install and configure Prisma         | Initialize Prisma, configure connection                 | 1.2.1        |
+| 1.2.3  | Create core schema                   | Platform, UnifiedMarket, PlatformMarket tables          | 1.2.2        |
+| 1.2.4  | Create user schema                   | User, WalletConnection, EAS attestation refs            | 1.2.2        |
+| 1.2.5  | Create portfolio schema              | Position, PortfolioSnapshot tables                      | 1.2.3        |
+| 1.2.6  | Create forecast schema               | Forecast table with EAS UID references, isPublic flag   | 1.2.3, 0.1.1 |
+| 1.2.7  | Create reputation schema             | Cross-platform reputation aggregation                   | 1.2.4, 0.3.7 |
+| 1.2.8  | Create superforecaster schema        | Leaderboard and tier tracking                           | 1.2.6, 1.2.7 |
+| 1.2.9  | **Create UserPrivacySettings table** | Profile visibility, forecast privacy, attestation prefs | 1.2.4, 0.5.1 |
+| 1.2.10 | **Create DataDeletionRequest table** | GDPR deletion request tracking                          | 1.2.4        |
+| 1.2.11 | **Create EASAttestation table**      | Track all attestations with privacy flags               | 1.2.4, 0.4.2 |
+| 1.2.12 | Create indices and migrations        | Optimize for attestation and privacy queries            | 1.2.3-1.2.11 |
+
+**Privacy-Related Schema:**
+
+```prisma
+model UserPrivacySettings {
+  id                        String            @id @default(cuid())
+  createdAt                 DateTime          @default(now())
+  updatedAt                 DateTime          @updatedAt
+
+  // Profile visibility
+  profileVisibility         ProfileVisibility @default(PUBLIC)
+  showOnLeaderboard         Boolean           @default(true)
+  showWalletAddress         Boolean           @default(false)
+
+  // Forecast privacy
+  defaultForecastPrivacy    ForecastPrivacy   @default(PUBLIC)
+  shareReasoningPublicly    Boolean           @default(false)
+
+  // Attestation preferences
+  useOffchainAttestations   Boolean           @default(false)
+  usePrivateDataAttestations Boolean          @default(false)
+
+  // Data controls
+  allowReputationExport     Boolean           @default(true)
+  allowDataAggregation      Boolean           @default(true)
+
+  userId                    String            @unique
+  user                      User              @relation(...)
+}
+
+model DataDeletionRequest {
+  id                        String            @id @default(cuid())
+  createdAt                 DateTime          @default(now())
+  userId                    String
+  requestType               DeletionType
+  status                    DeletionStatus    @default(PENDING)
+  processedAt               DateTime?
+  completedAt               DateTime?
+  attestationsRevoked       Int               @default(0)
+  offchainDataDeleted       Boolean           @default(false)
+}
+
+model EASAttestation {
+  id                        String            @id @default(cuid())
+  uid                       String            @unique
+  schemaUid                 String
+  schemaName                String
+  chainId                   Int               @default(8453)
+  txHash                    String?
+  attester                  String
+  recipient                 String
+  data                      Json
+  revoked                   Boolean           @default(false)
+  isOffchain                Boolean           @default(false)
+  isPrivate                 Boolean           @default(false)
+  merkleRoot                String?
+  userId                    String
+}
+```
+
+### 1.3 Smart Contract Infrastructure
+
+| ID    | Task                                  | Description                         | Dependencies |
+| ----- | ------------------------------------- | ----------------------------------- | ------------ |
+| 1.3.1 | Create CaliberCore contract           | Main business logic contract        | 0.2.9        |
+| 1.3.2 | Create ForecastRegistry contract      | Onchain forecast management         | 1.3.1, 0.2.1 |
+| 1.3.3 | Create PortfolioManager contract      | Cross-platform position tracking    | 1.3.1        |
+| 1.3.4 | Create CaliberToken contract          | $CALIBR token with staking rewards  | 1.3.1        |
+| 1.3.5 | Create SuperforecasterBadges contract | Badge minting and management        | 1.3.2, 0.2.5 |
+| 1.3.6 | Write comprehensive tests             | Foundry tests for all contracts     | 1.3.1-1.3.5  |
+| 1.3.7 | Deploy to Base Sepolia                | Testnet deployment and verification | 1.3.6        |
+| 1.3.8 | Create deployment scripts             | Automated deployment pipeline       | 1.3.7        |
+
+### 1.4 Core Utilities & Types
+
+| ID    | Task                             | Description                                 | Dependencies |
+| ----- | -------------------------------- | ------------------------------------------- | ------------ |
+| 1.4.1 | Define core TypeScript types     | UnifiedMarket, Position, Forecast types     | 0.1.9        |
+| 1.4.2 | Create Kelly calculator          | Kelly Criterion math utilities              | -            |
+| 1.4.3 | Create Brier score calculator    | Time-weighted Brier scoring                 | -            |
+| 1.4.4 | Create calibration calculator    | Calibration curves and metrics              | 1.4.3        |
+| 1.4.5 | Create EAS interaction utilities | Wrapper functions for attestations          | 0.4.6, 1.4.1 |
+| 1.4.6 | Create superforecaster utilities | Tier calculation and promotion logic        | 1.4.4, 0.3.7 |
+| 1.4.7 | **Create privacy utilities**     | Privacy settings helpers, Merkle tree utils | 0.5.3, 1.4.1 |
+| 1.4.8 | Write unit tests                 | Test all utility functions                  | 1.4.1-1.4.7  |
+
+### 1.5 Off-Chain Storage Infrastructure
+
+| ID    | Task                                 | Description                                       | Dependencies |
+| ----- | ------------------------------------ | ------------------------------------------------- | ------------ |
+| 1.5.1 | Set up IPFS integration              | Configure IPFS client for decentralized storage   | 1.1.6        |
+| 1.5.2 | Create off-chain attestation service | Store and retrieve off-chain attestations         | 1.5.1, 0.4.5 |
+| 1.5.3 | Implement signature verification     | Verify off-chain attestation signatures           | 1.5.2        |
+| 1.5.4 | Create backend fallback storage      | Calibr-hosted storage for off-chain data          | 1.2.1        |
+| 1.5.5 | Implement storage selection logic    | Route to IPFS or backend based on user preference | 1.5.1-1.5.4  |
+| 1.5.6 | Write storage integration tests      | Test off-chain storage reliability                | 1.5.1-1.5.5  |
+
+**Deliverables for Phase 1:**
+
+- [ ] Next.js monorepo with TypeScript fully configured
+- [ ] PostgreSQL schema with EAS and privacy tables ready
+- [ ] Core smart contracts deployed to Base Sepolia
+- [ ] Foundry development environment operational
+- [ ] Off-chain storage infrastructure operational
+- [ ] All core utilities tested and documented
+
+---
+
+## 4. Phase 2: Polymarket Data Integration
+
+**Goal:** Integrate Polymarket market data using Gamma API and CLOB for read-only operations.
+
+### 2.1 Gamma API Integration
+
+| ID    | Task                       | Description                              | Dependencies |
+| ----- | -------------------------- | ---------------------------------------- | ------------ |
+| 2.1.1 | Create Polymarket adapter  | Base adapter class with error handling   | 1.1.2        |
+| 2.1.2 | Implement markets endpoint | Fetch all markets with filtering         | 2.1.1        |
+| 2.1.3 | Implement market details   | Fetch single market with outcomes        | 2.1.1        |
+| 2.1.4 | Implement events endpoint  | Fetch events (grouped markets)           | 2.1.1        |
+| 2.1.5 | Create response mappers    | Transform API responses to unified types | 2.1.1, 1.4.1 |
+| 2.1.6 | Implement rate limiting    | Respect API rate limits with backoff     | 2.1.1        |
+| 2.1.7 | Add caching layer          | Redis caching for market data            | 2.1.2-2.1.4  |
+| 2.1.8 | Write integration tests    | Test against live Gamma API              | 2.1.1-2.1.7  |
+
+### 2.2 CLOB API Integration (Read-Only)
+
+| ID    | Task                            | Description                        | Dependencies |
+| ----- | ------------------------------- | ---------------------------------- | ------------ |
+| 2.2.1 | Install @polymarket/clob-client | Configure CLOB client package      | 2.1.1        |
+| 2.2.2 | Implement orderbook fetching    | Get current orderbook state        | 2.2.1        |
+| 2.2.3 | Implement price fetching        | Get current best bid/ask           | 2.2.1        |
+| 2.2.4 | Implement trade history         | Fetch recent trades for market     | 2.2.1        |
+| 2.2.5 | Create price feed service       | Periodic price updates to database | 2.2.3        |
+| 2.2.6 | Write CLOB integration tests    | Test orderbook and price fetching  | 2.2.1-2.2.5  |
+
+### 2.3 Market Synchronization
+
+| ID    | Task                           | Description                          | Dependencies |
+| ----- | ------------------------------ | ------------------------------------ | ------------ |
+| 2.3.1 | Create sync scheduler          | Background job for market updates    | 2.1.7        |
+| 2.3.2 | Implement market discovery     | Detect new markets on Polymarket     | 2.3.1, 2.1.2 |
+| 2.3.3 | Implement market updates       | Update existing market data          | 2.3.1, 2.1.3 |
+| 2.3.4 | Implement resolution detection | Detect and record market resolutions | 2.3.3        |
+| 2.3.5 | Create market matching service | Match Polymarket to unified markets  | 2.3.2, 1.2.3 |
+| 2.3.6 | Write sync integration tests   | Test full sync cycle                 | 2.3.1-2.3.5  |
+
+**Deliverables for Phase 2:**
+
+- [ ] Gamma API fully integrated with caching
+- [ ] CLOB read-only operations working
+- [ ] Market sync running on schedule
+- [ ] Market matching operational
+
+---
+
+## 5. Phase 3: Polymarket Trading
+
+**Goal:** Integrate Polymarket Builder Program for gasless trading capabilities.
+
+### 3.1 Builder Program Setup
+
+| ID    | Task                              | Description                              | Dependencies |
+| ----- | --------------------------------- | ---------------------------------------- | ------------ |
+| 3.1.1 | Apply for Builder Program         | Submit application to Polymarket         | -            |
+| 3.1.2 | Configure Builder API credentials | Set up API keys and environment          | 3.1.1        |
+| 3.1.3 | Install RelayClient package       | @polymarket/builder-relayer-client       | 3.1.2        |
+| 3.1.4 | Create RelayClient wrapper        | Calibr-specific relay client abstraction | 3.1.3        |
+| 3.1.5 | Test gasless infrastructure       | Verify relay connectivity                | 3.1.4        |
+
+### 3.2 Safe Wallet Integration
+
+| ID    | Task                           | Description                          | Dependencies |
+| ----- | ------------------------------ | ------------------------------------ | ------------ |
+| 3.2.1 | Implement Safe detection       | Check if user has existing Safe      | 3.1.4        |
+| 3.2.2 | Implement Safe deployment      | Deploy new Safe for user via relay   | 3.2.1        |
+| 3.2.3 | Implement Safe activation      | Activate Safe for Polymarket trading | 3.2.2        |
+| 3.2.4 | Create Safe management service | Track and manage user Safes          | 3.2.1-3.2.3  |
+| 3.2.5 | Write Safe integration tests   | Test Safe lifecycle                  | 3.2.1-3.2.4  |
+
+### 3.3 Authentication & Signing
+
+| ID    | Task                              | Description                          | Dependencies |
+| ----- | --------------------------------- | ------------------------------------ | ------------ |
+| 3.3.1 | Implement L1 authentication       | EOA signature for initial auth       | 3.1.4        |
+| 3.3.2 | Implement L2 authentication       | HMAC-based API authentication        | 3.3.1        |
+| 3.3.3 | Create API credential generator   | Generate and store CLOB credentials  | 3.3.2        |
+| 3.3.4 | Implement signature type handling | Support EOA, POLY_PROXY, GNOSIS_SAFE | 3.3.1-3.3.3  |
+| 3.3.5 | Write authentication tests        | Test full auth flow                  | 3.3.1-3.3.4  |
+
+### 3.4 Order Execution
+
+| ID    | Task                          | Description                      | Dependencies |
+| ----- | ----------------------------- | -------------------------------- | ------------ |
+| 3.4.1 | Create order builder          | Construct valid order structures | 3.3.4, 2.2.1 |
+| 3.4.2 | Implement market orders       | Execute at best available price  | 3.4.1        |
+| 3.4.3 | Implement limit orders        | Place orders at specified price  | 3.4.1        |
+| 3.4.4 | Implement order cancellation  | Cancel pending orders            | 3.4.1        |
+| 3.4.5 | Create order tracking service | Track order status and fills     | 3.4.2-3.4.4  |
+| 3.4.6 | Implement position sync       | Sync positions after trades      | 3.4.5, 1.2.5 |
+| 3.4.7 | Write order execution tests   | Test full order lifecycle        | 3.4.1-3.4.6  |
+
+**Deliverables for Phase 3:**
+
+- [ ] Builder Program integrated and operational
+- [ ] Safe wallet management working
+- [ ] Authentication flow complete
+- [ ] Order execution tested and verified
+
+---
+
+## 6. Phase 4: Core App Features
+
+**Goal:** Implement core application features including portfolio management, forecasting, and privacy settings.
+
+### 4.1 Markets & Portfolio View
+
+| ID    | Task                          | Description                              | Dependencies |
+| ----- | ----------------------------- | ---------------------------------------- | ------------ |
+| 4.1.1 | Create markets list component | Display available markets with filtering | 2.3.5        |
+| 4.1.2 | Create market detail view     | Single market with orderbook, history    | 4.1.1, 2.2.2 |
+| 4.1.3 | Create portfolio dashboard    | Aggregate positions across platforms     | 3.4.6        |
+| 4.1.4 | Implement P&L tracking        | Show unrealized/realized P&L             | 4.1.3        |
+| 4.1.5 | Create position detail view   | Individual position management           | 4.1.3        |
+| 4.1.6 | Add portfolio analytics       | Charts, allocation breakdown             | 4.1.3-4.1.5  |
+
+### 4.2 Kelly Criterion Integration
+
+| ID    | Task                            | Description                           | Dependencies |
+| ----- | ------------------------------- | ------------------------------------- | ------------ |
+| 4.2.1 | Create Kelly overlay component  | Show recommended sizes on markets     | 4.1.2, 1.4.2 |
+| 4.2.2 | Implement edge calculation      | Calculate edge from user probability  | 4.2.1        |
+| 4.2.3 | Create Kelly settings panel     | Configure fraction multiplier         | 4.2.1        |
+| 4.2.4 | Implement portfolio-level Kelly | Optimize across multiple positions    | 4.2.2, 4.1.3 |
+| 4.2.5 | Add Kelly explanation tooltips  | Help users understand recommendations | 4.2.1-4.2.4  |
+
+### 4.3 Forecast Journaling with EAS Integration
+
+| ID    | Task                                | Description                                     | Dependencies |
+| ----- | ----------------------------------- | ----------------------------------------------- | ------------ |
+| 4.3.1 | Create forecast submission UI       | Form for creating forecasts with reasoning      | 4.1.1, 0.4.6 |
+| 4.3.2 | Integrate EAS attestation creation  | Submit forecasts as onchain attestations        | 4.3.1, 0.2.1 |
+| 4.3.3 | Create forecast history view        | Display user's forecasting history              | 4.3.2        |
+| 4.3.4 | Implement forecast updates          | Allow probability updates with new attestations | 4.3.2        |
+| 4.3.5 | Create resolution tracking          | Track market resolutions and score forecasts    | 4.3.3, 1.4.3 |
+| 4.3.6 | Calculate onchain Brier scores      | Update EAS attestations with scores             | 4.3.5, 0.2.4 |
+| 4.3.7 | Implement calibration tracking      | Show calibration metrics over time              | 4.3.6, 1.4.4 |
+| 4.3.8 | Create forecast analytics dashboard | Detailed performance analytics                  | 4.3.7        |
+
+### 4.4 Privacy Settings UI
+
+| ID    | Task                                     | Description                                   | Dependencies |
+| ----- | ---------------------------------------- | --------------------------------------------- | ------------ |
+| 4.4.1 | Create privacy settings page             | Dedicated page for privacy controls           | 1.2.9        |
+| 4.4.2 | Implement profile visibility controls    | PUBLIC, AUTHENTICATED, PRIVATE options        | 4.4.1        |
+| 4.4.3 | Implement leaderboard opt-out            | Show/hide from public leaderboards            | 4.4.1        |
+| 4.4.4 | Create forecast privacy defaults         | Set default privacy for new forecasts         | 4.4.1, 4.3.1 |
+| 4.4.5 | **Implement attestation mode selection** | On-chain, off-chain, private (Merkle) options | 4.4.1, 0.5.5 |
+| 4.4.6 | Create per-forecast privacy override     | Change privacy on individual forecasts        | 4.4.4, 4.3.1 |
+| 4.4.7 | Implement data export controls           | Allow/disallow reputation export              | 4.4.1        |
+| 4.4.8 | Add privacy explanation tooltips         | Help users understand privacy options         | 4.4.1-4.4.7  |
+
+### 4.5 Attestation Mode Implementation
+
+| ID    | Task                                   | Description                                  | Dependencies |
+| ----- | -------------------------------------- | -------------------------------------------- | ------------ |
+| 4.5.1 | Implement on-chain attestation flow    | Standard public attestations                 | 4.4.5, 0.4.2 |
+| 4.5.2 | Implement off-chain attestation flow   | IPFS/backend stored attestations             | 4.4.5, 1.5.2 |
+| 4.5.3 | **Implement Merkle tree attestations** | Private data with selective disclosure       | 4.4.5, 0.5.3 |
+| 4.5.4 | Create selective disclosure UI         | Allow users to reveal specific fields        | 4.5.3        |
+| 4.5.5 | Implement proof generation             | Generate Merkle proofs for verification      | 4.5.3        |
+| 4.5.6 | Create attestation verification page   | Verify any attestation (public or disclosed) | 4.5.1-4.5.5  |
+| 4.5.7 | Write attestation mode tests           | Test all three modes end-to-end              | 4.5.1-4.5.6  |
+
+**Deliverables for Phase 4:**
+
+- [ ] Complete markets and portfolio views
+- [ ] Kelly Criterion integration operational
+- [ ] Forecast journaling with EAS working
+- [ ] Privacy settings UI complete
+- [ ] All three attestation modes (on-chain, off-chain, private) implemented
+
+---
+
+## 7. Phase 5: Cross-Chain Execution
+
+**Goal:** Implement the $CALIBR to Polymarket trading flow via Circle CCTP bridge.
+
+### 5.1 Token Swap Infrastructure
+
+| ID    | Task                            | Description                       | Dependencies |
+| ----- | ------------------------------- | --------------------------------- | ------------ |
+| 5.1.1 | Create Aerodrome integration    | Swap $CALIBR to USDC on Base      | 1.3.4        |
+| 5.1.2 | Implement swap estimation       | Calculate expected USDC output    | 5.1.1        |
+| 5.1.3 | Implement slippage protection   | User-configurable slippage limits | 5.1.2        |
+| 5.1.4 | Create swap transaction builder | Build and sign swap transactions  | 5.1.1-5.1.3  |
+| 5.1.5 | Write swap integration tests    | Test swap functionality           | 5.1.1-5.1.4  |
+
+### 5.2 CCTP Bridge Integration
+
+| ID    | Task                           | Description                     | Dependencies |
+| ----- | ------------------------------ | ------------------------------- | ------------ |
+| 5.2.1 | Integrate Circle CCTP SDK      | Configure for Base to Polygon   | 5.1.4        |
+| 5.2.2 | Implement bridge initiation    | Start USDC transfer to Polygon  | 5.2.1        |
+| 5.2.3 | Implement attestation waiting  | Wait for Circle attestation     | 5.2.2        |
+| 5.2.4 | Implement mint claiming        | Claim USDC on Polygon           | 5.2.3        |
+| 5.2.5 | Create bridge status tracking  | Track bridge progress           | 5.2.2-5.2.4  |
+| 5.2.6 | Implement bridge fee handling  | Add $0.10 fee to $CALIBR amount | 5.2.1        |
+| 5.2.7 | Write bridge integration tests | Test full bridge flow           | 5.2.1-5.2.6  |
+
+### 5.3 End-to-End Execution
+
+| ID    | Task                             | Description                         | Dependencies |
+| ----- | -------------------------------- | ----------------------------------- | ------------ |
+| 5.3.1 | Create execution router contract | Single-tx swap + bridge initiation  | 5.1.4, 5.2.1 |
+| 5.3.2 | Implement trade intent system    | Store intended trades during bridge | 5.3.1, 3.4.1 |
+| 5.3.3 | Create execution monitor         | Watch for bridge completion         | 5.3.2        |
+| 5.3.4 | Implement auto-execution         | Execute trade when USDC arrives     | 5.3.3, 3.4.2 |
+| 5.3.5 | Create execution status UI       | Show full execution progress        | 5.3.1-5.3.4  |
+| 5.3.6 | Write E2E execution tests        | Test complete flow                  | 5.3.1-5.3.5  |
+
+**Deliverables for Phase 5:**
+
+- [ ] $CALIBR swap to USDC operational
+- [ ] CCTP bridge integration complete
+- [ ] End-to-end execution working
+
+---
+
+## 8. Phase 6: Advanced Features & Superforecaster System
+
+**Goal:** Implement the comprehensive superforecaster celebration and leaderboard system.
+
+### 6.1 Superforecaster Leaderboard System
+
+| ID    | Task                                         | Description                                   | Dependencies |
+| ----- | -------------------------------------------- | --------------------------------------------- | ------------ |
+| 6.1.1 | Design leaderboard data structure            | Rankings, tiers, scores, achievements         | 4.3.8, 0.3.7 |
+| 6.1.2 | Create composite scoring algorithm           | Combine Calibr + external reputation scores   | 6.1.1, 0.3.7 |
+| 6.1.3 | Implement tier calculation system            | APPRENTICE to GRANDMASTER progression         | 6.1.2, 0.2.5 |
+| 6.1.4 | Create real-time leaderboard API             | Live rankings with filtering/sorting          | 6.1.3        |
+| 6.1.5 | Build leaderboard frontend                   | Beautiful, engaging leaderboard display       | 6.1.4        |
+| 6.1.6 | Add historical leaderboard tracking          | Track rankings over time                      | 6.1.4        |
+| 6.1.7 | Implement leaderboard categories             | Overall, category-specific, platform-specific | 6.1.4        |
+| 6.1.8 | Create leaderboard sharing features          | Social sharing of achievements                | 6.1.5        |
+| 6.1.9 | **Respect privacy settings in leaderboards** | Hide users who opted out                      | 6.1.5, 4.4.3 |
+
+### 6.2 Superforecaster Badge & Achievement System
+
+| ID    | Task                                | Description                              | Dependencies |
+| ----- | ----------------------------------- | ---------------------------------------- | ------------ |
+| 6.2.1 | Design badge visual system          | SVG badges for each tier and achievement | 6.1.3        |
+| 6.2.2 | Create achievement definitions      | Streak days, accuracy, volume milestones | 6.1.1        |
+| 6.2.3 | Implement badge minting contract    | NFT badges for major achievements        | 1.3.5, 6.2.1 |
+| 6.2.4 | Create achievement tracking system  | Monitor and unlock achievements          | 6.2.2, 6.2.3 |
+| 6.2.5 | Build badge display system          | Show badges on profiles and leaderboard  | 6.2.1, 6.1.5 |
+| 6.2.6 | Implement achievement notifications | Celebrate unlocked achievements          | 6.2.4        |
+| 6.2.7 | Create badge marketplace/sharing    | Allow badge display across platforms     | 6.2.3        |
+| 6.2.8 | Add achievement analytics           | Track achievement unlock rates           | 6.2.4        |
+
+### 6.3 Superforecaster Celebration & Recognition
+
+| ID    | Task                             | Description                               | Dependencies       |
+| ----- | -------------------------------- | ----------------------------------------- | ------------------ |
+| 6.3.1 | Design celebration animations    | Visual celebrations for tier promotions   | 6.1.3, 6.2.1       |
+| 6.3.2 | Create promotion ceremony system | Special UI for tier promotions            | 6.3.1              |
+| 6.3.3 | Implement streak tracking        | Daily forecasting streaks and bonuses     | 4.3.2              |
+| 6.3.4 | Create hall of fame              | Showcase top performers and their stories | 6.1.5              |
+| 6.3.5 | Add social recognition features  | Shoutouts, highlights, features           | 6.3.4              |
+| 6.3.6 | Implement $CALIBR reward boosts  | Extra rewards for superforecasters        | 6.1.3, 1.3.4       |
+| 6.3.7 | Create community features        | Superforecaster-only channels/perks       | 6.1.3              |
+| 6.3.8 | Add cross-platform attestations  | Share achievements to other EAS platforms | 6.2.3, 0.3.2-0.3.6 |
+
+### 6.4 Cross-Platform Reputation Integration
+
+| ID    | Task                                      | Description                                 | Dependencies |
+| ----- | ----------------------------------------- | ------------------------------------------- | ------------ |
+| 6.4.1 | Create Optimism Collective integration    | Import RetroFunding reputation              | 0.3.2, 6.1.2 |
+| 6.4.2 | Create Coinbase Verifications integration | Import verification levels                  | 0.3.4, 6.1.2 |
+| 6.4.3 | Create Gitcoin Passport integration       | Import passport scores                      | 0.3.6, 6.1.2 |
+| 6.4.4 | Add ENS integration                       | Display ENS names in leaderboards           | 6.1.5        |
+| 6.4.5 | Create reputation syncing system          | Regular updates from external platforms     | 6.4.1-6.4.3  |
+| 6.4.6 | Build reputation dashboard                | Show all connected platform reputations     | 6.4.1-6.4.4  |
+| 6.4.7 | Add reputation verification               | Verify and validate imported reputation     | 6.4.5        |
+| 6.4.8 | Create reputation sharing features        | Export Calibr reputation to other platforms | 6.4.6, 0.4.2 |
+
+### 6.5 Advanced Analytics & Insights
+
+| ID    | Task                               | Description                                | Dependencies |
+| ----- | ---------------------------------- | ------------------------------------------ | ------------ |
+| 6.5.1 | Create forecasting insights engine | AI-powered insights on performance         | 4.3.8, 6.1.2 |
+| 6.5.2 | Build comparison tools             | Compare performance vs other forecasters   | 6.1.4        |
+| 6.5.3 | Implement trend analysis           | Identify improving/declining forecasters   | 6.5.1        |
+| 6.5.4 | Create coaching recommendations    | Suggest areas for improvement              | 6.5.1, 6.5.3 |
+| 6.5.5 | Add market expertise tracking      | Identify domain expertise areas            | 4.3.8        |
+| 6.5.6 | Create forecaster profiles         | Rich profiles with stats and achievements  | 6.2.5, 6.4.6 |
+| 6.5.7 | **Implement data export features** | Export forecasting data and insights       | 6.5.1, 4.4.7 |
+| 6.5.8 | Add performance prediction         | Predict future performance based on trends | 6.5.1, 6.5.3 |
+
+**Deliverables for Phase 6:**
+
+- [ ] Complete superforecaster leaderboard with privacy controls
+- [ ] Badge and achievement system operational
+- [ ] Celebration and recognition features active
+- [ ] Comprehensive reputation aggregation from major platforms
+- [ ] Advanced analytics dashboard with data export
+
+---
+
+## 9. Phase 7: Polish & Launch
+
+**Goal:** Final testing, documentation, security audits, and launch preparation including GDPR compliance.
+
+### 7.1 Testing & Quality Assurance
+
+| ID    | Task                            | Description                         | Dependencies        |
+| ----- | ------------------------------- | ----------------------------------- | ------------------- |
+| 7.1.1 | Create comprehensive test suite | Unit, integration, E2E tests        | All previous phases |
+| 7.1.2 | Perform load testing            | Test system under expected load     | 7.1.1               |
+| 7.1.3 | Conduct security audit          | Smart contract and API security     | 7.1.1               |
+| 7.1.4 | Perform penetration testing     | Test for vulnerabilities            | 7.1.3               |
+| 7.1.5 | Fix identified issues           | Address all audit findings          | 7.1.3, 7.1.4        |
+| 7.1.6 | Final QA pass                   | Complete functionality verification | 7.1.5               |
+
+### 7.2 GDPR & Compliance Implementation
+
+| ID    | Task                                 | Description                               | Dependencies  |
+| ----- | ------------------------------------ | ----------------------------------------- | ------------- |
+| 7.2.1 | **Implement data export API**        | Export all user data in portable format   | 1.2.10, 6.5.7 |
+| 7.2.2 | **Implement data deletion API**      | Process deletion requests                 | 1.2.10        |
+| 7.2.3 | **Create deletion request queue**    | Background processing for deletions       | 7.2.2         |
+| 7.2.4 | **Implement attestation revocation** | Revoke EAS attestations on deletion       | 7.2.3, 0.4.2  |
+| 7.2.5 | **Implement off-chain data cleanup** | Delete IPFS and backend stored data       | 7.2.3, 1.5.2  |
+| 7.2.6 | Create data deletion confirmation    | Confirm deletion to user                  | 7.2.4, 7.2.5  |
+| 7.2.7 | **Write privacy policy**             | Document data handling practices          | 0.5.6         |
+| 7.2.8 | Create terms of service              | Legal terms for platform use              | 7.2.7         |
+| 7.2.9 | Test GDPR compliance flow            | Verify export and deletion work correctly | 7.2.1-7.2.6   |
+
+### 7.3 Documentation
+
+| ID    | Task                             | Description                      | Dependencies        |
+| ----- | -------------------------------- | -------------------------------- | ------------------- |
+| 7.3.1 | Create user documentation        | How-to guides for all features   | All previous phases |
+| 7.3.2 | Create API documentation         | Developer API reference          | All previous phases |
+| 7.3.3 | Create smart contract docs       | Contract interaction guides      | 1.3.1-1.3.5         |
+| 7.3.4 | **Create privacy documentation** | Explain privacy options to users | 0.5.6, 4.4.1-4.4.8  |
+| 7.3.5 | Create onboarding flow           | New user tutorial and setup      | 7.3.1               |
+| 7.3.6 | Create FAQ section               | Common questions and answers     | 7.3.1-7.3.4         |
+
+### 7.4 Infrastructure & Deployment
+
+| ID    | Task                              | Description                   | Dependencies |
+| ----- | --------------------------------- | ----------------------------- | ------------ |
+| 7.4.1 | Set up production infrastructure  | Railway, Vercel, database     | 7.1.6        |
+| 7.4.2 | Configure monitoring              | Logging, alerting, metrics    | 7.4.1        |
+| 7.4.3 | Set up CDN and caching            | Performance optimization      | 7.4.1        |
+| 7.4.4 | Deploy smart contracts to mainnet | Final contract deployment     | 7.1.5        |
+| 7.4.5 | Configure backup systems          | Database and data backups     | 7.4.1        |
+| 7.4.6 | Create deployment runbook         | Step-by-step deployment guide | 7.4.1-7.4.5  |
+
+### 7.5 Launch Preparation
+
+| ID    | Task                         | Description                        | Dependencies       |
+| ----- | ---------------------------- | ---------------------------------- | ------------------ |
+| 7.5.1 | Create launch checklist      | Pre-launch verification            | All previous tasks |
+| 7.5.2 | Set up support channels      | Discord, email support             | 7.5.1              |
+| 7.5.3 | Prepare marketing materials  | Launch announcements, social media | 7.5.1              |
+| 7.5.4 | Plan soft launch             | Limited access launch              | 7.5.1-7.5.3        |
+| 7.5.5 | Execute soft launch          | Deploy to limited users            | 7.5.4              |
+| 7.5.6 | Address soft launch feedback | Fix issues from soft launch        | 7.5.5              |
+| 7.5.7 | Execute public launch        | Full platform launch               | 7.5.6              |
+
+**Deliverables for Phase 7:**
+
+- [ ] All tests passing with good coverage
+- [ ] Security audit completed and issues resolved
+- [ ] GDPR export/deletion fully implemented
+- [ ] Privacy policy and terms of service published
+- [ ] Complete documentation published
+- [ ] Production infrastructure operational
+- [ ] Successful public launch
+
+---
+
+## Key Integration Points
+
+### EAS Ecosystem Integration
+
+- Optimism Collective: Import RetroFunding participation attestations
+- Coinbase Verifications: Import Base wallet verification levels
+- Gitcoin Passport: Import passport scores and stamps
+- ENS: Display ENS names throughout platform
+
+### Privacy Architecture
+
+```
++-----------------------------------------------------------------------------+
+|                          PRIVACY FLOW DIAGRAM                                |
++-----------------------------------------------------------------------------+
+|                                                                             |
+|  User creates forecast                                                      |
+|         |                                                                   |
+|         v                                                                   |
+|  +------------------+                                                       |
+|  | Check privacy    |                                                       |
+|  | settings         |                                                       |
+|  +--------+---------+                                                       |
+|           |                                                                 |
+|     +-----+-----+-----+                                                     |
+|     |           |     |                                                     |
+|     v           v     v                                                     |
+|  +------+  +-------+ +--------+                                             |
+|  |Public|  |Off-   | |Private |                                             |
+|  |On-   |  |chain  | |Merkle  |                                             |
+|  |chain |  |       | |Tree    |                                             |
+|  +--+---+  +---+---+ +---+----+                                             |
+|     |          |         |                                                  |
+|     v          v         v                                                  |
+|  +------+  +-------+ +--------+                                             |
+|  | EAS  |  | IPFS/ | | EAS    |                                             |
+|  |Base  |  |Backend| | (root) |                                             |
+|  +------+  +-------+ +--------+                                             |
+|                          |                                                  |
+|                          v                                                  |
+|                    +----------+                                             |
+|                    | Selective|                                             |
+|                    | Disclose |                                             |
+|                    +----------+                                             |
+|                                                                             |
++-----------------------------------------------------------------------------+
+```
+
+### Onchain Activity Generation
+
+This EAS-first approach with privacy options generates significant onchain activity:
+
+1. **Every public forecast** -> EAS attestation (high frequency)
+2. **Private forecasts** -> Merkle root attestation (privacy-preserving)
+3. **Identity verifications** -> EAS attestations (initial setup)
+4. **Calibration score updates** -> EAS attestations (periodic)
+5. **Badge promotions** -> EAS attestations + NFT mints
+6. **Reputation imports** -> EAS attestations (periodic sync)
+7. **Achievement unlocks** -> EAS attestations (event-driven)
+8. **Cross-platform sharing** -> EAS attestations (user-initiated)
+
+---
+
+## Recommended Development Sequence
+
+1. **Phase 0 is critical foundation** - All subsequent phases depend on EAS and privacy infrastructure
+2. **Phase 1 builds core database** with privacy tables from day one
+3. **Phase 4 privacy settings** should be implemented early to establish patterns
+4. **Phase 6 leaderboards** must respect privacy settings from the start
+5. **Phase 7 GDPR** ensures compliance before public launch
+
+---
+
+_This document represents the complete development roadmap for Calibr.ly's prediction market aggregation platform with EAS-integrated identity, privacy-preserving attestations, and GDPR compliance._
+
+_Version 5.0 | January 2026_
