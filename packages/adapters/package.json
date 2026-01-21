@@ -22,6 +22,18 @@
     "./matching": {
       "import": "./dist/matching/index.js",
       "types": "./dist/matching/index.d.ts"
+    },
+    "./cache": {
+      "import": "./dist/cache/index.js",
+      "types": "./dist/cache/index.d.ts"
+    },
+    "./feeds": {
+      "import": "./dist/feeds/index.js",
+      "types": "./dist/feeds/index.d.ts"
+    },
+    "./resolution": {
+      "import": "./dist/resolution/index.js",
+      "types": "./dist/resolution/index.d.ts"
     }
   },
   "scripts": {
@@ -36,6 +48,7 @@
   "dependencies": {
     "@calibr/core": "workspace:*",
     "@polymarket/clob-client": "^5.2.1",
+    "redis": "^4.6.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {

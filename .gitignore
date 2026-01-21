@@ -12,8 +12,8 @@ build/
 packages/contracts/cache/
 packages/contracts/out/
 packages/contracts/broadcast/
-cache/
-broadcast/
+/cache/
+/broadcast/
 
 # Environment
 .env
