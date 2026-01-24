@@ -2,7 +2,7 @@
   "name": "@calibr/adapters",
   "version": "0.1.0",
   "private": true,
-  "description": "Calibr.ly platform integrations (Polymarket, etc.)",
+  "description": "Calibr.xyz platform integrations (Polymarket, etc.)",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,6 +14,10 @@
     "./polymarket": {
       "import": "./dist/polymarket/index.js",
       "types": "./dist/polymarket/index.d.ts"
+    },
+    "./limitless": {
+      "import": "./dist/limitless/index.js",
+      "types": "./dist/limitless/index.d.ts"
     },
     "./sync": {
       "import": "./dist/sync/index.js",
@@ -34,6 +38,10 @@
     "./resolution": {
       "import": "./dist/resolution/index.js",
       "types": "./dist/resolution/index.d.ts"
+    },
+    "./trading": {
+      "import": "./dist/trading/index.js",
+      "types": "./dist/trading/index.d.ts"
     }
   },
   "scripts": {
@@ -48,7 +56,11 @@
   "dependencies": {
     "@calibr/core": "workspace:*",
     "@polymarket/clob-client": "^5.2.1",
+    "@safe-global/protocol-kit": "^6.1.2",
+    "@safe-global/safe-core-sdk": "^3.3.5",
+    "@safe-global/safe-core-sdk-types": "^5.1.0",
     "redis": "^4.6.0",
+    "viem": "^2",
     "zod": "^3.22.0"
   },
   "devDependencies": {

@@ -255,7 +255,7 @@ export class GammaClient {
         method: 'GET',
         headers: {
           Accept: 'application/json',
-          'User-Agent': 'Calibr.ly/1.0',
+          'User-Agent': 'Calibr.xyz/1.0',
         },
       });
 

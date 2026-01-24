@@ -1,5 +1,5 @@
 /**
- * Adapter Types for Calibr.ly Platform Integrations
+ * Adapter Types for Calibr.xyz Platform Integrations
  */
 
 import { z } from 'zod';
@@ -8,7 +8,7 @@ import { z } from 'zod';
 // Platform Types
 // =============================================================================
 
-export type Platform = 'POLYMARKET' | 'KALSHI' | 'METACULUS' | 'MANIFOLD' | 'IEM';
+export type Platform = 'POLYMARKET' | 'LIMITLESS' | 'OPINION' | 'PREDICTFUN' | 'KALSHI' | 'METACULUS' | 'MANIFOLD' | 'IEM';
 
 export interface PlatformConfig {
   platform: Platform;
@@ -38,6 +38,27 @@ export const MarketCategorySchema = z.enum([
 ]);
 export type MarketCategory = z.infer<typeof MarketCategorySchema>;
 
+/**
+ * Market type - binary (YES/NO) or multi-outcome
+ */
+export type MarketType = 'BINARY' | 'MULTIPLE_CHOICE' | 'SCALAR';
+
+/**
+ * Individual outcome for a market
+ */
+export interface MarketOutcome {
+  /** Index of this outcome (0-based) */
+  index: number;
+  /** Display label (e.g., 'Yes', 'No', 'Candidate A') */
+  label: string;
+  /** Current probability/price (0-1) */
+  price: number;
+  /** Platform-specific token ID for this outcome */
+  tokenId?: string;
+  /** Whether this outcome won (null if not resolved) */
+  isWinner?: boolean | null;
+}
+
 export interface PlatformMarket {
   id: string;
   platform: Platform;
@@ -47,8 +68,22 @@ export interface PlatformMarket {
   url?: string;
   imageUrl?: string;
 
-  // Pricing
+  /**
+   * Market type: BINARY (default), MULTIPLE_CHOICE, or SCALAR
+   */
+  marketType?: MarketType;
+
+  /**
+   * Outcomes for this market
+   * - Binary markets: [{ label: 'Yes', ... }, { label: 'No', ... }]
+   * - Multi-choice: [{ label: 'Option A', ... }, { label: 'Option B', ... }, ...]
+   */
+  outcomes?: MarketOutcome[];
+
+  // Pricing (for backwards compatibility with binary markets)
+  /** @deprecated Use outcomes[0].price for YES price */
   yesPrice?: number;
+  /** @deprecated Use outcomes[1].price for NO price */
   noPrice?: number;
   lastPrice?: number;
 
@@ -56,7 +91,7 @@ export interface PlatformMarket {
   volume: number;
   liquidity: number;
 
-  // Order book
+  // Order book (for primary outcome in multi-choice markets)
   bestBid?: number;
   bestAsk?: number;
   spread?: number;
@@ -67,6 +102,8 @@ export interface PlatformMarket {
   closesAt?: Date;
   resolvedAt?: Date;
   resolution?: string;
+  /** Index of winning outcome for multi-choice markets */
+  winningOutcomeIndex?: number | null;
 
   // Categorization
   category?: MarketCategory;
