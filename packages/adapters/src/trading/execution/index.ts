@@ -56,6 +56,18 @@ export {
   type IEmailAdapter,
 } from './notifier';
 
+// Order Builder
+export {
+  OrderBuilder,
+  createOrderBuilder,
+  orderBuilder,
+  type OrderBuilderConfig,
+  type PlatformOrderConfig,
+  type OrderBuildInput,
+  type OrderBuildResult,
+  type IOrderBuilder,
+} from './order-builder';
+
 // ============================================================================
 // Factory Functions for Composing Services
 // ============================================================================
