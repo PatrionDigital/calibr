@@ -1,11 +1,11 @@
-# Calibr.ly Project Tasks
+# Calibr.xyz Project Tasks
 
 ## Prediction Market Portfolio Manager & Aggregation Layer
 
-**Version:** 5.0  
-**Last Updated:** January 2026  
-**Status:** Development Phase  
-**Major Updates:** EAS Foundation, Privacy & Compliance, Superforecaster Leaderboards
+**Version:** 5.2
+**Last Updated:** January 23, 2026
+**Status:** Development Phase
+**Major Updates:** EAS Foundation, Privacy & Compliance, Superforecaster Leaderboards, Multi-Platform Trading Adapters, Limitless Trading Integration (Complete)
 
 ---
 
@@ -14,12 +14,13 @@
 1. [Project Phases Overview](#1-project-phases-overview)
 2. [Phase 0: EAS Foundation & Digital Identity](#2-phase-0-eas-foundation--digital-identity)
 3. [Phase 1: Core Infrastructure](#3-phase-1-core-infrastructure)
-4. [Phase 2: Polymarket Data Integration](#4-phase-2-polymarket-data-integration)
-5. [Phase 3: Polymarket Trading](#5-phase-3-polymarket-trading)
+4. [Phase 2: Data Integration](#4-phase-2-data-integration)
+5. [Phase 3: Multi-Platform Trading](#5-phase-3-multi-platform-trading)
 6. [Phase 4: Core App Features](#6-phase-4-core-app-features)
 7. [Phase 5: Cross-Chain Execution](#7-phase-5-cross-chain-execution)
 8. [Phase 6: Advanced Features & Superforecaster System](#8-phase-6-advanced-features--superforecaster-system)
 9. [Phase 7: Polish & Launch](#9-phase-7-polish--launch)
+10. [Phase 8: Mainnet Deployment](#10-phase-8-mainnet-deployment)
 
 ---
 
@@ -27,26 +28,27 @@
 
 ### Task Summary
 
-| Phase                          | Focus                                                           |
-| ------------------------------ | --------------------------------------------------------------- |
-| **Phase 0: EAS Foundation**    | EAS Schemas, Resolvers, Identity, **Privacy Architecture**      |
-| Phase 1: Core Infrastructure   | Monorepo, DB, Auth, Core Utils, **Privacy Tables**              |
-| Phase 2: Polymarket Data       | Gamma API, CLOB (read-only), Sync                               |
-| Phase 3: Polymarket Trading    | Builder Program, Auth, Gasless                                  |
-| Phase 4: Core App Features     | Markets, Portfolio, Kelly, Forecasting, **Privacy Settings UI** |
-| Phase 5: Cross-Chain Execution | $CALIBR Flow, Bridge, CTF                                       |
-| Phase 6: Advanced Features     | Leaderboards, Reputation, Celebrations                          |
-| Phase 7: Polish & Launch       | Testing, Docs, Infrastructure, **GDPR Compliance**              |
+| Phase                          | Focus                                                           | Status      |
+| ------------------------------ | --------------------------------------------------------------- | ----------- |
+| **Phase 0: EAS Foundation**    | EAS Schemas (testnet), Resolvers, Identity, Privacy Architecture| ✅ Complete |
+| Phase 1: Core Infrastructure   | Monorepo, DB, Auth, Core Utils, **Privacy Tables**              | ✅ Complete |
+| Phase 2: Data Integration      | Polymarket + Limitless APIs, CLOB (read-only), Sync             | ✅ Complete |
+| Phase 3: Multi-Platform Trading| ITradingAdapter, Limitless Trading, Position Import             | 🔄 Active   |
+| Phase 4: Core App Features     | Markets, Portfolio, Kelly, Forecasting, **Privacy Settings UI** | 🔄 Active   |
+| Phase 5: Cross-Chain Execution | Limitless Trading, $CALIBR Flow, Bridge, Polymarket via CCTP    | 🔄 Active   |
+| Phase 6: Advanced Features     | Leaderboards, Reputation, Celebrations                          | Pending     |
+| Phase 7: Polish & Launch       | Testing, Docs, Infrastructure, **GDPR Compliance**              | Pending     |
+| **Phase 8: Mainnet Deployment**| EAS Schemas (mainnet), Contracts, Production Launch             | Pending     |
 
 ### Phase Diagram
 
 ```
 +-----------------------------------------------------------------------------+
-|                         CALIBR.LY DEVELOPMENT PHASES                         |
+|                         CALIBR.XYZ DEVELOPMENT PHASES                         |
 +-----------------------------------------------------------------------------+
 |                                                                             |
-|  * PHASE 0: EAS FOUNDATION *                                                |
-|  |-- EAS Schema Registry & Resolvers                                        |
+|  * PHASE 0: EAS FOUNDATION * (TESTNET)                                      |
+|  |-- EAS Schema Registry & Resolvers (Base Sepolia)                         |
 |  |-- Cross-platform identity integration                                    |
 |  |-- Superforecaster tier system foundation                                 |
 |  |-- Privacy architecture design                                            |
@@ -60,15 +62,16 @@
 |  |-- Foundry smart contract setup                                           |
 |  +-- Base network integration                                               |
 |                                                                             |
-|  PHASE 2: POLYMARKET DATA INTEGRATION                                       |
-|  |-- Gamma API integration                                                  |
-|  |-- CLOB read-only integration                                             |
-|  +-- Real-time price feeds                                                  |
+|  PHASE 2: DATA INTEGRATION                                                  |
+|  |-- Polymarket: Gamma API + CLOB (read-only)                               |
+|  |-- Limitless: REST API integration                                        |
+|  +-- Real-time price feeds (multi-platform)                                 |
 |                                                                             |
-|  PHASE 3: POLYMARKET TRADING                                                |
-|  |-- Builder Program integration                                            |
-|  |-- Safe wallet deployment & management                                    |
-|  +-- Gasless trading via RelayClient                                        |
+|  PHASE 3: MULTI-PLATFORM TRADING                                            |
+|  |-- ITradingAdapter interface (platform-agnostic)                          |
+|  |-- Limitless trading adapter (EIP-712 signed orders)                      |
+|  |-- Position import from wallet addresses                                  |
+|  +-- Order execution & position sync                                        |
 |                                                                             |
 |  PHASE 4: CORE APP FEATURES                                                 |
 |  |-- Markets aggregation & portfolio view                                   |
@@ -80,6 +83,7 @@
 |  PHASE 5: CROSS-CHAIN EXECUTION                                             |
 |  |-- $CALIBR -> USDC -> Polygon flow                                        |
 |  |-- CCTP bridge integration                                                |
+|  |-- Polymarket trading via Builder Program                                 |
 |  +-- Smart contract execution layer                                         |
 |                                                                             |
 |  * PHASE 6: SUPERFORECASTER SYSTEM *                                        |
@@ -92,7 +96,13 @@
 |  |-- Testing, security audits                                               |
 |  |-- Documentation & infrastructure                                         |
 |  |-- GDPR data export/deletion implementation                               |
-|  +-- Public launch preparation                                              |
+|  +-- Testnet launch & beta testing                                          |
+|                                                                             |
+|  * PHASE 8: MAINNET DEPLOYMENT *                                            |
+|  |-- Deploy EAS schemas to Base mainnet                                     |
+|  |-- Deploy smart contracts to mainnet                                      |
+|  |-- Production infrastructure setup                                        |
+|  +-- Public mainnet launch                                                  |
 |                                                                             |
 +-----------------------------------------------------------------------------+
 ```
@@ -101,21 +111,20 @@
 
 ## 2. Phase 0: EAS Foundation & Digital Identity
 
-**Goal:** Establish the attestation, identity, and privacy infrastructure that forms the bedrock of the entire platform.
+**Goal:** Establish the attestation, identity, and privacy infrastructure on testnet that forms the bedrock of the entire platform.
 
-### 0.1 EAS Schema Design & Deployment
+### 0.1 EAS Schema Design & Deployment (Testnet)
 
-| ID    | Task                            | Description                                       | Dependencies |
-| ----- | ------------------------------- | ------------------------------------------------- | ------------ |
-| 0.1.1 | Design Forecast Schema          | Define attestation structure for forecasts        | -            |
-| 0.1.2 | Design Calibration Score Schema | Define attestation structure for scoring          | 0.1.1        |
-| 0.1.3 | Design Identity Schema          | Cross-platform identity linking structure         | -            |
-| 0.1.4 | Design Superforecaster Schema   | Badge and tier system structure                   | 0.1.1, 0.1.2 |
-| 0.1.5 | Design Reputation Schema        | Platform reputation aggregation                   | 0.1.3        |
-| 0.1.6 | Design Private Data Schema      | Merkle tree root storage for selective disclosure | 0.1.3        |
-| 0.1.7 | Deploy schemas to Base testnet  | Register all schemas via EAS                      | 0.1.1-0.1.6  |
-| 0.1.8 | Deploy schemas to Base mainnet  | Production schema deployment                      | 0.1.7        |
-| 0.1.9 | Create schema documentation     | Document all schemas with examples                | 0.1.8        |
+| ID    | Task                            | Description                                       | Dependencies | Status |
+| ----- | ------------------------------- | ------------------------------------------------- | ------------ | ------ |
+| 0.1.1 | Design Forecast Schema          | Define attestation structure for forecasts        | -            | ✅ Done |
+| 0.1.2 | Design Calibration Score Schema | Define attestation structure for scoring          | 0.1.1        | ✅ Done |
+| 0.1.3 | Design Identity Schema          | Cross-platform identity linking structure         | -            | ✅ Done |
+| 0.1.4 | Design Superforecaster Schema   | Badge and tier system structure                   | 0.1.1, 0.1.2 | ✅ Done |
+| 0.1.5 | Design Reputation Schema        | Platform reputation aggregation                   | 0.1.3        | ✅ Done |
+| 0.1.6 | Design Private Data Schema      | Merkle tree root storage for selective disclosure | 0.1.3        | ✅ Done |
+| 0.1.7 | Deploy schemas to Base Sepolia  | Register all schemas via EAS on testnet           | 0.1.1-0.1.6  | ✅ Done |
+| 0.1.8 | Create schema documentation     | Document all schemas with examples                | 0.1.7        | ✅ Done |
 
 **Schema Specifications:**
 
@@ -139,55 +148,54 @@
 "bytes32 merkleRoot,string dataType,uint256 fieldCount,uint256 createdAt";
 ```
 
-### 0.2 EAS Resolver Contracts
+### 0.2 EAS Resolver Contracts (Testnet)
 
-| ID    | Task                               | Description                                     | Dependencies |
-| ----- | ---------------------------------- | ----------------------------------------------- | ------------ |
-| 0.2.1 | Create CaliberEASResolver contract | Core resolver with validation logic             | 0.1.1-0.1.6  |
-| 0.2.2 | Implement forecast validation      | Validate probability bounds, market existence   | 0.2.1        |
-| 0.2.3 | Implement identity verification    | Verify cross-platform proofs                    | 0.2.1        |
-| 0.2.4 | Implement calibration calculation  | Onchain Brier score and calibration math        | 0.2.1        |
-| 0.2.5 | Implement superforecaster logic    | Tier calculation and promotion logic            | 0.2.1, 0.2.4 |
-| 0.2.6 | Implement private data resolver    | Merkle root validation for selective disclosure | 0.2.1        |
-| 0.2.7 | Write comprehensive tests          | Unit tests for all resolver functions           | 0.2.1-0.2.6  |
-| 0.2.8 | Deploy resolver to testnet         | Test deployment and validation                  | 0.2.7        |
-| 0.2.9 | Deploy resolver to mainnet         | Production deployment                           | 0.2.8        |
+| ID    | Task                               | Description                                     | Dependencies | Status |
+| ----- | ---------------------------------- | ----------------------------------------------- | ------------ | ------ |
+| 0.2.1 | Create CaliberEASResolver contract | Core resolver with validation logic             | 0.1.1-0.1.6  | ✅ Done |
+| 0.2.2 | Implement forecast validation      | Validate probability bounds, market existence   | 0.2.1        | ✅ Done |
+| 0.2.3 | Implement identity verification    | Verify cross-platform proofs                    | 0.2.1        | ✅ Done |
+| 0.2.4 | Implement calibration calculation  | Onchain Brier score and calibration math        | 0.2.1        | ✅ Done |
+| 0.2.5 | Implement superforecaster logic    | Tier calculation and promotion logic            | 0.2.1, 0.2.4 | ✅ Done |
+| 0.2.6 | Implement private data resolver    | Merkle root validation for selective disclosure | 0.2.1        | ✅ Done |
+| 0.2.7 | Write comprehensive tests          | Unit tests for all resolver functions           | 0.2.1-0.2.6  | ✅ Done |
+| 0.2.8 | Deploy resolver to Base Sepolia    | Test deployment and validation                  | 0.2.7        | ✅ Done |
 
 ### 0.3 Cross-Platform Identity Integration
 
-| ID    | Task                                   | Description                                  | Dependencies        |
-| ----- | -------------------------------------- | -------------------------------------------- | ------------------- |
-| 0.3.1 | Research Optimism Collective EAS usage | Understand RetroFunding attestation patterns | -                   |
-| 0.3.2 | Implement Optimism reputation import   | Query OP attestations for reputation         | 0.3.1               |
-| 0.3.3 | Research Coinbase Verifications        | Understand Base verification attestations    | -                   |
-| 0.3.4 | Implement Coinbase verification import | Import verification level from Base          | 0.3.3               |
-| 0.3.5 | Research Gitcoin Passport integration  | Understand passport score attestations       | -                   |
-| 0.3.6 | Implement Gitcoin score import         | Import passport scores and stamps            | 0.3.5               |
-| 0.3.7 | Create composite scoring algorithm     | Combine Calibr + external reputation         | 0.3.2, 0.3.4, 0.3.6 |
-| 0.3.8 | Test cross-platform integrations       | Verify all import mechanisms work            | 0.3.2-0.3.7         |
+Note: Calibr uses EAS exclusively on Base. Cross-platform identity links prediction market accounts (Polymarket, Limitless, etc.) to the user's Base wallet.
+
+| ID    | Task                                   | Description                                   | Dependencies | Status  |
+| ----- | -------------------------------------- | --------------------------------------------- | ------------ | ------- |
+| 0.3.1 | Define identity linking flow           | How users link Polymarket/Limitless accounts  | 0.1.3        | ✅ Done |
+| 0.3.2 | Implement identity attestation         | Create identity attestations on Base          | 0.3.1, 0.4.2 | ✅ Done |
+| 0.3.3 | Create identity verification service   | Verify user owns platform accounts            | 0.3.2        | ✅ Done |
+| 0.3.4 | Implement platform-specific verifiers  | Polymarket, Limitless account verification    | 0.3.3        | ✅ Done |
+| 0.3.5 | Create identity query service          | Query linked identities for a wallet          | 0.3.2        | ✅ Done |
+| 0.3.6 | Test identity flows                    | End-to-end identity linking tests             | 0.3.2-0.3.5  | ✅ Done |
 
 ### 0.4 EAS SDK Integration
 
-| ID    | Task                            | Description                             | Dependencies |
-| ----- | ------------------------------- | --------------------------------------- | ------------ |
-| 0.4.1 | Install and configure EAS SDK   | Set up EAS client for Base network      | -            |
-| 0.4.2 | Create attestation service      | Service layer for creating attestations | 0.4.1, 0.2.1 |
-| 0.4.3 | Create query service            | Service layer for querying attestations | 0.4.1        |
-| 0.4.4 | Implement batch attestations    | Optimize for multiple attestations      | 0.4.2        |
-| 0.4.5 | Add offline attestation support | Support for off-chain attestations      | 0.4.2        |
-| 0.4.6 | Create EAS utilities package    | Reusable EAS interaction utilities      | 0.4.2, 0.4.3 |
-| 0.4.7 | Write integration tests         | Test EAS SDK integration                | 0.4.1-0.4.6  |
+| ID    | Task                            | Description                             | Dependencies | Status  |
+| ----- | ------------------------------- | --------------------------------------- | ------------ | ------- |
+| 0.4.1 | Install and configure EAS SDK   | Set up EAS client for Base network      | -            | ✅ Done |
+| 0.4.2 | Create attestation service      | Service layer for creating attestations | 0.4.1, 0.2.1 | ✅ Done |
+| 0.4.3 | Create query service            | Service layer for querying attestations | 0.4.1        | ✅ Done |
+| 0.4.4 | Implement batch attestations    | Optimize for multiple attestations      | 0.4.2        | ✅ Done |
+| 0.4.5 | Add offline attestation support | Support for off-chain attestations      | 0.4.2        | ✅ Done |
+| 0.4.6 | Create EAS utilities package    | Reusable EAS interaction utilities      | 0.4.2, 0.4.3 | ✅ Done |
+| 0.4.7 | Write integration tests         | Test EAS SDK integration                | 0.4.1-0.4.6  | ✅ Done |
 
 ### 0.5 Privacy Architecture Design
 
-| ID    | Task                                  | Description                              | Dependencies |
-| ----- | ------------------------------------- | ---------------------------------------- | ------------ |
-| 0.5.1 | Design privacy data model             | Define public vs private data boundaries | 0.1.1-0.1.6  |
-| 0.5.2 | Design off-chain storage architecture | IPFS and backend storage strategy        | 0.5.1        |
-| 0.5.3 | Design Merkle tree implementation     | Private data attestation structure       | 0.5.1        |
-| 0.5.4 | Design selective disclosure flow      | User-controlled field revelation         | 0.5.3        |
-| 0.5.5 | Design attestation mode selection     | On-chain, off-chain, private modes       | 0.5.1-0.5.4  |
-| 0.5.6 | Document privacy architecture         | Technical specification document         | 0.5.1-0.5.5  |
+| ID    | Task                                  | Description                              | Dependencies | Status  |
+| ----- | ------------------------------------- | ---------------------------------------- | ------------ | ------- |
+| 0.5.1 | Design privacy data model             | Define public vs private data boundaries | 0.1.1-0.1.6  | ✅ Done |
+| 0.5.2 | Design off-chain storage architecture | IPFS and backend storage strategy        | 0.5.1        | ✅ Done |
+| 0.5.3 | Design Merkle tree implementation     | Private data attestation structure       | 0.5.1        | ✅ Done |
+| 0.5.4 | Design selective disclosure flow      | User-controlled field revelation         | 0.5.3        | ✅ Done |
+| 0.5.5 | Design attestation mode selection     | On-chain, off-chain, private modes       | 0.5.1-0.5.4  | ✅ Done |
+| 0.5.6 | Document privacy architecture         | Technical specification document         | 0.5.1-0.5.5  | ✅ Done |
 
 **Deliverables for Phase 0:**
 
@@ -206,32 +214,32 @@
 
 ### 1.1 Project Setup (Next.js + TypeScript)
 
-| ID    | Task                            | Description                                    | Dependencies |
-| ----- | ------------------------------- | ---------------------------------------------- | ------------ |
-| 1.1.1 | Initialize Next.js monorepo     | Set up pnpm workspaces, Next.js 14, TypeScript | 0.4.7        |
-| 1.1.2 | Create package structure        | Create core, adapters, api, web packages       | 1.1.1        |
-| 1.1.3 | Configure Foundry workspace     | Set up smart contract development environment  | 1.1.1        |
-| 1.1.4 | Set up Anvil local blockchain   | Local development blockchain with EAS deployed | 1.1.3        |
-| 1.1.5 | Configure CI/CD                 | GitHub Actions for lint, test, build, deploy   | 1.1.1        |
-| 1.1.6 | Set up development environment  | Docker Compose for Postgres, Redis, Anvil      | 1.1.4        |
-| 1.1.7 | Configure environment variables | Create .env templates with EAS addresses       | 1.1.6        |
+| ID    | Task                            | Description                                    | Dependencies | Status  |
+| ----- | ------------------------------- | ---------------------------------------------- | ------------ | ------- |
+| 1.1.1 | Initialize Next.js monorepo     | Set up pnpm workspaces, Next.js 14, TypeScript | 0.4.7        | ✅ Done |
+| 1.1.2 | Create package structure        | Create core, adapters, api, web packages       | 1.1.1        | ✅ Done |
+| 1.1.3 | Configure Foundry workspace     | Set up smart contract development environment  | 1.1.1        | ✅ Done |
+| 1.1.4 | Set up Anvil local blockchain   | Local development blockchain with EAS deployed | 1.1.3        | ✅ Done |
+| 1.1.5 | Configure CI/CD                 | GitHub Actions for lint, test, build, deploy   | 1.1.1        | ✅ Done |
+| 1.1.6 | Set up development environment  | Docker Compose for Postgres, Redis, Anvil      | 1.1.4        | ✅ Done |
+| 1.1.7 | Configure environment variables | Create .env templates with EAS addresses       | 1.1.6        | ✅ Done |
 
 ### 1.2 Database Schema (Enhanced for EAS & Privacy)
 
-| ID     | Task                                 | Description                                             | Dependencies |
-| ------ | ------------------------------------ | ------------------------------------------------------- | ------------ |
-| 1.2.1  | Set up PostgreSQL                    | Provision database (local + staging)                    | 1.1.6        |
-| 1.2.2  | Install and configure Prisma         | Initialize Prisma, configure connection                 | 1.2.1        |
-| 1.2.3  | Create core schema                   | Platform, UnifiedMarket, PlatformMarket tables          | 1.2.2        |
-| 1.2.4  | Create user schema                   | User, WalletConnection, EAS attestation refs            | 1.2.2        |
-| 1.2.5  | Create portfolio schema              | Position, PortfolioSnapshot tables                      | 1.2.3        |
-| 1.2.6  | Create forecast schema               | Forecast table with EAS UID references, isPublic flag   | 1.2.3, 0.1.1 |
-| 1.2.7  | Create reputation schema             | Cross-platform reputation aggregation                   | 1.2.4, 0.3.7 |
-| 1.2.8  | Create superforecaster schema        | Leaderboard and tier tracking                           | 1.2.6, 1.2.7 |
-| 1.2.9  | **Create UserPrivacySettings table** | Profile visibility, forecast privacy, attestation prefs | 1.2.4, 0.5.1 |
-| 1.2.10 | **Create DataDeletionRequest table** | GDPR deletion request tracking                          | 1.2.4        |
-| 1.2.11 | **Create EASAttestation table**      | Track all attestations with privacy flags               | 1.2.4, 0.4.2 |
-| 1.2.12 | Create indices and migrations        | Optimize for attestation and privacy queries            | 1.2.3-1.2.11 |
+| ID     | Task                                 | Description                                             | Dependencies | Status  |
+| ------ | ------------------------------------ | ------------------------------------------------------- | ------------ | ------- |
+| 1.2.1  | Set up PostgreSQL                    | Provision database (local + staging)                    | 1.1.6        | ✅ Done |
+| 1.2.2  | Install and configure Prisma         | Initialize Prisma, configure connection                 | 1.2.1        | ✅ Done |
+| 1.2.3  | Create core schema                   | Platform, UnifiedMarket, PlatformMarket tables          | 1.2.2        | ✅ Done |
+| 1.2.4  | Create user schema                   | User, WalletConnection, EAS attestation refs            | 1.2.2        | ✅ Done |
+| 1.2.5  | Create portfolio schema              | Position, PortfolioSnapshot tables                      | 1.2.3        | ✅ Done |
+| 1.2.6  | Create forecast schema               | Forecast table with EAS UID references, isPublic flag   | 1.2.3, 0.1.1 | ✅ Done |
+| 1.2.7  | Create reputation schema             | Cross-platform reputation aggregation                   | 1.2.4, 0.3.7 | ✅ Done |
+| 1.2.8  | Create superforecaster schema        | Leaderboard and tier tracking                           | 1.2.6, 1.2.7 | ✅ Done |
+| 1.2.9  | **Create UserPrivacySettings table** | Profile visibility, forecast privacy, attestation prefs | 1.2.4, 0.5.1 | ✅ Done |
+| 1.2.10 | **Create DataDeletionRequest table** | GDPR deletion request tracking                          | 1.2.4        | ✅ Done |
+| 1.2.11 | **Create EASAttestation table**      | Track all attestations with privacy flags               | 1.2.4, 0.4.2 | ✅ Done |
+| 1.2.12 | Create indices and migrations        | Optimize for attestation and privacy queries            | 1.2.3-1.2.11 | ✅ Done |
 
 **Privacy-Related Schema:**
 
@@ -294,55 +302,71 @@ model EASAttestation {
 
 ### 1.3 Smart Contract Infrastructure
 
-| ID    | Task                                  | Description                         | Dependencies |
-| ----- | ------------------------------------- | ----------------------------------- | ------------ |
-| 1.3.1 | Create CaliberCore contract           | Main business logic contract        | 0.2.9        |
-| 1.3.2 | Create ForecastRegistry contract      | Onchain forecast management         | 1.3.1, 0.2.1 |
-| 1.3.3 | Create PortfolioManager contract      | Cross-platform position tracking    | 1.3.1        |
-| 1.3.4 | Create CaliberToken contract          | $CALIBR token with staking rewards  | 1.3.1        |
-| 1.3.5 | Create SuperforecasterBadges contract | Badge minting and management        | 1.3.2, 0.2.5 |
-| 1.3.6 | Write comprehensive tests             | Foundry tests for all contracts     | 1.3.1-1.3.5  |
-| 1.3.7 | Deploy to Base Sepolia                | Testnet deployment and verification | 1.3.6        |
-| 1.3.8 | Create deployment scripts             | Automated deployment pipeline       | 1.3.7        |
+| ID    | Task                                  | Description                         | Dependencies | Status  |
+| ----- | ------------------------------------- | ----------------------------------- | ------------ | ------- |
+| 1.3.1 | Create CaliberCore contract           | Main business logic contract        | 0.2.9        | ✅ Done |
+| 1.3.2 | Create ForecastRegistry contract      | Onchain forecast management         | 1.3.1, 0.2.1 | ✅ Done |
+| 1.3.3 | Create PortfolioManager contract      | Cross-platform position tracking    | 1.3.1        | ✅ Done |
+| 1.3.4 | Create CaliberToken contract          | $CALIBR token with staking rewards  | 1.3.1        | ✅ Done |
+| 1.3.5 | Create SuperforecasterBadges contract | Badge minting and management        | 1.3.2, 0.2.5 | ✅ Done |
+| 1.3.6 | Write comprehensive tests             | Foundry tests for all contracts     | 1.3.1-1.3.5  | ✅ Done |
+| 1.3.7 | Deploy to Base Sepolia                | Testnet deployment and verification | 1.3.6        | ✅ Done |
+| 1.3.8 | Create deployment scripts             | Automated deployment pipeline       | 1.3.7        | ✅ Done |
 
 ### 1.4 Core Utilities & Types
 
-| ID    | Task                             | Description                                 | Dependencies |
-| ----- | -------------------------------- | ------------------------------------------- | ------------ |
-| 1.4.1 | Define core TypeScript types     | UnifiedMarket, Position, Forecast types     | 0.1.9        |
-| 1.4.2 | Create Kelly calculator          | Kelly Criterion math utilities              | -            |
-| 1.4.3 | Create Brier score calculator    | Time-weighted Brier scoring                 | -            |
-| 1.4.4 | Create calibration calculator    | Calibration curves and metrics              | 1.4.3        |
-| 1.4.5 | Create EAS interaction utilities | Wrapper functions for attestations          | 0.4.6, 1.4.1 |
-| 1.4.6 | Create superforecaster utilities | Tier calculation and promotion logic        | 1.4.4, 0.3.7 |
-| 1.4.7 | **Create privacy utilities**     | Privacy settings helpers, Merkle tree utils | 0.5.3, 1.4.1 |
-| 1.4.8 | Write unit tests                 | Test all utility functions                  | 1.4.1-1.4.7  |
+| ID    | Task                             | Description                                 | Dependencies | Status  |
+| ----- | -------------------------------- | ------------------------------------------- | ------------ | ------- |
+| 1.4.1 | Define core TypeScript types     | UnifiedMarket, Position, Forecast types     | 0.1.9        | ✅ Done |
+| 1.4.2 | Create Kelly calculator          | Kelly Criterion math utilities              | -            | ✅ Done |
+| 1.4.3 | Create Brier score calculator    | Time-weighted Brier scoring                 | -            | ✅ Done |
+| 1.4.4 | Create calibration calculator    | Calibration curves and metrics              | 1.4.3        | ✅ Done |
+| 1.4.5 | Create EAS interaction utilities | Wrapper functions for attestations          | 0.4.6, 1.4.1 | ✅ Done |
+| 1.4.6 | Create superforecaster utilities | Tier calculation and promotion logic        | 1.4.4, 0.3.7 | ✅ Done |
+| 1.4.7 | **Create privacy utilities**     | Privacy settings helpers, Merkle tree utils | 0.5.3, 1.4.1 | ✅ Done |
+| 1.4.8 | Write unit tests                 | Test all utility functions                  | 1.4.1-1.4.7  | ✅ Done |
 
 ### 1.5 Off-Chain Storage Infrastructure
 
-| ID    | Task                                 | Description                                       | Dependencies |
-| ----- | ------------------------------------ | ------------------------------------------------- | ------------ |
-| 1.5.1 | Set up IPFS integration              | Configure IPFS client for decentralized storage   | 1.1.6        |
-| 1.5.2 | Create off-chain attestation service | Store and retrieve off-chain attestations         | 1.5.1, 0.4.5 |
-| 1.5.3 | Implement signature verification     | Verify off-chain attestation signatures           | 1.5.2        |
-| 1.5.4 | Create backend fallback storage      | Calibr-hosted storage for off-chain data          | 1.2.1        |
-| 1.5.5 | Implement storage selection logic    | Route to IPFS or backend based on user preference | 1.5.1-1.5.4  |
-| 1.5.6 | Write storage integration tests      | Test off-chain storage reliability                | 1.5.1-1.5.5  |
+| ID    | Task                                 | Description                                       | Dependencies | Status  |
+| ----- | ------------------------------------ | ------------------------------------------------- | ------------ | ------- |
+| 1.5.1 | Set up IPFS integration              | Configure IPFS client for decentralized storage   | 1.1.6        | ✅ Done |
+| 1.5.2 | Create off-chain attestation service | Store and retrieve off-chain attestations         | 1.5.1, 0.4.5 | ✅ Done |
+| 1.5.3 | Implement signature verification     | Verify off-chain attestation signatures           | 1.5.2        | ✅ Done |
+| 1.5.4 | Create backend fallback storage      | Calibr-hosted storage for off-chain data          | 1.2.1        | ✅ Done |
+| 1.5.5 | Implement storage selection logic    | Route to IPFS or backend based on user preference | 1.5.1-1.5.4  | ✅ Done |
+| 1.5.6 | Write storage integration tests      | Test off-chain storage reliability                | 1.5.1-1.5.5  | ✅ Done |
 
 **Deliverables for Phase 1:**
 
-- [ ] Next.js monorepo with TypeScript fully configured
-- [ ] PostgreSQL schema with EAS and privacy tables ready
-- [ ] Core smart contracts deployed to Base Sepolia
-- [ ] Foundry development environment operational
-- [ ] Off-chain storage infrastructure operational
-- [ ] All core utilities tested and documented
+- [x] Next.js monorepo with TypeScript fully configured
+- [x] PostgreSQL schema with EAS and privacy tables ready
+- [x] Core smart contracts deployed to Base Sepolia
+- [x] Foundry development environment operational
+- [x] Off-chain storage infrastructure operational
+- [x] All core utilities tested and documented
 
 ---
 
-## 4. Phase 2: Polymarket Data Integration
+## 4. Phase 2: Data Integration
 
-**Goal:** Integrate Polymarket market data using Gamma API and CLOB for read-only operations.
+**Goal:** Integrate Polymarket and Limitless market data via REST APIs and CLOB for read-only operations.
+
+### 2.0 Limitless API Integration
+
+| ID    | Task                           | Description                              | Dependencies | Status  |
+| ----- | ------------------------------ | ---------------------------------------- | ------------ | ------- |
+| 2.0.1 | Create Limitless API client    | REST client with rate limiting & caching | 1.1.2        | ✅ Done |
+| 2.0.2 | Create Limitless adapter       | Base adapter class with error handling   | 2.0.1        | ✅ Done |
+| 2.0.3 | Implement markets endpoint     | Fetch active markets with pagination     | 2.0.2        | ✅ Done |
+| 2.0.4 | Implement market details       | Fetch single market by slug              | 2.0.2        | ✅ Done |
+| 2.0.5 | Implement order book fetching  | Get current orderbook state              | 2.0.2        | ✅ Done |
+| 2.0.6 | Create response mappers        | Transform API to unified types           | 2.0.2, 1.4.1 | ✅ Done |
+| 2.0.7 | Fix CLOB price display         | Correct price interpretation for CLOB    | 2.0.6        | ✅ Done |
+| 2.0.8 | Support multi-outcome markets  | Handle GROUP markets with N outcomes     | 2.0.6        | ✅ Done |
+| 2.0.9 | Add rate limiting and caching  | Respect API limits with backoff          | 2.0.1        | ✅ Done |
+
+### 2.1 Polymarket Gamma API Integration
 
 ### 2.1 Gamma API Integration
 
@@ -381,65 +405,85 @@ model EASAttestation {
 
 **Deliverables for Phase 2:**
 
+- [x] Limitless API fully integrated with caching and rate limiting
+- [x] Limitless CLOB and AMM market data working
+- [x] Multi-outcome (GROUP) market support
 - [ ] Gamma API fully integrated with caching
-- [ ] CLOB read-only operations working
+- [ ] Polymarket CLOB read-only operations working
 - [ ] Market sync running on schedule
 - [ ] Market matching operational
 
 ---
 
-## 5. Phase 3: Polymarket Trading
+## 5. Phase 3: Multi-Platform Trading
 
-**Goal:** Integrate Polymarket Builder Program for gasless trading capabilities.
+**Goal:** Implement platform-agnostic trading through ITradingAdapter interface, starting with Limitless (Base) and extensible to Polymarket (Polygon) via Phase 5.
 
-### 3.1 Builder Program Setup
+### 3.1 Trading Adapter Interface
 
-| ID    | Task                              | Description                              | Dependencies |
-| ----- | --------------------------------- | ---------------------------------------- | ------------ |
-| 3.1.1 | Apply for Builder Program         | Submit application to Polymarket         | -            |
-| 3.1.2 | Configure Builder API credentials | Set up API keys and environment          | 3.1.1        |
-| 3.1.3 | Install RelayClient package       | @polymarket/builder-relayer-client       | 3.1.2        |
-| 3.1.4 | Create RelayClient wrapper        | Calibr-specific relay client abstraction | 3.1.3        |
-| 3.1.5 | Test gasless infrastructure       | Verify relay connectivity                | 3.1.4        |
+| ID    | Task                              | Description                                  | Dependencies | Status |
+| ----- | --------------------------------- | -------------------------------------------- | ------------ | ------ |
+| 3.1.1 | Define ITradingAdapter interface  | Platform-agnostic trading abstraction        | 2.1.1        | ✅ Done |
+| 3.1.2 | Define order types and enums      | OrderType, OrderSide, OrderStatus            | 3.1.1        | ✅ Done |
+| 3.1.3 | Define authentication interface   | Platform credentials abstraction             | 3.1.1        | ✅ Done |
+| 3.1.4 | Create adapter factory            | getTradingAdapter(platform) function         | 3.1.1        | ✅ Done |
+| 3.1.5 | Write adapter interface tests     | Test type contracts                          | 3.1.1-3.1.4  | ✅ Done |
 
-### 3.2 Safe Wallet Integration
+### 3.2 Limitless Trading Adapter (Primary)
 
-| ID    | Task                           | Description                          | Dependencies |
-| ----- | ------------------------------ | ------------------------------------ | ------------ |
-| 3.2.1 | Implement Safe detection       | Check if user has existing Safe      | 3.1.4        |
-| 3.2.2 | Implement Safe deployment      | Deploy new Safe for user via relay   | 3.2.1        |
-| 3.2.3 | Implement Safe activation      | Activate Safe for Polymarket trading | 3.2.2        |
-| 3.2.4 | Create Safe management service | Track and manage user Safes          | 3.2.1-3.2.3  |
-| 3.2.5 | Write Safe integration tests   | Test Safe lifecycle                  | 3.2.1-3.2.4  |
+| ID    | Task                              | Description                                  | Dependencies | Status  |
+| ----- | --------------------------------- | -------------------------------------------- | ------------ | ------- |
+| 3.2.1 | Implement EIP-712 order signing   | Sign orders with user's wallet               | 3.1.1        | ✅ Done |
+| 3.2.2 | Implement order placement         | Submit signed orders to Limitless CLOB       | 3.2.1        | ✅ Done |
+| 3.2.3 | Implement order cancellation      | Cancel pending orders (DELETE method)        | 3.2.1        | ✅ Done |
+| 3.2.4 | Implement GTC/FOK order types     | Good-Till-Cancelled and Fill-Or-Kill         | 3.2.2        | ✅ Done |
+| 3.2.5 | Implement position fetching       | Get user positions from Limitless            | 3.2.1        | ✅ Done |
+| 3.2.6 | Implement API authentication      | Message signing → login → session cookie     | 3.2.1        | ✅ Done |
+| 3.2.7 | Implement direct AMM trading      | buyFromAMM/sellToAMM via FPMM contracts      | 3.2.1        | ✅ Done |
+| 3.2.8 | Implement direct CTF operations   | splitPosition/mergePositions/redeemPositions | 3.2.1        | ✅ Done |
+| 3.2.9 | Write Limitless trading tests     | Test order lifecycle on testnet              | 3.2.1-3.2.8  | ✅ Done |
 
-### 3.3 Authentication & Signing
+### 3.3 Position Import & Sync
 
-| ID    | Task                              | Description                          | Dependencies |
-| ----- | --------------------------------- | ------------------------------------ | ------------ |
-| 3.3.1 | Implement L1 authentication       | EOA signature for initial auth       | 3.1.4        |
-| 3.3.2 | Implement L2 authentication       | HMAC-based API authentication        | 3.3.1        |
-| 3.3.3 | Create API credential generator   | Generate and store CLOB credentials  | 3.3.2        |
-| 3.3.4 | Implement signature type handling | Support EOA, POLY_PROXY, GNOSIS_SAFE | 3.3.1-3.3.3  |
-| 3.3.5 | Write authentication tests        | Test full auth flow                  | 3.3.1-3.3.4  |
+| ID    | Task                              | Description                                  | Dependencies | Status  |
+| ----- | --------------------------------- | -------------------------------------------- | ------------ | ------- |
+| 3.3.1 | Implement wallet position scan    | Read ERC-1155 positions from wallet (Base)   | 2.0.1        | ✅ Done |
+| 3.3.2 | Implement Limitless position sync | Sync positions from Limitless portfolio API  | 3.2.5        | ✅ Done |
+| 3.3.3 | Create position aggregation       | Aggregate positions across platforms         | 3.3.1, 3.3.2 | ✅ Done |
+| 3.3.4 | Implement P&L calculation         | Calculate unrealized/realized P&L            | 3.3.3        | ✅ Done |
+| 3.3.5 | Create position history tracking  | Track position changes over time             | 3.3.3        | ✅ Done |
+| 3.3.6 | Write position sync tests         | Test position import and sync                | 3.3.1-3.3.5  | ✅ Done |
 
-### 3.4 Order Execution
+### 3.4 Order Execution Service
 
-| ID    | Task                          | Description                      | Dependencies |
-| ----- | ----------------------------- | -------------------------------- | ------------ |
-| 3.4.1 | Create order builder          | Construct valid order structures | 3.3.4, 2.2.1 |
-| 3.4.2 | Implement market orders       | Execute at best available price  | 3.4.1        |
-| 3.4.3 | Implement limit orders        | Place orders at specified price  | 3.4.1        |
-| 3.4.4 | Implement order cancellation  | Cancel pending orders            | 3.4.1        |
-| 3.4.5 | Create order tracking service | Track order status and fills     | 3.4.2-3.4.4  |
-| 3.4.6 | Implement position sync       | Sync positions after trades      | 3.4.5, 1.2.5 |
-| 3.4.7 | Write order execution tests   | Test full order lifecycle        | 3.4.1-3.4.6  |
+| ID    | Task                              | Description                                  | Dependencies | Status |
+| ----- | --------------------------------- | -------------------------------------------- | ------------ | ------ |
+| 3.4.1 | Create order builder service      | Construct valid order structures             | 3.1.1        | ✅ Done |
+| 3.4.2 | Implement execution router        | Route orders to correct platform adapter     | 3.4.1, 3.2.2 | ✅ Done |
+| 3.4.3 | Create order status tracking      | Track order status and fills                 | 3.4.2        | ✅ Done |
+| 3.4.4 | Implement execution logging       | Log all trade executions                     | 3.4.2        | ✅ Done |
+| 3.4.5 | Add trade notifications           | Notify users of order fills                  | 3.4.3        | ✅ Done |
+| 3.4.6 | Write execution service tests     | Test full order lifecycle                    | 3.4.1-3.4.5  | ✅ Done |
+
+### 3.5 Polymarket Trading Adapter (Stub - Completed in Phase 5)
+
+| ID    | Task                              | Description                                  | Dependencies | Status |
+| ----- | --------------------------------- | -------------------------------------------- | ------------ | ------ |
+| 3.5.1 | Create Polymarket adapter stub    | Placeholder for Phase 5 implementation       | 3.1.1        | ✅ Done |
+| 3.5.2 | Apply for Builder Program         | Submit application to Polymarket             | -            | 🔄 Next |
+| 3.5.3 | Document Polymarket flow          | Document CCTP bridge + trading flow          | 3.5.2        | Pending |
 
 **Deliverables for Phase 3:**
 
-- [ ] Builder Program integrated and operational
-- [ ] Safe wallet management working
-- [ ] Authentication flow complete
-- [ ] Order execution tested and verified
+- [x] ITradingAdapter interface fully implemented
+- [x] Limitless trading operational (EIP-712 signed orders)
+- [x] Limitless API authentication (message signing → session cookie)
+- [x] Direct AMM trading via FPMM contracts (buyFromAMM/sellToAMM)
+- [x] Direct CTF operations (splitPosition/mergePositions/redeemPositions)
+- [x] Position import from wallet addresses working (ERC-1155 scanner)
+- [x] Position sync from Limitless portfolio API
+- [x] Position aggregation across platforms
+- [x] Order execution service with logging
 
 ---
 
@@ -449,14 +493,16 @@ model EASAttestation {
 
 ### 4.1 Markets & Portfolio View
 
-| ID    | Task                          | Description                              | Dependencies |
-| ----- | ----------------------------- | ---------------------------------------- | ------------ |
-| 4.1.1 | Create markets list component | Display available markets with filtering | 2.3.5        |
-| 4.1.2 | Create market detail view     | Single market with orderbook, history    | 4.1.1, 2.2.2 |
-| 4.1.3 | Create portfolio dashboard    | Aggregate positions across platforms     | 3.4.6        |
-| 4.1.4 | Implement P&L tracking        | Show unrealized/realized P&L             | 4.1.3        |
-| 4.1.5 | Create position detail view   | Individual position management           | 4.1.3        |
-| 4.1.6 | Add portfolio analytics       | Charts, allocation breakdown             | 4.1.3-4.1.5  |
+| ID    | Task                          | Description                              | Dependencies | Status  |
+| ----- | ----------------------------- | ---------------------------------------- | ------------ | ------- |
+| 4.1.1 | Create markets list component | Display available markets with filtering | 2.0.9        | ✅ Done |
+| 4.1.2 | Create market detail view     | Single market with orderbook, TradingPanel | 4.1.1, 2.0.5 | ✅ Done |
+| 4.1.3 | Create portfolio dashboard    | Aggregate positions with wallet scan     | 3.3.2        | ✅ Done |
+| 4.1.4 | Implement P&L tracking        | Show unrealized/realized P&L             | 4.1.3        | ✅ Done |
+| 4.1.5 | Implement resolution alerts   | Show resolved markets with payouts       | 4.1.4        | ✅ Done |
+| 4.1.6 | Create platform breakdown     | Positions grouped by platform            | 4.1.3        | ✅ Done |
+| 4.1.7 | Create position detail view   | Individual position management           | 4.1.3        | Pending |
+| 4.1.8 | Add portfolio analytics       | Charts, allocation breakdown             | 4.1.3-4.1.6  | Pending |
 
 ### 4.2 Kelly Criterion Integration
 
@@ -508,7 +554,12 @@ model EASAttestation {
 
 **Deliverables for Phase 4:**
 
-- [ ] Complete markets and portfolio views
+- [x] Markets list with filtering and search
+- [x] Market detail view with trading panel
+- [x] Portfolio dashboard with P&L tracking
+- [x] Resolution alerts for resolved markets
+- [x] On-chain wallet scanning for position import
+- [ ] Position detail view
 - [ ] Kelly Criterion integration operational
 - [ ] Forecast journaling with EAS working
 - [ ] Privacy settings UI complete
@@ -516,9 +567,36 @@ model EASAttestation {
 
 ---
 
-## 7. Phase 5: Cross-Chain Execution
+## 7. Phase 5: Cross-Chain Execution & Trading
 
-**Goal:** Implement the $CALIBR to Polymarket trading flow via Circle CCTP bridge.
+**Goal:** Implement trading execution on Limitless (Base) and Polymarket (Polygon via CCTP bridge).
+
+### 5.0 Limitless Trading (Base - Direct)
+
+| ID    | Task                             | Description                              | Dependencies | Status  |
+| ----- | -------------------------------- | ---------------------------------------- | ------------ | ------- |
+| 5.0.1 | Implement Limitless order signing | EIP-712 typed data signing for orders   | 3.2.1        | ✅ Done |
+| 5.0.2 | Create order placement service   | Submit signed orders to Limitless CLOB   | 5.0.1        | ✅ Done |
+| 5.0.3 | Implement order cancellation     | Cancel pending orders (DELETE method)    | 5.0.1        | ✅ Done |
+| 5.0.4 | Add collateral approval flow     | USDC approval for Limitless contracts    | 5.0.2        | ✅ Done |
+| 5.0.5 | Create trade execution UI        | Buy/sell interface for Limitless markets | 5.0.2        | ✅ Done |
+| 5.0.6 | Implement position tracking      | Track user positions after trades        | 5.0.2        | ✅ Done |
+| 5.0.7 | Add AMM trading UI support       | Direct FPMM trading in TradingPanel      | 5.0.5        | ✅ Done |
+| 5.0.8 | Write Limitless trading tests    | Test order lifecycle on Base             | 5.0.1-5.0.7  | Pending |
+
+**Limitless Trading Flow (Base - No Bridge Required):**
+```
+User Wallet (Base)
+       |
+       v
+  USDC Approval → Limitless Contracts
+       |
+       v
+  EIP-712 Signed Order
+       |
+       v
+  Limitless CLOB → Position
+```
 
 ### 5.1 Token Swap Infrastructure
 
@@ -555,9 +633,12 @@ model EASAttestation {
 
 **Deliverables for Phase 5:**
 
+- [x] Limitless trading fully operational on Base
+- [x] Trade execution UI (TradingPanel component)
+- [x] AMM trading with USDC approval flow
 - [ ] $CALIBR swap to USDC operational
 - [ ] CCTP bridge integration complete
-- [ ] End-to-end execution working
+- [ ] End-to-end cross-chain execution working
 
 ---
 
@@ -681,28 +762,26 @@ model EASAttestation {
 | 7.3.5 | Create onboarding flow           | New user tutorial and setup      | 7.3.1               |
 | 7.3.6 | Create FAQ section               | Common questions and answers     | 7.3.1-7.3.4         |
 
-### 7.4 Infrastructure & Deployment
+### 7.4 Infrastructure & Deployment (Staging/Testnet)
 
 | ID    | Task                              | Description                   | Dependencies |
 | ----- | --------------------------------- | ----------------------------- | ------------ |
-| 7.4.1 | Set up production infrastructure  | Railway, Vercel, database     | 7.1.6        |
+| 7.4.1 | Set up staging infrastructure     | Railway, Vercel, database     | 7.1.6        |
 | 7.4.2 | Configure monitoring              | Logging, alerting, metrics    | 7.4.1        |
 | 7.4.3 | Set up CDN and caching            | Performance optimization      | 7.4.1        |
-| 7.4.4 | Deploy smart contracts to mainnet | Final contract deployment     | 7.1.5        |
-| 7.4.5 | Configure backup systems          | Database and data backups     | 7.4.1        |
-| 7.4.6 | Create deployment runbook         | Step-by-step deployment guide | 7.4.1-7.4.5  |
+| 7.4.4 | Configure backup systems          | Database and data backups     | 7.4.1        |
+| 7.4.5 | Create deployment runbook         | Step-by-step deployment guide | 7.4.1-7.4.4  |
 
-### 7.5 Launch Preparation
+### 7.5 Beta Launch Preparation
 
 | ID    | Task                         | Description                        | Dependencies       |
 | ----- | ---------------------------- | ---------------------------------- | ------------------ |
 | 7.5.1 | Create launch checklist      | Pre-launch verification            | All previous tasks |
 | 7.5.2 | Set up support channels      | Discord, email support             | 7.5.1              |
-| 7.5.3 | Prepare marketing materials  | Launch announcements, social media | 7.5.1              |
-| 7.5.4 | Plan soft launch             | Limited access launch              | 7.5.1-7.5.3        |
-| 7.5.5 | Execute soft launch          | Deploy to limited users            | 7.5.4              |
-| 7.5.6 | Address soft launch feedback | Fix issues from soft launch        | 7.5.5              |
-| 7.5.7 | Execute public launch        | Full platform launch               | 7.5.6              |
+| 7.5.3 | Prepare beta program         | Invite-only beta access            | 7.5.1-7.5.2        |
+| 7.5.4 | Execute beta launch          | Deploy to beta users on testnet    | 7.5.3              |
+| 7.5.5 | Collect beta feedback        | Gather user feedback and issues    | 7.5.4              |
+| 7.5.6 | Address beta feedback        | Fix issues from beta testing       | 7.5.5              |
 
 **Deliverables for Phase 7:**
 
@@ -711,8 +790,64 @@ model EASAttestation {
 - [ ] GDPR export/deletion fully implemented
 - [ ] Privacy policy and terms of service published
 - [ ] Complete documentation published
+- [ ] Staging infrastructure operational
+- [ ] Successful beta launch on testnet
+
+---
+
+## 10. Phase 8: Mainnet Deployment
+
+**Goal:** Deploy all contracts and schemas to mainnet and execute public production launch.
+
+### 8.1 EAS Mainnet Deployment
+
+| ID    | Task                              | Description                            | Dependencies |
+| ----- | --------------------------------- | -------------------------------------- | ------------ |
+| 8.1.1 | Deploy EAS schemas to Base mainnet| Register all 6 schemas on mainnet      | 0.1.7, 7.5.6 |
+| 8.1.2 | Deploy CaliberEASResolver         | Deploy resolver to mainnet             | 0.2.8, 8.1.1 |
+| 8.1.3 | Verify mainnet deployments        | Verify contracts on Basescan           | 8.1.1, 8.1.2 |
+| 8.1.4 | Update EAS UIDs in config         | Configure production schema UIDs       | 8.1.3        |
+
+### 8.2 Smart Contract Mainnet Deployment
+
+| ID    | Task                              | Description                            | Dependencies |
+| ----- | --------------------------------- | -------------------------------------- | ------------ |
+| 8.2.1 | Deploy CaliberRegistry            | Deploy registry contract to mainnet    | 1.3.7, 8.1.4 |
+| 8.2.2 | Deploy CaliberToken               | Deploy $CALIBR token to mainnet        | 1.3.4, 8.2.1 |
+| 8.2.3 | Deploy SuperforecasterBadges      | Deploy NFT badge contract              | 1.3.5, 8.2.1 |
+| 8.2.4 | Deploy execution router           | Deploy cross-chain execution contract  | 5.3.1, 8.2.2 |
+| 8.2.5 | Verify all contracts              | Verify on Basescan and Polygonscan     | 8.2.1-8.2.4  |
+
+### 8.3 Production Infrastructure
+
+| ID    | Task                              | Description                            | Dependencies |
+| ----- | --------------------------------- | -------------------------------------- | ------------ |
+| 8.3.1 | Provision production database     | Set up production PostgreSQL           | 7.4.1        |
+| 8.3.2 | Configure production Redis        | Production caching layer               | 7.4.1        |
+| 8.3.3 | Set up production API             | Deploy API to production               | 8.3.1, 8.3.2 |
+| 8.3.4 | Configure production frontend     | Deploy frontend to production          | 8.3.3        |
+| 8.3.5 | Configure mainnet RPC endpoints   | Set up production RPC providers        | 8.2.5        |
+| 8.3.6 | Enable production monitoring      | Activate alerting for production       | 8.3.3, 8.3.4 |
+
+### 8.4 Public Launch
+
+| ID    | Task                              | Description                            | Dependencies |
+| ----- | --------------------------------- | -------------------------------------- | ------------ |
+| 8.4.1 | Final security review             | Production security checklist          | 8.2.5, 8.3.6 |
+| 8.4.2 | Migrate beta users                | Migrate data from testnet to mainnet   | 8.4.1        |
+| 8.4.3 | Prepare launch materials          | Announcements, social media            | 8.4.1        |
+| 8.4.4 | Execute soft launch               | Limited public access                  | 8.4.2, 8.4.3 |
+| 8.4.5 | Monitor soft launch               | Watch for issues in production         | 8.4.4        |
+| 8.4.6 | Execute public launch             | Full public launch                     | 8.4.5        |
+| 8.4.7 | Post-launch monitoring            | Extended monitoring period             | 8.4.6        |
+
+**Deliverables for Phase 8:**
+
+- [ ] All EAS schemas deployed to Base mainnet
+- [ ] All smart contracts deployed and verified
 - [ ] Production infrastructure operational
-- [ ] Successful public launch
+- [ ] Successful public mainnet launch
+- [ ] Post-launch stability confirmed
 
 ---
 
@@ -789,6 +924,62 @@ This EAS-first approach with privacy options generates significant onchain activ
 
 ---
 
-_This document represents the complete development roadmap for Calibr.ly's prediction market aggregation platform with EAS-integrated identity, privacy-preserving attestations, and GDPR compliance._
+---
 
-_Version 5.0 | January 2026_
+## Follow-Up Items
+
+Items deferred or partially completed that should be revisited in future iterations.
+
+### Limitless Integration Notes (Completed Jan 2026)
+
+The following Limitless integration work was completed as off-plan tasks:
+
+| Item | Description | Status | Notes |
+| ---- | ----------- | ------ | ----- |
+| API Client | REST client with rate limiting & caching | ✅ Done | `api-client.ts` - 100 req/min, 30s cache |
+| Market Adapter | Data adapter with unified types | ✅ Done | `adapter.ts` - supports AMM/CLOB/GROUP |
+| CLOB Price Fix | Correct price interpretation | ✅ Done | CLOB uses `prices[0]` for YES probability |
+| Trading Adapter | EIP-712 signed order placement | ✅ Done | `trading/limitless/adapter.ts` |
+| API Authentication | Message signing → login → cookie | ✅ Done | Session valid ~30 days |
+| Direct AMM Trading | FPMM buy/sell without API | ✅ Done | `buyFromAMM()`, `sellToAMM()` |
+| Direct CTF Operations | Split/merge/redeem positions | ✅ Done | Works for both AMM and CLOB markets |
+| Trading Panel UI | Frontend trade execution | ✅ Done | AMM instant fill, CLOB redirects to Limitless |
+
+**Limitless Contract Addresses (Base Mainnet):**
+- CTF Contract: `0xC9c98965297Bc527861c898329Ee280632B76e18`
+- CTF Exchange: `0x05c748E2f4DcDe0ec9Fa8DDc40DE6b867f923fa5`
+- USDC: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
+
+**API Endpoints Used:**
+- `POST /auth/login` - Authentication with wallet signature
+- `POST /orders` - Submit CLOB orders
+- `DELETE /orders/{id}` - Cancel orders
+- `GET /portfolio/positions` - Fetch user positions
+- `GET /markets/active` - Fetch active markets
+
+### Platform Integrations
+
+| Item | Description | Status | Notes |
+| ---- | ----------- | ------ | ----- |
+| Predict.fun Full Integration | Blast L2 prediction market | Partial | Adapter created but no REST API available; requires custom indexer to read from smart contracts. Currently skipped. |
+| Polymarket Sync | Polygon CLOB integration | Pending | Sync service exists but rate limiting issues need resolution |
+
+### Frontend Improvements
+
+| Item | Description | Status | Notes |
+| ---- | ----------- | ------ | ----- |
+| Frontend Guidelines Alignment | Update UI to match `frontend-guidelines-v5` spec | Partial | Basic terminal aesthetic implemented; detailed dashboard layout from spec not fully implemented |
+| Connection Error Handling | Browser extension interference (MetaMask SES) | Workaround | Added Next.js proxy to avoid CORS; may need further investigation for production |
+
+### Sync Service Enhancements
+
+| Item | Description | Status | Notes |
+| ---- | ----------- | ------ | ----- |
+| Opinion API Key | Add API key support for higher rate limits | Pending | Currently using public endpoints |
+| Manifold Market Limits | Sync more markets from Manifold | Pending | Currently limited to top 500 by volume |
+
+---
+
+_This document represents the complete development roadmap for Calibr.xyz's prediction market aggregation platform with EAS-integrated identity, privacy-preserving attestations, and GDPR compliance._
+
+_Version 5.1 | January 2026_
