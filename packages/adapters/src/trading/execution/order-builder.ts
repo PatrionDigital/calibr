@@ -3,7 +3,6 @@
  * Constructs and validates order structures for all supported platforms
  */
 
-import { z } from 'zod';
 import type {
   UnifiedOrderRequest,
   OrderSide,

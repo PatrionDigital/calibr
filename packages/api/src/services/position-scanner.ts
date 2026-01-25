@@ -8,7 +8,6 @@ import type { Platform } from '@prisma/client';
 import {
   ERC1155Scanner,
   type MarketTokenMapping,
-  type ScannedPosition as OnChainScannedPosition,
 } from '@calibr/adapters';
 
 // =============================================================================
@@ -121,7 +120,7 @@ export class PositionScanner {
   private async getExistingPositions(
     address: string,
     platform: 'POLYMARKET' | 'LIMITLESS',
-    options: PositionScanOptions
+    _options: PositionScanOptions
   ): Promise<ScannedPosition[]> {
     const positions: ScannedPosition[] = [];
 

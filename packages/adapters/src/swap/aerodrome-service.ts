@@ -22,10 +22,9 @@ import {
   type AerodromeRoute,
   type ISwapService,
   DEFAULT_SWAP_CONFIG,
-  AERODROME_ADDRESSES,
   BASE_TOKENS,
 } from './types';
-import { AERODROME_ROUTER_ABI, ERC20_ABI, AERODROME_POOL_ABI } from './abi';
+import { AERODROME_ROUTER_ABI, ERC20_ABI } from './abi';
 
 // =============================================================================
 // Constants
@@ -34,7 +33,6 @@ import { AERODROME_ROUTER_ABI, ERC20_ABI, AERODROME_POOL_ABI } from './abi';
 const MAX_UINT256 = 2n ** 256n - 1n;
 const MIN_SLIPPAGE = 0.0001; // 0.01%
 const MAX_SLIPPAGE = 0.5; // 50%
-const HIGH_PRICE_IMPACT_THRESHOLD = 0.01; // 1%
 
 // =============================================================================
 // Swap Service Implementation

@@ -491,7 +491,7 @@ export class LimitlessAdapter implements IPlatformAdapter {
    * Get recent trades for a market
    * Note: Limitless API provides events, not raw trades
    */
-  async getTrades(marketSlug: string, limit = 100): Promise<Trade[]> {
+  async getTrades(_marketSlug: string, _limit = 100): Promise<Trade[]> {
     // Limitless doesn't have a direct trades endpoint like Polymarket
     // We would need to parse from /markets/{slug}/events
     // For now, return empty array

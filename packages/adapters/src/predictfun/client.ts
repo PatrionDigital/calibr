@@ -177,14 +177,10 @@ export class PredictFunClient {
     if (cached) return cached;
 
     try {
-      const currentBlock = await this.getBlockNumber();
-      // Look back ~7 days of blocks (Blast has ~2s blocks)
-      const fromBlock = params?.fromBlock || currentBlock - 302400;
-
-      // TokenRegistered event topic
-      const tokenRegisteredTopic = '0x' + Buffer.from(
-        'TokenRegistered(uint256,uint256,bytes32)'
-      ).slice(0, 32).toString('hex');
+      // Get current block for reference (not currently used but needed for future indexer)
+      await this.getBlockNumber();
+      // Look back ~7 days of blocks (Blast has ~2s blocks) - for future indexer implementation
+      // const fromBlock = params?.fromBlock || currentBlock - 302400;
 
       // This is a placeholder - real implementation would:
       // 1. Scan TokenRegistered events from CTF Exchange

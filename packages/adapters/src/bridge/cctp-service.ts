@@ -148,63 +148,59 @@ export class CCTPBridgeService implements IBridgeService {
     // Execute depositForBurn
     const recipientBytes32 = addressToBytes32(recipient);
 
-    try {
-      const { request: txRequest } = await this.sourceClient.simulateContract({
-        address: CCTP_ADDRESSES.BASE.TOKEN_MESSENGER,
-        abi: TOKEN_MESSENGER_ABI,
-        functionName: 'depositForBurn',
-        args: [
-          request.amount,
-          destConfig.domain,
-          recipientBytes32,
-          CCTP_ADDRESSES.BASE.USDC,
-        ],
-        account: this.account,
-      });
+    const { request: txRequest } = await this.sourceClient.simulateContract({
+      address: CCTP_ADDRESSES.BASE.TOKEN_MESSENGER,
+      abi: TOKEN_MESSENGER_ABI,
+      functionName: 'depositForBurn',
+      args: [
+        request.amount,
+        destConfig.domain,
+        recipientBytes32,
+        CCTP_ADDRESSES.BASE.USDC,
+      ],
+      account: this.account,
+    });
 
-      const txHash = await this.walletClient.writeContract(txRequest);
-      const receipt = await this.sourceClient.waitForTransactionReceipt({ hash: txHash });
+    const txHash = await this.walletClient.writeContract(txRequest);
+    const receipt = await this.sourceClient.waitForTransactionReceipt({ hash: txHash });
 
-      if (receipt.status !== 'success') {
-        throw new Error('Bridge transaction failed');
-      }
-
-      // Extract message from logs
-      const { message, messageHash } = this.extractMessageFromLogs(receipt.logs);
-
-      // Update status
-      this.updateBridgeStatus(trackingId, 'initiated', {
-        sourceChain,
-        destinationChain: request.destinationChain,
-        amount: request.amount,
-        sourceTxHash: txHash,
-        messageHash,
-      });
-
-      // Emit progress event
-      this.emitProgress({
-        trackingId,
-        phase: 'initiated',
-        txHash,
-      });
-
-      return {
-        success: true,
-        txHash,
-        status: 'initiated',
-        sourceChain,
-        destinationChain: request.destinationChain,
-        recipient,
-        amount: request.amount,
-        netAmount,
-        messageHash,
-        message,
-        trackingId,
-        feeBreakdown,
-      };
-    } catch (error) {
-      throw error;
+    if (receipt.status !== 'success') {
+      throw new Error('Bridge transaction failed');
     }
+
+    // Extract message from logs
+    const { message, messageHash } = this.extractMessageFromLogs(receipt.logs);
+
+    // Update status
+    this.updateBridgeStatus(trackingId, 'initiated', {
+      sourceChain,
+      destinationChain: request.destinationChain,
+      amount: request.amount,
+      sourceTxHash: txHash,
+      messageHash,
+    });
+
+    // Emit progress event
+    this.emitProgress({
+      trackingId,
+      phase: 'initiated',
+      txHash,
+    });
+
+    return {
+      success: true,
+      txHash,
+      status: 'initiated',
+      sourceChain,
+      destinationChain: request.destinationChain,
+      recipient,
+      amount: request.amount,
+      netAmount,
+      messageHash,
+      message,
+      trackingId,
+      feeBreakdown,
+    };
   }
 
   async waitForAttestation(
@@ -424,12 +420,12 @@ export class CCTPBridgeService implements IBridgeService {
   // Utility Methods
   // ===========================================================================
 
-  calculateBridgeFee(amount: bigint): bigint {
+  calculateBridgeFee(_amount: bigint): bigint {
     // Fixed fee of $0.10 in USDC (6 decimals)
     return this.config.bridgeFee;
   }
 
-  estimateBridgeTime(destinationChain: SupportedChain): BridgeTimeEstimate {
+  estimateBridgeTime(_destinationChain: SupportedChain): BridgeTimeEstimate {
     // CCTP typically takes 15-30 minutes
     // Attestation time varies but usually 10-15 mins
     return {

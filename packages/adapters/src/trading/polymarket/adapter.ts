@@ -24,7 +24,7 @@ import type {
 import { PolymarketAuthService } from './auth';
 import { PolymarketSafeService } from './safe';
 import { PolymarketOrderBuilder } from './orders';
-import { POLYGON_MAINNET_CONFIG, POLYMARKET_ADDRESSES } from './config';
+import { POLYGON_MAINNET_CONFIG } from './config';
 
 export interface PolymarketAdapterOptions {
   chainId?: number;

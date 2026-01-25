@@ -28,8 +28,6 @@ import type {
   Trade,
   MarketQueryParams,
   EventQueryParams,
-  MarketStatus,
-  MarketCategory,
   MarketOutcome,
 } from '../types';
 

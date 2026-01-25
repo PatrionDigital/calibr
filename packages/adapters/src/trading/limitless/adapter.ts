@@ -8,8 +8,6 @@ import {
   type WalletClient,
   type Hex,
   type Address,
-  encodeFunctionData,
-  parseAbi,
   createPublicClient,
   http,
 } from 'viem';

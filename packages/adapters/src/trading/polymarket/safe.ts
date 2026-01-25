@@ -18,32 +18,6 @@ import { polygon } from 'viem/chains';
 import type { PolymarketSafeWallet } from '../types';
 import { POLYMARKET_ADDRESSES, POLYMARKET_API } from './config';
 
-// Minimal Safe Proxy Factory ABI
-const SAFE_PROXY_FACTORY_ABI = [
-  {
-    inputs: [
-      { name: '_singleton', type: 'address' },
-      { name: 'initializer', type: 'bytes' },
-      { name: 'saltNonce', type: 'uint256' },
-    ],
-    name: 'createProxyWithNonce',
-    outputs: [{ name: 'proxy', type: 'address' }],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { name: '_singleton', type: 'address' },
-      { name: 'initializer', type: 'bytes' },
-      { name: 'saltNonce', type: 'uint256' },
-    ],
-    name: 'calculateCreateProxyWithNonceAddress',
-    outputs: [{ name: 'proxy', type: 'address' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-] as const;
-
 // Minimal Safe ABI for setup and module operations
 const SAFE_ABI = [
   {

@@ -8,11 +8,9 @@ import {
   type Hex,
   type WalletClient,
   type PublicClient,
-  createWalletClient,
   createPublicClient,
   http,
   keccak256,
-  toBytes,
   encodePacked,
 } from 'viem';
 import { polygon } from 'viem/chains';
@@ -143,7 +141,7 @@ export class PolymarketAuthService {
   async deriveApiCredentials(
     address: string,
     signature: Hex,
-    signatureType: PolymarketSignatureType
+    _signatureType: PolymarketSignatureType
   ): Promise<L1AuthResult> {
     // Create a deterministic seed from the signature
     const seed = keccak256(

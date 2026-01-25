@@ -8,12 +8,9 @@ import { prisma } from '../lib/prisma';
 import type { SuperforecasterTier } from '@prisma/client';
 import {
   type LeaderboardEntry,
-  type Achievement,
   ACHIEVEMENT_DEFINITIONS,
   getAchievementsByCategory,
   checkAchievements,
-  getUnlockedAchievements,
-  getInProgressAchievements,
   calculateAchievementScore,
   ACHIEVEMENT_TIER_COLORS,
   ACHIEVEMENT_CATEGORY_LABELS,

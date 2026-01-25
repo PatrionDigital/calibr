@@ -35,9 +35,10 @@ const AuthenticateSchema = z.object({
 
 const PlaceOrderSchema = UnifiedOrderRequestSchema;
 
-const CancelOrderSchema = z.object({
-  orderId: z.string().min(1),
-});
+// CancelOrderSchema - orderId is parsed directly from route params
+// const CancelOrderSchema = z.object({
+//   orderId: z.string().min(1),
+// });
 
 // In-memory session storage (replace with Redis in production)
 const sessions = new Map<string, {

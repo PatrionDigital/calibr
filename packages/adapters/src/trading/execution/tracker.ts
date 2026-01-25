@@ -79,7 +79,7 @@ export class OrderStatusTracker implements IOrderStatusTracker {
     const subscriptionId = randomUUID();
     const pollingInterval = options?.pollingInterval ?? this.config.defaultPollingInterval;
     const timeout = options?.timeout ?? this.config.defaultTimeout;
-    const stopOnTerminal = options?.stopOnTerminal ?? true;
+    // Note: stopOnTerminal defaults to true in OrderTrackingOptions
 
     // Create subscription
     const subscription: OrderTrackingSubscription = {

@@ -10,10 +10,9 @@ import type {
   NotificationPreferences,
   NotificationType,
   NotificationDeliveryMethod,
-  NotificationDeliveryStatus,
   IExecutionLogger,
 } from './types';
-import type { TradingPlatform, UnifiedOrder, UnifiedTrade } from '../types';
+import type { UnifiedOrder, UnifiedTrade } from '../types';
 
 // ============================================================================
 // Notifier Configuration

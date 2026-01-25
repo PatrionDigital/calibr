@@ -192,7 +192,7 @@ export class PolymarketOrderBuilder {
    */
   async submitOrder(
     request: UnifiedOrderRequest,
-    credentials: PolymarketCredentials
+    _credentials: PolymarketCredentials
   ): Promise<UnifiedOrder> {
     if (!this.clobClient) {
       throw new Error('CLOB client not initialized. Call initialize() first.');
