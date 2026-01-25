@@ -1,6 +1,7 @@
 [build]
 builder = "nixpacks"
-buildCommand = "pnpm turbo build --filter=@calibr/api"
+buildCommand = "rm -rf node_modules/.cache && pnpm turbo build --filter=@calibr/api --force"
+watchPatterns = ["packages/api/**", "packages/core/**", "packages/adapters/**"]
 
 [deploy]
 startCommand = "cd packages/api && node dist/server.js"
