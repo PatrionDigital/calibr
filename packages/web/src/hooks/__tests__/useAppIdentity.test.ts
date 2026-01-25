@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useAppIdentity } from '../useAppIdentity';
 import {
@@ -127,7 +127,7 @@ describe('useAppIdentity', () => {
       expect(result.current.hasClobCredentials).toBe(true);
       expect(result.current.calibrationTier).toBe('EXPERT');
       expect(result.current.linkedPlatforms).toHaveLength(1);
-      expect(result.current.linkedPlatforms[0].platform).toBe('POLYMARKET');
+      expect(result.current.linkedPlatforms[0]?.platform).toBe('POLYMARKET');
     });
 
     it('sets canTrade to true when wallet and credentials are present', () => {
