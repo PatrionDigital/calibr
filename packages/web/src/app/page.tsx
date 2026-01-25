@@ -28,7 +28,8 @@ export default function Home() {
           <p className="text-sm mb-2 text-[hsl(var(--success))]">{">"} Phase 3 complete: Portfolio dashboard live</p>
           <p className="text-sm mb-2 text-[hsl(var(--success))]">{">"} Phase 4 complete: Kelly Criterion, Forecasts, Privacy Settings</p>
           <p className="text-sm mb-2 text-[hsl(var(--success))]">{">"} Phase 2.7 complete: Category/platform filters + platform badges</p>
-          <p className="text-sm text-[hsl(var(--warning))]">{">"} Phase 5 in progress: Limitless trading integration</p>
+          <p className="text-sm mb-2 text-[hsl(var(--success))]">{">"} Phase 5 complete: Cross-chain execution infrastructure</p>
+          <p className="text-sm text-[hsl(var(--warning))]">{">"} Phase 6 in progress: Superforecaster leaderboard system</p>
         </div>
 
         <div className="space-y-4">
@@ -68,6 +69,15 @@ export default function Home() {
               <div className="text-[hsl(var(--primary))] font-bold mb-1">SETTINGS</div>
               <div className="text-sm text-[hsl(var(--muted-foreground))]">
                 Privacy, Kelly config, attestation modes, account
+              </div>
+            </Link>
+            <Link
+              href="/leaderboard"
+              className="ascii-box p-4 hover:border-[hsl(var(--primary))] transition-colors block"
+            >
+              <div className="text-[hsl(var(--primary))] font-bold mb-1">LEADERBOARD</div>
+              <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                Superforecaster rankings, tier progression, achievements
               </div>
             </Link>
           </div>
