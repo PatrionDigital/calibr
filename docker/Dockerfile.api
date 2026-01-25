@@ -1,4 +1,4 @@
-# Calibr.ly API Dockerfile
+# Calibr.xyz API Dockerfile
 # Multi-stage build for optimized production image
 
 # ==============================================================================

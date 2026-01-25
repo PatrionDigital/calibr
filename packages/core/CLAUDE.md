@@ -1,7 +1,7 @@
-# Calibr.ly Core
+# Calibr.xyz Core
 
 ## Purpose
-Shared business logic and utilities used across all Calibr.ly packages.
+Shared business logic and utilities used across all Calibr.xyz packages.
 
 ## Structure
 ```

@@ -443,4 +443,253 @@ export class AttestationService {
   getSchemaUrl(schemaUid: `0x${string}`): string {
     return `${this.config.easScanUrl}/schema/view/${schemaUid}`;
   }
+
+  // ===========================================================================
+  // Batch Attestation Methods
+  // ===========================================================================
+
+  /**
+   * Create multiple forecast attestations in a single transaction
+   * More gas efficient than individual attestations
+   */
+  async createBatchForecastAttestations(
+    attestations: CreateForecastAttestationParams[]
+  ): Promise<{ uids: `0x${string}`[]; txHash: `0x${string}` }> {
+    if (!this.schemas.FORECAST_SCHEMA_UID) {
+      throw new Error('Forecast schema UID not configured');
+    }
+
+    if (attestations.length === 0) {
+      throw new Error('No attestations provided');
+    }
+
+    // Build multiAttest request
+    const multiAttestRequest = {
+      schema: this.schemas.FORECAST_SCHEMA_UID,
+      data: attestations.map(({ recipient, data }) => ({
+        recipient,
+        expirationTime: 0n,
+        revocable: true,
+        refUID: '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`,
+        data: encodeForecastData(data),
+        value: 0n,
+      })),
+    };
+
+    const tx = await this.eas.multiAttest([multiAttestRequest]);
+    const uids = await tx.wait();
+
+    // Get transaction hash
+    const txHash = ((tx as unknown as { tx?: { hash?: string } }).tx?.hash ?? '0x') as `0x${string}`;
+
+    return {
+      uids: uids as `0x${string}`[],
+      txHash,
+    };
+  }
+
+  /**
+   * Create multiple identity attestations in a single transaction
+   */
+  async createBatchIdentityAttestations(
+    attestations: CreateIdentityAttestationParams[]
+  ): Promise<{ uids: `0x${string}`[]; txHash: `0x${string}` }> {
+    if (!this.schemas.IDENTITY_SCHEMA_UID) {
+      throw new Error('Identity schema UID not configured');
+    }
+
+    if (attestations.length === 0) {
+      throw new Error('No attestations provided');
+    }
+
+    // Build multiAttest request (only public attestations)
+    const publicAttestations = attestations.filter(a => !a.usePrivateData);
+
+    if (publicAttestations.length === 0) {
+      throw new Error('Batch attestations only support public identity attestations');
+    }
+
+    const multiAttestRequest = {
+      schema: this.schemas.IDENTITY_SCHEMA_UID,
+      data: publicAttestations.map(({ recipient, data }) => ({
+        recipient,
+        expirationTime: 0n,
+        revocable: true,
+        refUID: '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`,
+        data: encodeIdentityData(data),
+        value: 0n,
+      })),
+    };
+
+    const tx = await this.eas.multiAttest([multiAttestRequest]);
+    const uids = await tx.wait();
+
+    // Get transaction hash
+    const txHash = ((tx as unknown as { tx?: { hash?: string } }).tx?.hash ?? '0x') as `0x${string}`;
+
+    return {
+      uids: uids as `0x${string}`[],
+      txHash,
+    };
+  }
+
+  /**
+   * Create multiple attestations of different types in a single transaction
+   * Useful for complex operations like updating both forecast and calibration
+   */
+  async createMixedBatchAttestations(params: {
+    forecasts?: CreateForecastAttestationParams[];
+    calibrations?: CreateCalibrationAttestationParams[];
+    identities?: CreateIdentityAttestationParams[];
+    superforecasters?: CreateSuperforecasterAttestationParams[];
+  }): Promise<{
+    forecastUids: `0x${string}`[];
+    calibrationUids: `0x${string}`[];
+    identityUids: `0x${string}`[];
+    superforecasterUids: `0x${string}`[];
+    txHash: `0x${string}`;
+  }> {
+    const requests: Array<{
+      schema: `0x${string}`;
+      data: Array<{
+        recipient: `0x${string}`;
+        expirationTime: bigint;
+        revocable: boolean;
+        refUID: `0x${string}`;
+        data: `0x${string}`;
+        value: bigint;
+      }>;
+    }> = [];
+
+    // Track counts for result parsing
+    let forecastCount = 0;
+    let calibrationCount = 0;
+    let identityCount = 0;
+    let superforecasterCount = 0;
+
+    // Add forecast attestations
+    if (params.forecasts?.length && this.schemas.FORECAST_SCHEMA_UID) {
+      forecastCount = params.forecasts.length;
+      requests.push({
+        schema: this.schemas.FORECAST_SCHEMA_UID,
+        data: params.forecasts.map(({ recipient, data }) => ({
+          recipient,
+          expirationTime: 0n,
+          revocable: true,
+          refUID: '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`,
+          data: encodeForecastData(data),
+          value: 0n,
+        })),
+      });
+    }
+
+    // Add calibration attestations
+    if (params.calibrations?.length && this.schemas.CALIBRATION_SCHEMA_UID) {
+      calibrationCount = params.calibrations.length;
+      requests.push({
+        schema: this.schemas.CALIBRATION_SCHEMA_UID,
+        data: params.calibrations.map(({ recipient, data }) => ({
+          recipient,
+          expirationTime: 0n,
+          revocable: false,
+          refUID: '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`,
+          data: encodeCalibrationData(data),
+          value: 0n,
+        })),
+      });
+    }
+
+    // Add identity attestations (public only)
+    if (params.identities?.length && this.schemas.IDENTITY_SCHEMA_UID) {
+      const publicIdentities = params.identities.filter(a => !a.usePrivateData);
+      if (publicIdentities.length > 0) {
+        identityCount = publicIdentities.length;
+        requests.push({
+          schema: this.schemas.IDENTITY_SCHEMA_UID,
+          data: publicIdentities.map(({ recipient, data }) => ({
+            recipient,
+            expirationTime: 0n,
+            revocable: true,
+            refUID: '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`,
+            data: encodeIdentityData(data),
+            value: 0n,
+          })),
+        });
+      }
+    }
+
+    // Add superforecaster attestations
+    if (params.superforecasters?.length && this.schemas.SUPERFORECASTER_SCHEMA_UID) {
+      superforecasterCount = params.superforecasters.length;
+      requests.push({
+        schema: this.schemas.SUPERFORECASTER_SCHEMA_UID,
+        data: params.superforecasters.map(({ recipient, data }) => ({
+          recipient,
+          expirationTime: 0n,
+          revocable: false,
+          refUID: '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`,
+          data: encodeSuperforecasterData(data),
+          value: 0n,
+        })),
+      });
+    }
+
+    if (requests.length === 0) {
+      throw new Error('No valid attestations to create');
+    }
+
+    const tx = await this.eas.multiAttest(requests);
+    const allUids = await tx.wait();
+    const txHash = ((tx as unknown as { tx?: { hash?: string } }).tx?.hash ?? '0x') as `0x${string}`;
+
+    // Parse UIDs back to original schema order
+    const uidsArray = Array.isArray(allUids) ? allUids : [allUids];
+    let offset = 0;
+
+    const forecastUids = uidsArray.slice(offset, offset + forecastCount) as `0x${string}`[];
+    offset += forecastCount;
+
+    const calibrationUids = uidsArray.slice(offset, offset + calibrationCount) as `0x${string}`[];
+    offset += calibrationCount;
+
+    const identityUids = uidsArray.slice(offset, offset + identityCount) as `0x${string}`[];
+    offset += identityCount;
+
+    const superforecasterUids = uidsArray.slice(offset, offset + superforecasterCount) as `0x${string}`[];
+
+    return {
+      forecastUids,
+      calibrationUids,
+      identityUids,
+      superforecasterUids,
+      txHash,
+    };
+  }
+
+  /**
+   * Revoke multiple attestations in a single transaction
+   */
+  async revokeBatchAttestations(
+    schemaUid: `0x${string}`,
+    uids: `0x${string}`[]
+  ): Promise<{ txHash: `0x${string}` }> {
+    if (uids.length === 0) {
+      throw new Error('No UIDs provided');
+    }
+
+    const tx = await this.eas.multiRevoke([
+      {
+        schema: schemaUid,
+        data: uids.map(uid => ({
+          uid,
+          value: 0n,
+        })),
+      },
+    ]);
+
+    await tx.wait();
+    const txHash = ((tx as unknown as { tx?: { hash?: string } }).tx?.hash ?? '0x') as `0x${string}`;
+
+    return { txHash };
+  }
 }

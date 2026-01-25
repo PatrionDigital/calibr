@@ -1,5 +1,5 @@
 // =============================================================================
-// Calibr.ly Prisma Schema v5.0
+// Calibr.xyz Prisma Schema v5.0
 // Prediction Market Portfolio Manager & Aggregation Layer
 // Database: PostgreSQL (Supabase) | Blockchain: Base (EAS), Polygon (Polymarket)
 // =============================================================================
@@ -691,6 +691,7 @@ model EASAttestation {
   isOffchain Boolean @default(false) @map("is_offchain")
   isPrivate  Boolean @default(false) @map("is_private")
   merkleRoot String? @map("merkle_root")
+  signature  String? // For off-chain attestations
 
   // Relations
   userId String @map("user_id")
@@ -769,6 +770,7 @@ model DataDeletionRequest {
 
 enum Platform {
   POLYMARKET
+  LIMITLESS
   KALSHI
   IEM
   METACULUS

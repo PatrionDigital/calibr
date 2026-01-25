@@ -1,0 +1,32 @@
+'use client';
+
+import * as React from 'react';
+import { useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WagmiProvider } from 'wagmi';
+import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
+import { config } from '@/lib/wagmi';
+
+import '@rainbow-me/rainbowkit/styles.css';
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  // Create QueryClient in state to avoid recreation on re-renders
+  const [queryClient] = useState(() => new QueryClient());
+
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider
+          theme={darkTheme({
+            accentColor: '#00ff00',
+            accentColorForeground: '#000000',
+            borderRadius: 'none',
+            fontStack: 'system',
+          })}
+        >
+          {children}
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
+}

@@ -10,7 +10,7 @@ import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 
 /**
  * @title SuperforecasterBadges
- * @author Calibr.ly Team
+ * @author Calibr.xyz Team
  * @notice Soulbound NFT badges for superforecaster tier achievements
  * @dev Non-transferable ERC-721 tokens representing tier progression
  */
@@ -257,7 +257,7 @@ contract SuperforecasterBadges is ERC721, ERC721Enumerable, ERC721URIStorage, Ow
                 tokenId.toString(),
                 '", "description": "Superforecaster achievement badge for reaching ',
                 tierName,
-                ' tier on Calibr.ly", "image": "data:image/svg+xml;base64,',
+                ' tier on Calibr.xyz", "image": "data:image/svg+xml;base64,',
                 Base64.encode(bytes(svg)),
                 '", "attributes": [{"trait_type": "Tier", "value": "',
                 tierName,
@@ -307,7 +307,7 @@ contract SuperforecasterBadges is ERC721, ERC721Enumerable, ERC721URIStorage, Ow
                 rank.toString(),
                 '</text>',
                 '<text x="200" y="360" text-anchor="middle" font-family="monospace" font-size="12" fill="#008000">',
-                'CALIBR.LY SUPERFORECASTER',
+                'CALIBR.XYZ SUPERFORECASTER',
                 '</text>',
                 '</svg>'
             )

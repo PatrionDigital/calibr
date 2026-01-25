@@ -9,7 +9,7 @@ import {CaliberCore} from "../src/CaliberCore.sol";
 
 /**
  * @title RegisterSchemasScript
- * @notice Registers Calibr.ly EAS schemas on Base network
+ * @notice Registers Calibr.xyz EAS schemas on Base network
  * @dev Run this after deploying CaliberEASResolver
  */
 contract RegisterSchemasScript is Script {

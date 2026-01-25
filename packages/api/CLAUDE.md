@@ -1,4 +1,4 @@
-# Calibr.ly API
+# Calibr.xyz API
 
 ## Stack
 - Hono (lightweight web framework)
@@ -7,7 +7,7 @@
 - Zod (validation)
 
 ## Architecture
-This package provides the backend API services for Calibr.ly:
+This package provides the backend API services for Calibr.xyz:
 - API Gateway with request routing and rate limiting
 - Aggregator Service for market syncing and matching
 - Portfolio Service for position tracking and P&L

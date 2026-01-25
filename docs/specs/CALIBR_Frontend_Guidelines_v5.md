@@ -1,4 +1,4 @@
-# Calibr.ly Frontend Guidelines
+# Calibr.xyz Frontend Guidelines
 
 ## Prediction Market Portfolio Manager & Aggregation Layer
 
@@ -71,7 +71,7 @@ A simplified interface for tablet and mobile that maintains the terminal aesthet
 
 ### 1.3 Theming System (Post-MVP)
 
-Calibr.ly will support three visual themes, each with Light and Dark variants:
+Calibr.xyz will support three visual themes, each with Light and Dark variants:
 
 | Theme           | Inspiration                          | Dark Mode                            | Light Mode                            |
 | --------------- | ------------------------------------ | ------------------------------------ | ------------------------------------- |
@@ -89,7 +89,7 @@ Calibr.ly will support three visual themes, each with Light and Dark variants:
 
 ### 1.4 Blockchain Transparency Principle
 
-As a Web3 application, Calibr.ly embraces **radical transparency** by surfacing blockchain data throughout the UI. Every on-chain action should be verifiable by the user.
+As a Web3 application, Calibr.xyz embraces **radical transparency** by surfacing blockchain data throughout the UI. Every on-chain action should be verifiable by the user.
 
 **Core Rules:**
 
@@ -277,7 +277,7 @@ This section maps every user-facing data point from the Data Schema to its UI lo
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           CALIBR.LY PAGE STRUCTURE                          │
+│                           CALIBR.XYZ PAGE STRUCTURE                          │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌─ MAIN DASHBOARD ────────────────────────────────────────────────────┐   │
@@ -335,7 +335,7 @@ This section maps every user-facing data point from the Data Schema to its UI lo
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ CALIBR.LY v1.0 │ ◉ Base │ ◉ Polygon │ [🔮 EXPERT] 0x7a3...f9e [📋] │ $12,847 │ [?][⚙] │
+│ CALIBR.XYZ v1.0 │ ◉ Base │ ◉ Polygon │ [🔮 EXPERT] 0x7a3...f9e [📋] │ $12,847 │ [?][⚙] │
 ├───────────────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                           │
 │ ┌─ MARKET BROWSER ──────┐ ┌─ ACTIVE MARKETS ─────────────────────────────┐ ┌─ PORTFOLIO ─┐
@@ -892,7 +892,7 @@ PRESET TOOLTIPS:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ CALIBR.LY │ PROFILE & LEADERBOARD │ [← Back to Dashboard]         │ 0x7a3...f9e │ [⚙] │
+│ CALIBR.XYZ │ PROFILE & LEADERBOARD │ [← Back to Dashboard]         │ 0x7a3...f9e │ [⚙] │
 ├───────────────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                           │
 │ ┌─ YOUR PROFILE ────────────────────────────────────────────────────────────────────────┐│
@@ -1025,7 +1025,7 @@ TOOLTIP CONTENT (on hover):
 ### 8.1 Core Framework
 
 ```
-Calibr.ly Frontend Stack
+Calibr.xyz Frontend Stack
 ├── Framework: Next.js 14 (App Router)
 ├── Language: TypeScript (Strict Mode)
 ├── Styling: Tailwind CSS v4
@@ -1689,6 +1689,6 @@ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id
 
 ---
 
-_This document represents the complete frontend guidelines for Calibr.ly's prediction market aggregation platform._  
+_This document represents the complete frontend guidelines for Calibr.xyz's prediction market aggregation platform._  
 _Version 5.0 | January 2026_  
 _Aligned with: Project Requirements v5.0, Data Schema v5.0, Project Tasks v5.0_

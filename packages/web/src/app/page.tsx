@@ -4,14 +4,14 @@ export default function Home() {
   return (
     <main className="min-h-screen p-8">
       <div className="max-w-4xl mx-auto">
-        <pre className="text-[hsl(var(--primary))] text-sm mb-8 terminal-glow">
+        <pre className="text-[hsl(var(--primary))] text-xs mb-8 terminal-glow">
           {`
- ██████╗ █████╗ ██╗     ██╗██████╗ ██████╗    ██╗  ██╗   ██╗
-██╔════╝██╔══██╗██║     ██║██╔══██╗██╔══██╗   ██║  ╚██╗ ██╔╝
-██║     ███████║██║     ██║██████╔╝██████╔╝   ██║   ╚████╔╝
-██║     ██╔══██║██║     ██║██╔══██╗██╔══██╗   ██║    ╚██╔╝
-╚██████╗██║  ██║███████╗██║██████╔╝██║  ██║██╗███████╗██║
- ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝╚══════╝╚═╝
+ ██████╗ █████╗ ██╗     ██╗██████╗ ██████╗    ██╗  ██╗██╗   ██╗███████╗
+██╔════╝██╔══██╗██║     ██║██╔══██╗██╔══██╗   ╚██╗██╔╝╚██╗ ██╔╝╚══███╔╝
+██║     ███████║██║     ██║██████╔╝██████╔╝    ╚███╔╝  ╚████╔╝   ███╔╝
+██║     ██╔══██║██║     ██║██╔══██╗██╔══██╗    ██╔██╗   ╚██╔╝   ███╔╝
+╚██████╗██║  ██║███████╗██║██████╔╝██║  ██║██╗██╔╝ ██╗   ██║   ███████╗
+ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝
           `}
         </pre>
         <h1 className="text-2xl mb-4 terminal-glow">Prediction Market Portfolio Manager</h1>
@@ -22,8 +22,13 @@ export default function Home() {
         <div className="ascii-box p-4 mb-8">
           <p className="text-sm mb-2">{">"} System initializing...</p>
           <p className="text-sm mb-2 text-[hsl(var(--success))]">{">"} Phase 1 complete: Monorepo structure</p>
-          <p className="text-sm mb-2 text-[hsl(var(--success))]">{">"} Phase 2 complete: Polymarket Data Integration</p>
-          <p className="text-sm text-[hsl(var(--muted-foreground))]">{">"} Phase 3 pending: Smart Contracts</p>
+          <p className="text-sm mb-2 text-[hsl(var(--success))]">{">"} Phase 2 complete: Limitless Data Integration</p>
+          <p className="text-sm mb-2 text-[hsl(var(--success))]">{">"} Phase 2.5 complete: Multi-outcome market support</p>
+          <p className="text-sm mb-2 text-[hsl(var(--success))]">{">"} Phase 2.6 complete: Opinion, Predict.fun, Manifold adapters</p>
+          <p className="text-sm mb-2 text-[hsl(var(--success))]">{">"} Phase 3 complete: Portfolio dashboard live</p>
+          <p className="text-sm mb-2 text-[hsl(var(--success))]">{">"} Phase 4 complete: Kelly Criterion, Forecasts, Privacy Settings</p>
+          <p className="text-sm mb-2 text-[hsl(var(--success))]">{">"} Phase 2.7 complete: Category/platform filters + platform badges</p>
+          <p className="text-sm text-[hsl(var(--warning))]">{">"} Phase 5 in progress: Limitless trading integration</p>
         </div>
 
         <div className="space-y-4">
@@ -38,29 +43,39 @@ export default function Home() {
                 View aggregated prediction markets, sync status, and live prices
               </div>
             </Link>
-            <div className="ascii-box p-4 opacity-50">
-              <div className="font-bold mb-1 text-[hsl(var(--muted-foreground))]">PORTFOLIO</div>
+            <Link
+              href="/portfolio"
+              className="ascii-box p-4 hover:border-[hsl(var(--primary))] transition-colors block"
+            >
+              <div className="text-[hsl(var(--primary))] font-bold mb-1">PORTFOLIO</div>
               <div className="text-sm text-[hsl(var(--muted-foreground))]">
-                Coming soon - Track your positions across platforms
+                Track your positions across platforms, view P&L
               </div>
-            </div>
-            <div className="ascii-box p-4 opacity-50">
-              <div className="font-bold mb-1 text-[hsl(var(--muted-foreground))]">FORECASTS</div>
+            </Link>
+            <Link
+              href="/forecasts"
+              className="ascii-box p-4 hover:border-[hsl(var(--primary))] transition-colors block"
+            >
+              <div className="text-[hsl(var(--primary))] font-bold mb-1">FORECAST JOURNAL</div>
               <div className="text-sm text-[hsl(var(--muted-foreground))]">
-                Coming soon - Journal your predictions and track calibration
+                Record predictions, track calibration, Kelly recommendations
               </div>
-            </div>
-            <div className="ascii-box p-4 opacity-50">
-              <div className="font-bold mb-1 text-[hsl(var(--muted-foreground))]">IDENTITY</div>
+            </Link>
+            <Link
+              href="/settings"
+              className="ascii-box p-4 hover:border-[hsl(var(--primary))] transition-colors block"
+            >
+              <div className="text-[hsl(var(--primary))] font-bold mb-1">SETTINGS</div>
               <div className="text-sm text-[hsl(var(--muted-foreground))]">
-                Coming soon - EAS attestations and on-chain identity
+                Privacy, Kelly config, attestation modes, account
               </div>
-            </div>
+            </Link>
           </div>
         </div>
 
         <div className="mt-8 text-xs text-[hsl(var(--muted-foreground))]">
-          <p>Built on Base L2 with Polymarket integration via Polygon</p>
+          <p className="mb-1">Supported platforms: Polymarket, Limitless, Opinion, Predict.fun, Manifold</p>
+          <p>Built on Base L2 with cross-chain integrations (Polygon, BNB, Blast)</p>
         </div>
       </div>
     </main>

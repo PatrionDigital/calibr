@@ -4,6 +4,9 @@
  */
 
 import { polymarketSync, type SyncResult } from './polymarket-sync';
+import { limitlessSync } from './limitless-sync';
+import { opinionSync } from './opinion-sync';
+import { manifoldSync } from './manifold-sync';
 
 // =============================================================================
 // Types
@@ -130,7 +133,7 @@ export class SyncScheduler {
   // ===========================================================================
 
   /**
-   * Run market sync (can be called manually)
+   * Run market sync for all platforms (can be called manually)
    */
   async runMarketSync(): Promise<SyncResult | null> {
     if (this.state.marketSyncRunning) {
@@ -139,29 +142,126 @@ export class SyncScheduler {
     }
 
     this.state.marketSyncRunning = true;
-    console.log('[Scheduler] Starting market sync...');
+    console.log('[Scheduler] Starting market sync for all platforms...');
+
+    const combinedResult: SyncResult = {
+      success: true,
+      syncedAt: new Date(),
+      duration: 0,
+      marketsCreated: 0,
+      marketsUpdated: 0,
+      pricesUpdated: 0,
+      errors: [],
+    };
+
+    const startTime = Date.now();
 
     try {
-      const result = await polymarketSync.syncMarkets({
+      // Sync Polymarket
+      console.log('[Scheduler] Syncing Polymarket...');
+      const polymarketResult = await polymarketSync.syncMarkets({
         batchSize: 100,
         maxPages: 20,
         activeOnly: true,
       });
 
+      combinedResult.marketsCreated += polymarketResult.marketsCreated;
+      combinedResult.marketsUpdated += polymarketResult.marketsUpdated;
+      combinedResult.pricesUpdated += polymarketResult.pricesUpdated;
+      if (!polymarketResult.success) {
+        combinedResult.success = false;
+        combinedResult.errors.push(...polymarketResult.errors.map(e => `[Polymarket] ${e}`));
+      }
+
+      console.log(
+        `[Scheduler] Polymarket sync complete - Created: ${polymarketResult.marketsCreated}, Updated: ${polymarketResult.marketsUpdated}`
+      );
+
+      // Sync Limitless (API uses fixed page size of 25)
+      console.log('[Scheduler] Syncing Limitless...');
+      const limitlessResult = await limitlessSync.syncMarkets({
+        batchSize: 25, // Limitless API page size is fixed at 25
+        maxPages: 20,  // Enough for ~500 markets
+        activeOnly: true,
+      });
+
+      combinedResult.marketsCreated += limitlessResult.marketsCreated;
+      combinedResult.marketsUpdated += limitlessResult.marketsUpdated;
+      combinedResult.pricesUpdated += limitlessResult.pricesUpdated;
+      if (!limitlessResult.success) {
+        combinedResult.success = false;
+        combinedResult.errors.push(...limitlessResult.errors.map(e => `[Limitless] ${e}`));
+      }
+
+      console.log(
+        `[Scheduler] Limitless sync complete - Created: ${limitlessResult.marketsCreated}, Updated: ${limitlessResult.marketsUpdated}`
+      );
+
+      // Sync Opinion
+      console.log('[Scheduler] Syncing Opinion...');
+      try {
+        const opinionResult = await opinionSync.syncMarkets({
+          batchSize: 20,
+          maxPages: 10,
+          activeOnly: true,
+        });
+
+        combinedResult.marketsCreated += opinionResult.marketsCreated;
+        combinedResult.marketsUpdated += opinionResult.marketsUpdated;
+        combinedResult.pricesUpdated += opinionResult.pricesUpdated;
+        if (!opinionResult.success) {
+          combinedResult.errors.push(...opinionResult.errors.map(e => `[Opinion] ${e}`));
+        }
+
+        console.log(
+          `[Scheduler] Opinion sync complete - Created: ${opinionResult.marketsCreated}, Updated: ${opinionResult.marketsUpdated}`
+        );
+      } catch (error) {
+        const msg = `Opinion sync failed: ${error instanceof Error ? error.message : 'Unknown'}`;
+        console.error('[Scheduler]', msg);
+        combinedResult.errors.push(`[Opinion] ${msg}`);
+      }
+
+      // Sync Manifold
+      console.log('[Scheduler] Syncing Manifold...');
+      try {
+        const manifoldResult = await manifoldSync.syncMarkets({
+          batchSize: 100,
+          maxPages: 5,
+          activeOnly: true,
+        });
+
+        combinedResult.marketsCreated += manifoldResult.marketsCreated;
+        combinedResult.marketsUpdated += manifoldResult.marketsUpdated;
+        combinedResult.pricesUpdated += manifoldResult.pricesUpdated;
+        if (!manifoldResult.success) {
+          combinedResult.errors.push(...manifoldResult.errors.map(e => `[Manifold] ${e}`));
+        }
+
+        console.log(
+          `[Scheduler] Manifold sync complete - Created: ${manifoldResult.marketsCreated}, Updated: ${manifoldResult.marketsUpdated}`
+        );
+      } catch (error) {
+        const msg = `Manifold sync failed: ${error instanceof Error ? error.message : 'Unknown'}`;
+        console.error('[Scheduler]', msg);
+        combinedResult.errors.push(`[Manifold] ${msg}`);
+      }
+
+      combinedResult.duration = Date.now() - startTime;
       this.state.lastMarketSync = new Date();
       this.state.marketSyncCount++;
 
-      if (result.success) {
+      if (combinedResult.success) {
         console.log(
-          `[Scheduler] Market sync complete - Created: ${result.marketsCreated}, Updated: ${result.marketsUpdated}, Duration: ${result.duration}ms`
+          `[Scheduler] All market syncs complete - Total Created: ${combinedResult.marketsCreated}, Updated: ${combinedResult.marketsUpdated}, Duration: ${combinedResult.duration}ms`
         );
       } else {
-        console.error(`[Scheduler] Market sync failed with ${result.errors.length} errors`);
-        this.addError('markets', result.errors[0] || 'Unknown error');
+        console.error(`[Scheduler] Market sync completed with ${combinedResult.errors.length} errors`);
+        this.addError('markets', combinedResult.errors[0] || 'Unknown error');
       }
 
-      this.config.onSyncComplete?.('markets', result);
-      return result;
+      this.config.onSyncComplete?.('markets', combinedResult);
+      return combinedResult;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       console.error('[Scheduler] Market sync error:', err.message);
@@ -174,7 +274,7 @@ export class SyncScheduler {
   }
 
   /**
-   * Run price sync (can be called manually)
+   * Run price sync for all platforms (can be called manually)
    */
   async runPriceSync(): Promise<SyncResult | null> {
     if (this.state.priceSyncRunning) {
@@ -183,18 +283,67 @@ export class SyncScheduler {
 
     this.state.priceSyncRunning = true;
 
+    const combinedResult: SyncResult = {
+      success: true,
+      syncedAt: new Date(),
+      duration: 0,
+      marketsCreated: 0,
+      marketsUpdated: 0,
+      pricesUpdated: 0,
+      errors: [],
+    };
+
+    const startTime = Date.now();
+
     try {
-      const result = await polymarketSync.syncPrices();
+      // Sync Polymarket prices
+      const polymarketResult = await polymarketSync.syncPrices();
+      combinedResult.pricesUpdated += polymarketResult.pricesUpdated;
+      if (!polymarketResult.success) {
+        combinedResult.errors.push(...polymarketResult.errors.map(e => `[Polymarket] ${e}`));
+      }
+
+      // Sync Limitless prices
+      const limitlessResult = await limitlessSync.syncPrices();
+      combinedResult.pricesUpdated += limitlessResult.pricesUpdated;
+      if (!limitlessResult.success) {
+        combinedResult.errors.push(...limitlessResult.errors.map(e => `[Limitless] ${e}`));
+      }
+
+      // Sync Opinion prices
+      try {
+        const opinionResult = await opinionSync.syncPrices();
+        combinedResult.pricesUpdated += opinionResult.pricesUpdated;
+        if (!opinionResult.success) {
+          combinedResult.errors.push(...opinionResult.errors.map(e => `[Opinion] ${e}`));
+        }
+      } catch (error) {
+        combinedResult.errors.push(`[Opinion] Price sync failed: ${error instanceof Error ? error.message : 'Unknown'}`);
+      }
+
+      // Sync Manifold prices
+      try {
+        const manifoldResult = await manifoldSync.syncPrices();
+        combinedResult.pricesUpdated += manifoldResult.pricesUpdated;
+        if (!manifoldResult.success) {
+          combinedResult.errors.push(...manifoldResult.errors.map(e => `[Manifold] ${e}`));
+        }
+      } catch (error) {
+        combinedResult.errors.push(`[Manifold] Price sync failed: ${error instanceof Error ? error.message : 'Unknown'}`);
+      }
+
+      combinedResult.duration = Date.now() - startTime;
+      combinedResult.success = combinedResult.errors.length === 0;
 
       this.state.lastPriceSync = new Date();
       this.state.priceSyncCount++;
 
-      if (!result.success && result.errors.length > 0) {
-        this.addError('prices', result.errors[0] ?? 'Unknown error');
+      if (!combinedResult.success && combinedResult.errors.length > 0) {
+        this.addError('prices', combinedResult.errors[0] ?? 'Unknown error');
       }
 
-      this.config.onSyncComplete?.('prices', result);
-      return result;
+      this.config.onSyncComplete?.('prices', combinedResult);
+      return combinedResult;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       this.addError('prices', err.message);
@@ -222,22 +371,37 @@ export class SyncScheduler {
   async getHealth(): Promise<{
     scheduler: boolean;
     polymarket: { healthy: boolean; details: Record<string, boolean> };
+    limitless: { healthy: boolean; details: Record<string, boolean> };
     stats: {
-      totalMarkets: number;
-      activeMarkets: number;
-      lastSync: Date | null;
-      recentErrors: number;
+      polymarket: {
+        totalMarkets: number;
+        activeMarkets: number;
+        lastSync: Date | null;
+        recentErrors: number;
+      };
+      limitless: {
+        totalMarkets: number;
+        activeMarkets: number;
+        lastSync: Date | null;
+        recentErrors: number;
+      };
     };
   }> {
-    const [polymarketHealth, stats] = await Promise.all([
+    const [polymarketHealth, polymarketStats, limitlessHealth, limitlessStats] = await Promise.all([
       polymarketSync.healthCheck(),
       polymarketSync.getStats(),
+      limitlessSync.healthCheck(),
+      limitlessSync.getStats(),
     ]);
 
     return {
       scheduler: this.state.isRunning,
       polymarket: polymarketHealth,
-      stats,
+      limitless: limitlessHealth,
+      stats: {
+        polymarket: polymarketStats,
+        limitless: limitlessStats,
+      },
     };
   }
 

@@ -2,7 +2,7 @@
   "name": "@calibr/core",
   "version": "0.1.0",
   "private": true,
-  "description": "Calibr.ly shared business logic and utilities",
+  "description": "Calibr.xyz shared business logic and utilities",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

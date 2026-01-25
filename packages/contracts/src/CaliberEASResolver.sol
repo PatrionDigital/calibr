@@ -10,8 +10,8 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 
 /**
  * @title CaliberEASResolver
- * @author Calibr.ly Team
- * @notice Custom EAS resolver for Calibr.ly attestations on Base network
+ * @author Calibr.xyz Team
+ * @notice Custom EAS resolver for Calibr.xyz attestations on Base network
  * @dev Validates attestations and maintains on-chain state for calibration scores and tiers
  *
  * Security features (OpenZeppelin best practices):
@@ -19,7 +19,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
  * - Pausable: Emergency stop mechanism for incident response
  * - ReentrancyGuard: Protection against reentrancy attacks
  *
- * @custom:security-contact security@calibr.ly
+ * @custom:security-contact security@calibr.xyz
  */
 contract CaliberEASResolver is SchemaResolver, AccessControl, Pausable, ReentrancyGuard {
     // =============================================================================
@@ -244,13 +244,16 @@ contract CaliberEASResolver is SchemaResolver, AccessControl, Pausable, Reentran
      * @inheritdoc SchemaResolver
      * @dev Called when a new attestation is created
      * @dev Includes whenNotPaused modifier for emergency stop capability
+     * @dev Allows self-attestations (attester == recipient) without ATTESTER_ROLE
      */
     function onAttest(
         Attestation calldata attestation,
         uint256 /* value */
     ) internal override whenNotPaused returns (bool) {
-        // Verify attester has the ATTESTER_ROLE
-        if (!hasRole(ATTESTER_ROLE, attestation.attester)) {
+        // Allow self-attestations (user attesting for themselves)
+        // For third-party attestations, require ATTESTER_ROLE
+        bool isSelfAttestation = attestation.attester == attestation.recipient;
+        if (!isSelfAttestation && !hasRole(ATTESTER_ROLE, attestation.attester)) {
             revert UnauthorizedAttester();
         }
 

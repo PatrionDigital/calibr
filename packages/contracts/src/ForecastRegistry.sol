@@ -6,7 +6,7 @@ import {IEAS, AttestationRequest, AttestationRequestData} from "@ethereum-attest
 
 /**
  * @title ForecastRegistry
- * @author Calibr.ly Team
+ * @author Calibr.xyz Team
  * @notice On-chain forecast management with EAS attestation integration
  * @dev Tracks forecasts, resolutions, and Brier scores
  */

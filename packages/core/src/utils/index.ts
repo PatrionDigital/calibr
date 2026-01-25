@@ -1,5 +1,5 @@
 /**
- * Core utilities for Calibr.ly
+ * Core utilities for Calibr.xyz
  * Includes: Kelly Criterion, Brier Scoring, Calibration, Superforecaster Tiers
  */
 
