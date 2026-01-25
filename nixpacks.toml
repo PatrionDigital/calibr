@@ -9,7 +9,7 @@ nixPkgs = ["nodejs_20", "pnpm"]
 cmds = ["pnpm install --frozen-lockfile"]
 
 [phases.build]
-cmds = ["pnpm turbo build --filter=@calibr/api"]
+cmds = ["pnpm turbo build --filter=@calibr/api --force"]
 
 [start]
 cmd = "cd packages/api && npx prisma generate && node dist/server.js"
