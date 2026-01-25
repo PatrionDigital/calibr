@@ -35,6 +35,9 @@ app.use(
       'http://127.0.0.1:3000',
       'http://localhost:3001',
       'http://127.0.0.1:3001',
+      'https://calibr-web.vercel.app',
+      'https://calibr.xyz',
+      'https://www.calibr.xyz',
     ],
     credentials: true,
   })
@@ -60,6 +63,23 @@ app.get('/', (c) => {
       attestations: '/api/attestations',
       leaderboard: '/api/leaderboard',
     },
+  });
+});
+
+// Debug endpoint - REMOVE IN PRODUCTION
+app.get('/debug/env', (c) => {
+  const dbUrl = process.env.DATABASE_URL || 'NOT SET';
+  const maskedDbUrl = dbUrl.includes('@')
+    ? dbUrl.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')
+    : dbUrl;
+
+  return c.json({
+    DATABASE_URL: maskedDbUrl,
+    DIRECT_URL: process.env.DIRECT_URL ? 'SET' : 'NOT SET',
+    NODE_ENV: process.env.NODE_ENV,
+    PORT: process.env.PORT,
+    envVarsCount: Object.keys(process.env).length,
+    databaseEnvVars: Object.keys(process.env).filter(k => k.includes('DATABASE')),
   });
 });
 

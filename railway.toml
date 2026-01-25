@@ -3,7 +3,7 @@ builder = "nixpacks"
 buildCommand = "pnpm turbo build --filter=@calibr/api"
 
 [deploy]
-startCommand = "pnpm --filter @calibr/api start"
+startCommand = "cd packages/api && node dist/server.js"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"

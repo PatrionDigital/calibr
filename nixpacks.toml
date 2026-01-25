@@ -1,0 +1,15 @@
+[variables]
+NODE_ENV = "production"
+PRISMA_CLI_BINARY_TARGETS = "linux-musl-openssl-3.0.x"
+
+[phases.setup]
+nixPkgs = ["nodejs_20", "pnpm"]
+
+[phases.install]
+cmds = ["pnpm install --frozen-lockfile"]
+
+[phases.build]
+cmds = ["pnpm turbo build --filter=@calibr/api"]
+
+[start]
+cmd = "cd packages/api && npx prisma generate && node dist/server.js"

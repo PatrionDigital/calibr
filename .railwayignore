@@ -1,0 +1,66 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+dist
+**/dist
+.next
+**/.next
+out
+**/out
+
+# Foundry
+packages/contracts/out
+packages/contracts/cache
+packages/contracts/lib
+packages/contracts/broadcast
+
+# Environment files - CRITICAL: don't override Railway env vars
+.env
+.env.*
+!.env.example
+*.local
+
+# Development
+*.log
+.turbo
+**/.turbo
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitmodules
+
+# Documentation
+docs
+*.md
+!README.md
+
+# Tests
+**/*.test.ts
+**/*.spec.ts
+**/test
+**/tests
+coverage
+**/.coverage
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Claude
+.claude
+CLAUDE.md
+**/CLAUDE.md

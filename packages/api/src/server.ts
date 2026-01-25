@@ -8,6 +8,18 @@ import app, { syncScheduler } from './index';
 
 const port = parseInt(process.env.PORT || '3001');
 
+// Debug: Log database URL (masked)
+const dbUrl = process.env.DATABASE_URL || 'NOT SET';
+const maskedDbUrl = dbUrl.includes('@')
+  ? dbUrl.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')
+  : dbUrl;
+console.log(`\n[DEBUG] === Environment Variables ===`);
+console.log(`[DEBUG] DATABASE_URL: ${maskedDbUrl}`);
+console.log(`[DEBUG] DIRECT_URL set: ${!!process.env.DIRECT_URL}`);
+console.log(`[DEBUG] NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`[DEBUG] All env vars starting with DATABASE: ${Object.keys(process.env).filter(k => k.includes('DATABASE')).join(', ') || 'none'}`);
+console.log(`[DEBUG] =================================\n`);
+
 console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║                   CALIBR.XYZ API                       ║

@@ -15,10 +15,16 @@ packages/contracts/broadcast/
 /cache/
 /broadcast/
 
-# Environment
+# Environment files
 .env
-.env.*
+.env.local
+.env.production
+.env.production.*
+.env.development
+.env.*.local
+packages/**/.env*
 !.env.example
+!packages/**/.env.example
 
 # IDE
 .idea/
