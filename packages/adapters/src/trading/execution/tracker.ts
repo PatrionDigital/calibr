@@ -10,6 +10,7 @@ import type {
   IOrderStatusTracker,
   OrderStatusUpdate,
   OrderTrackingSubscription,
+  OrderTrackingSubscriptionBuilder,
   OrderTrackingOptions,
   ITradeNotifier,
   IExecutionLogger,
@@ -69,7 +70,7 @@ export class OrderStatusTracker implements IOrderStatusTracker {
     platform: TradingPlatform,
     orderId: string,
     options?: OrderTrackingOptions
-  ): OrderTrackingSubscription {
+  ): OrderTrackingSubscriptionBuilder {
     // Check subscription limit
     if (this.subscriptions.size >= this.config.maxSubscriptions) {
       throw new Error(`Maximum subscription limit (${this.config.maxSubscriptions}) reached`);
@@ -108,7 +109,12 @@ export class OrderStatusTracker implements IOrderStatusTracker {
 
     // Return subscription with methods to set callbacks
     return {
-      ...subscription,
+      id: subscription.id,
+      orderId: subscription.orderId,
+      platform: subscription.platform,
+      pollingInterval: subscription.pollingInterval,
+      isActive: subscription.isActive,
+      createdAt: subscription.createdAt,
       onStatusUpdate: (callback: (update: OrderStatusUpdate) => void) => {
         const sub = this.subscriptions.get(subscriptionId);
         if (sub) {
@@ -121,7 +127,7 @@ export class OrderStatusTracker implements IOrderStatusTracker {
           sub.onError = callback;
         }
       },
-    } as OrderTrackingSubscription;
+    };
   }
 
   /**

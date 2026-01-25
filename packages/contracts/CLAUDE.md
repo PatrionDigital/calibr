@@ -1,4 +1,4 @@
-# Calibr.ly Smart Contracts
+# Calibr.xyz Smart Contracts
 
 ## Framework
 Foundry (forge, anvil, cast)

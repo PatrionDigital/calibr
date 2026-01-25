@@ -2,7 +2,7 @@
   "name": "@calibr/contracts",
   "version": "0.1.0",
   "private": true,
-  "description": "Calibr.ly Foundry smart contracts",
+  "description": "Calibr.xyz Foundry smart contracts",
   "type": "module",
   "scripts": {
     "build": "forge build",

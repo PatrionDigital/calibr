@@ -316,8 +316,8 @@ export class PnLCalculator {
     const sorted = [...history].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
     for (let i = 1; i < sorted.length; i++) {
-      const prev = sorted[i - 1];
-      const curr = sorted[i];
+      const prev = sorted[i - 1]!;
+      const curr = sorted[i]!;
 
       daily.push({
         startDate: prev.timestamp,

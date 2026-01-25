@@ -1,8 +1,8 @@
-# Calibr.ly - Prediction Market Portfolio Manager
+# Calibr.xyz - Prediction Market Portfolio Manager
 
 ## Project Overview
 
-Calibr.ly is a prediction market aggregation platform targeting hardcore forecasting
+Calibr.xyz is a prediction market aggregation platform targeting hardcore forecasting
 enthusiasts. It operates as both a portfolio manager and aggregation layer on Base L2
 with cross-chain functionality to Polygon for Polymarket integration.
 
@@ -47,6 +47,7 @@ Reference these files in /docs/spec/ for detailed specifications:
 - Prefer composition over inheritance
 - Keep components small and focused
 - Use IBM Plex Mono for all UI text
+- **No mock implementations** - Always write production-ready code. Never use placeholder data, fake UIDs, or simulated functionality. All features must work end-to-end.
 
 ## Commands
 

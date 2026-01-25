@@ -92,7 +92,7 @@ function getPrivateDataEncoder(): SchemaEncoder {
  * @param data Forecast data to encode
  * @returns Encoded bytes string
  */
-export function encodeForecastData(data: ForecastAttestationData): string {
+export function encodeForecastData(data: ForecastAttestationData): `0x${string}` {
   const encoder = getForecastEncoder();
   return encoder.encodeData([
     { name: 'probability', value: BigInt(data.probability), type: 'uint256' },
@@ -101,7 +101,7 @@ export function encodeForecastData(data: ForecastAttestationData): string {
     { name: 'confidence', value: BigInt(data.confidence), type: 'uint256' },
     { name: 'reasoning', value: data.reasoning, type: 'string' },
     { name: 'isPublic', value: data.isPublic, type: 'bool' },
-  ]);
+  ]) as `0x${string}`;
 }
 
 /**
@@ -109,7 +109,7 @@ export function encodeForecastData(data: ForecastAttestationData): string {
  * @param data Calibration data to encode
  * @returns Encoded bytes string
  */
-export function encodeCalibrationData(data: CalibrationAttestationData): string {
+export function encodeCalibrationData(data: CalibrationAttestationData): `0x${string}` {
   const encoder = getCalibrationEncoder();
   return encoder.encodeData([
     { name: 'brierScore', value: BigInt(data.brierScore), type: 'uint256' },
@@ -117,7 +117,7 @@ export function encodeCalibrationData(data: CalibrationAttestationData): string 
     { name: 'timeWeightedScore', value: BigInt(data.timeWeightedScore), type: 'uint256' },
     { name: 'period', value: BigInt(data.period), type: 'uint256' },
     { name: 'category', value: data.category, type: 'string' },
-  ]);
+  ]) as `0x${string}`;
 }
 
 /**
@@ -125,7 +125,7 @@ export function encodeCalibrationData(data: CalibrationAttestationData): string 
  * @param data Identity data to encode
  * @returns Encoded bytes string
  */
-export function encodeIdentityData(data: IdentityAttestationData): string {
+export function encodeIdentityData(data: IdentityAttestationData): `0x${string}` {
   const encoder = getIdentityEncoder();
   return encoder.encodeData([
     { name: 'platform', value: data.platform, type: 'string' },
@@ -133,7 +133,7 @@ export function encodeIdentityData(data: IdentityAttestationData): string {
     { name: 'proofHash', value: data.proofHash, type: 'bytes32' },
     { name: 'verified', value: data.verified, type: 'bool' },
     { name: 'verifiedAt', value: BigInt(data.verifiedAt), type: 'uint256' },
-  ]);
+  ]) as `0x${string}`;
 }
 
 /**
@@ -141,7 +141,7 @@ export function encodeIdentityData(data: IdentityAttestationData): string {
  * @param data Superforecaster data to encode
  * @returns Encoded bytes string
  */
-export function encodeSuperforecasterData(data: SuperforecasterAttestationData): string {
+export function encodeSuperforecasterData(data: SuperforecasterAttestationData): `0x${string}` {
   const encoder = getSuperforecasterEncoder();
   return encoder.encodeData([
     { name: 'tier', value: data.tier, type: 'string' },
@@ -149,7 +149,7 @@ export function encodeSuperforecasterData(data: SuperforecasterAttestationData):
     { name: 'period', value: BigInt(data.period), type: 'uint256' },
     { name: 'category', value: data.category, type: 'string' },
     { name: 'rank', value: BigInt(data.rank), type: 'uint256' },
-  ]);
+  ]) as `0x${string}`;
 }
 
 /**
@@ -157,7 +157,7 @@ export function encodeSuperforecasterData(data: SuperforecasterAttestationData):
  * @param data Reputation data to encode
  * @returns Encoded bytes string
  */
-export function encodeReputationData(data: ReputationAttestationData): string {
+export function encodeReputationData(data: ReputationAttestationData): `0x${string}` {
   const encoder = getReputationEncoder();
   return encoder.encodeData([
     { name: 'platform', value: data.platform, type: 'string' },
@@ -165,7 +165,7 @@ export function encodeReputationData(data: ReputationAttestationData): string {
     { name: 'winRate', value: BigInt(data.winRate), type: 'uint256' },
     { name: 'profitLoss', value: BigInt(data.profitLoss), type: 'uint256' },
     { name: 'verificationLevel', value: data.verificationLevel, type: 'string' },
-  ]);
+  ]) as `0x${string}`;
 }
 
 /**
@@ -179,13 +179,13 @@ export function encodePrivateData(
   merkleRoot: `0x${string}`,
   dataType: string,
   fieldCount: number
-): string {
+): `0x${string}` {
   const encoder = getPrivateDataEncoder();
   return encoder.encodeData([
     { name: 'merkleRoot', value: merkleRoot, type: 'bytes32' },
     { name: 'dataType', value: dataType, type: 'string' },
     { name: 'fieldCount', value: BigInt(fieldCount), type: 'uint256' },
-  ]);
+  ]) as `0x${string}`;
 }
 
 // =============================================================================

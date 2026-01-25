@@ -1,11 +1,11 @@
-# Calibr.ly Moodboard & Design Research
+# Calibr.xyz Moodboard & Design Research
 
 ## Prediction Market Portfolio Manager & Aggregation Layer
 
 **Version:** 5.0  
 **Last Updated:** January 2026  
 **Purpose:** Visual inspiration, design philosophy, and research references  
-**See Also:** Frontend Guidelines v5.0 (for actual Calibr.ly specifications)
+**See Also:** Frontend Guidelines v5.0 (for actual Calibr.xyz specifications)
 
 ---
 
@@ -25,11 +25,11 @@
 
 ### 1.1 Core Concept: Bloomberg Terminal for Prediction Markets
 
-Calibr.ly employs a retro-futuristic ASCII/terminal interface aesthetic that signals technical sophistication to hardcore prediction market enthusiasts. This is not a consumer-friendly "easy onboarding" interface—it's a **power user tool** designed for serious forecasters who appreciate information density and keyboard-first workflows.
+Calibr.xyz employs a retro-futuristic ASCII/terminal interface aesthetic that signals technical sophistication to hardcore prediction market enthusiasts. This is not a consumer-friendly "easy onboarding" interface—it's a **power user tool** designed for serious forecasters who appreciate information density and keyboard-first workflows.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    CALIBR.LY DESIGN PRINCIPLES                              │
+│                    CALIBR.XYZ DESIGN PRINCIPLES                              │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  1. INFORMATION DENSITY    → Maximum data per viewport                      │
@@ -441,6 +441,6 @@ INTERACTION:
 
 ---
 
-_This moodboard establishes the visual direction and design philosophy for Calibr.ly's distinctive interface._  
+_This moodboard establishes the visual direction and design philosophy for Calibr.xyz's distinctive interface._  
 _For actual implementation specifications, see Frontend Guidelines v5.0._  
 _Version 5.0 | January 2026_

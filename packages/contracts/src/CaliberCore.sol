@@ -6,8 +6,8 @@ import {IEAS, AttestationRequest, AttestationRequestData} from "@ethereum-attest
 
 /**
  * @title CaliberCore
- * @author Calibr.ly Team
- * @notice Main contract for Calibr.ly prediction market aggregation
+ * @author Calibr.xyz Team
+ * @notice Main contract for Calibr.xyz prediction market aggregation
  * @dev Integrates with EAS for attestations on Base network
  */
 contract CaliberCore is Ownable {

@@ -2,7 +2,7 @@
   "name": "@calibr/api",
   "version": "0.1.0",
   "private": true,
-  "description": "Calibr.ly backend API services",
+  "description": "Calibr.xyz backend API services",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

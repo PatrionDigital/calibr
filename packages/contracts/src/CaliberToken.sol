@@ -8,7 +8,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title CaliberToken
- * @author Calibr.ly Team
+ * @author Calibr.xyz Team
  * @notice $CALIBR token with staking rewards for superforecasters
  * @dev ERC-20 with permit, burning, and staking functionality
  */

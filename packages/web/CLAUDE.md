@@ -1,4 +1,4 @@
-# Calibr.ly Frontend
+# Calibr.xyz Frontend
 
 ## Stack
 - Next.js 14 with App Router

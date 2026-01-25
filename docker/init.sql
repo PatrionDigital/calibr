@@ -1,4 +1,4 @@
--- Calibr.ly Database Initialization
+-- Calibr.xyz Database Initialization
 -- This script runs when the PostgreSQL container is first created
 
 -- Enable required extensions
@@ -14,5 +14,5 @@ GRANT ALL PRIVILEGES ON DATABASE calibr TO calibr;
 -- Log initialization
 DO $$
 BEGIN
-    RAISE NOTICE 'Calibr.ly database initialized successfully';
+    RAISE NOTICE 'Calibr.xyz database initialized successfully';
 END $$;

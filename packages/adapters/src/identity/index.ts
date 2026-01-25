@@ -44,7 +44,7 @@ export function createIdentityService(config?: {
   polygonRpcUrl?: string;
   cacheTtlMs?: number;
   registerDefaultVerifiers?: boolean;
-}): IdentityVerificationService {
+}): IdentityService {
   const service = new IdentityService({
     baseRpcUrl: config?.baseRpcUrl,
     polygonRpcUrl: config?.polygonRpcUrl,

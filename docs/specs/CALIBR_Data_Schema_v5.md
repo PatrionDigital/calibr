@@ -1,4 +1,4 @@
-# Calibr.ly Data Schema
+# Calibr.xyz Data Schema
 
 ## Prediction Market Portfolio Manager & Aggregation Layer
 
@@ -953,7 +953,7 @@ import { IEAS, Attestation } from "@ethereum-attestation-service/eas-contracts/c
 
 /**
  * @title CaliberEASResolver
- * @notice Resolver for Calibr.ly attestations on Base network
+ * @notice Resolver for Calibr.xyz attestations on Base network
  */
 contract CaliberEASResolver is SchemaResolver {
     // Schema UIDs (set after deployment)
@@ -1744,5 +1744,5 @@ ALTER TABLE "Forecast" ADD COLUMN "easAttestationUid" TEXT;
 
 ---
 
-_This document represents the complete data schema for Calibr.ly's prediction market aggregation platform with EAS-integrated identity infrastructure and privacy-preserving attestations._  
+_This document represents the complete data schema for Calibr.xyz's prediction market aggregation platform with EAS-integrated identity infrastructure and privacy-preserving attestations._  
 _Version 5.0 | January 2026_

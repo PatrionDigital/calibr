@@ -99,7 +99,7 @@ export interface OrderStatusUpdate {
 }
 
 /**
- * Order tracking subscription
+ * Order tracking subscription (internal state)
  */
 export interface OrderTrackingSubscription {
   /** Subscription ID */
@@ -112,6 +112,29 @@ export interface OrderTrackingSubscription {
   onStatusUpdate: (update: OrderStatusUpdate) => void;
   /** Callback for errors */
   onError?: (error: Error) => void;
+  /** Polling interval in ms */
+  pollingInterval: number;
+  /** Whether subscription is active */
+  isActive: boolean;
+  /** When subscription was created */
+  createdAt: Date;
+}
+
+/**
+ * Order tracking subscription builder (returned to caller)
+ * Allows setting callbacks via fluent API
+ */
+export interface OrderTrackingSubscriptionBuilder {
+  /** Subscription ID */
+  id: string;
+  /** Order ID being tracked */
+  orderId: string;
+  /** Platform */
+  platform: TradingPlatform;
+  /** Set the status update callback */
+  onStatusUpdate: (callback: (update: OrderStatusUpdate) => void) => void;
+  /** Set the error callback */
+  onError: (callback: (error: Error) => void) => void;
   /** Polling interval in ms */
   pollingInterval: number;
   /** Whether subscription is active */
@@ -322,7 +345,7 @@ export interface IOrderStatusTracker {
     platform: TradingPlatform,
     orderId: string,
     options?: OrderTrackingOptions
-  ): OrderTrackingSubscription;
+  ): OrderTrackingSubscriptionBuilder;
   /** Stop tracking an order */
   stopTracking(subscriptionId: string): void;
   /** Get current order status */

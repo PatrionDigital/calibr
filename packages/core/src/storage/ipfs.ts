@@ -1,5 +1,5 @@
 /**
- * IPFS Storage Service for Calibr.ly
+ * IPFS Storage Service for Calibr.xyz
  * Handles off-chain storage for forecast reasoning, private data, and metadata
  *
  * Uses Pinata for pinned IPFS storage with encryption support for private data
@@ -84,7 +84,7 @@ export class IPFSStorage {
         JSON.stringify({
           name,
           keyvalues: {
-            app: 'calibr.ly',
+            app: 'calibr.xyz',
             timestamp: Date.now().toString(),
           },
         })

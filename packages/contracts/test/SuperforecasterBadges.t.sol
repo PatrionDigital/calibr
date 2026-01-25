@@ -212,9 +212,9 @@ contract SuperforecasterBadgesTest is Test {
 
     function test_SetBaseURI() public {
         vm.prank(owner);
-        badges.setBaseURI("https://api.calibr.ly/metadata/");
+        badges.setBaseURI("https://api.calibr.xyz/metadata/");
 
-        assertEq(badges.baseTokenURI(), "https://api.calibr.ly/metadata/");
+        assertEq(badges.baseTokenURI(), "https://api.calibr.xyz/metadata/");
     }
 
     function test_FullTierProgression() public {

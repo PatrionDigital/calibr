@@ -10,7 +10,7 @@ _Fair Launch via Hunt.town Bonding Curve_
 
 ## 1. Executive Summary
 
-$CALIBR is the native utility token of Calibr.ly—a prediction market aggregator platform built on Base L2 for serious forecasters. Designed around the principle of _"Precision forecasting. Proven rewards."_, Calibr.ly serves as the Bloomberg Terminal for prediction markets, aggregating positions across multiple platforms while rewarding accuracy and continuous engagement.
+$CALIBR is the native utility token of Calibr.xyz—a prediction market aggregator platform built on Base L2 for serious forecasters. Designed around the principle of _"Precision forecasting. Proven rewards."_, Calibr.xyz serves as the Bloomberg Terminal for prediction markets, aggregating positions across multiple platforms while rewarding accuracy and continuous engagement.
 
 This document outlines a community-first tokenomics model featuring a fair launch via Hunt.town's bonding curve mechanism, ensuring transparent price discovery and broad token distribution from day one.
 
@@ -149,7 +149,7 @@ Users should review Hunt.town's documentation for complete details on curve mech
 
 ### 7.1 Primary Revenue Source
 
-Calibr.ly generates revenue through a 0.5% fee on all winning positions across aggregated prediction markets. This fee is only charged on successful trades, directly aligning protocol revenue with user success.
+Calibr.xyz generates revenue through a 0.5% fee on all winning positions across aggregated prediction markets. This fee is only charged on successful trades, directly aligning protocol revenue with user success.
 
 ### 7.2 Fee Split Allocation
 
@@ -173,7 +173,7 @@ This creates continuous buy pressure proportional to platform usage, directly li
 
 ## 8. Roll-Over Bonus System
 
-The Roll-Over Bonus System is Calibr.ly's signature incentive mechanism, rewarding traders who maintain continuous engagement with the platform.
+The Roll-Over Bonus System is Calibr.xyz's signature incentive mechanism, rewarding traders who maintain continuous engagement with the platform.
 
 ### 8.1 How It Works
 
@@ -240,7 +240,7 @@ Staked $CALIBR holders can vote on:
 
 ### 10.1 Protocol-Owned Liquidity (POL)
 
-Calibr.ly maintains protocol-owned liquidity to ensure deep, reliable trading for $CALIBR. Rather than relying on external liquidity providers who may withdraw during market stress, the protocol controls its own liquidity positions.
+Calibr.xyz maintains protocol-owned liquidity to ensure deep, reliable trading for $CALIBR. Rather than relying on external liquidity providers who may withdraw during market stress, the protocol controls its own liquidity positions.
 
 ### 10.2 Key Principles
 
@@ -308,7 +308,7 @@ Certain third-party swap and bridge fees may be charged during the execution pro
 
 ### 12.2 Third-Party Launchpad Disclaimer
 
-$CALIBR is issued via Hunt.town, a third-party bonding curve platform. Calibr.ly does not control Hunt.town's infrastructure, smart contracts, or operations. Users should conduct their own research (DYOR) regarding Hunt.town's mechanisms, fees, security practices, and risks before participating in the token launch.
+$CALIBR is issued via Hunt.town, a third-party bonding curve platform. Calibr.xyz does not control Hunt.town's infrastructure, smart contracts, or operations. Users should conduct their own research (DYOR) regarding Hunt.town's mechanisms, fees, security practices, and risks before participating in the token launch.
 
 ### 12.3 Prediction Market Disclaimer
 
@@ -318,7 +318,7 @@ Prediction market trading may be prohibited or restricted in certain jurisdictio
 - Determining the legality of prediction market participation in their location
 - Any tax obligations arising from prediction market activities
 
-Calibr.ly makes no representations regarding the legality of prediction market participation in any jurisdiction. Users who are uncertain about the legal status of prediction markets in their jurisdiction should consult with qualified legal counsel before participating.
+Calibr.xyz makes no representations regarding the legality of prediction market participation in any jurisdiction. Users who are uncertain about the legal status of prediction markets in their jurisdiction should consult with qualified legal counsel before participating.
 
 ### 12.4 General Disclaimer
 
@@ -332,9 +332,9 @@ Token purchases involve substantial risk, including but not limited to:
 - Regulatory changes
 - Platform discontinuation
 
-Past performance does not guarantee future results. Users participate entirely at their own risk and assume all responsibility for their actions. Calibr.ly, its founders, team members, affiliates, and associated parties expressly disclaim all liability for any losses, damages, or adverse outcomes incurred in connection with the purchase, sale, or use of $CALIBR tokens or participation in the Calibr.ly platform.
+Past performance does not guarantee future results. Users participate entirely at their own risk and assume all responsibility for their actions. Calibr.xyz, its founders, team members, affiliates, and associated parties expressly disclaim all liability for any losses, damages, or adverse outcomes incurred in connection with the purchase, sale, or use of $CALIBR tokens or participation in the Calibr.xyz platform.
 
-**By participating in the $CALIBR token launch or using the Calibr.ly platform, users acknowledge that they have read, understood, and accepted these risks and disclaimers.**
+**By participating in the $CALIBR token launch or using the Calibr.xyz platform, users acknowledge that they have read, understood, and accepted these risks and disclaimers.**
 
 ---
 
@@ -353,18 +353,18 @@ $CALIBR represents a new approach to prediction market tokenomics, combining fai
 
 _"Precision forecasting. Proven rewards."_
 
-Calibr.ly aims to become the definitive platform for sophisticated forecasters—providing professional-grade tools, transparent tokenomics, and meaningful rewards for accuracy.
+Calibr.xyz aims to become the definitive platform for sophisticated forecasters—providing professional-grade tools, transparent tokenomics, and meaningful rewards for accuracy.
 
 ---
 
 **For more information:**
 
-- Website: [calibr.ly](https://calibr.ly)
-- Documentation: [docs.calibr.ly](https://docs.calibr.ly)
+- Website: [calibr.xyz](https://calibr.xyz)
+- Documentation: [docs.calibr.xyz](https://docs.calibr.xyz)
 - Hunt.town Launch: [hunt.town](https://hunt.town)
 
 ---
 
 _$CALIBR Tokenomics Whitepaper v4.0_
 _January 2026_
-_© Calibr.ly_
+_© Calibr.xyz_

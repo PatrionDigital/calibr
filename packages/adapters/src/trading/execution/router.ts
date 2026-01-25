@@ -78,7 +78,7 @@ export class ExecutionRouter implements IExecutionRouter {
     const startTime = Date.now();
 
     // Log execution start
-    await this.logEvent(executionId, 'EXECUTION_STARTED', request.platform, request, request.userAddress);
+    await this.logEvent(executionId, 'EXECUTION_STARTED', request.platform, { ...request }, request.userAddress);
 
     try {
       // Validate request

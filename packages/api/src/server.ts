@@ -10,7 +10,7 @@ const port = parseInt(process.env.PORT || '3001');
 
 console.log(`
 ╔═══════════════════════════════════════════════════════╗
-║                   CALIBR.LY API                       ║
+║                   CALIBR.XYZ API                       ║
 ║         Prediction Market Portfolio Manager           ║
 ╠═══════════════════════════════════════════════════════╣
 ║  Port: ${port}                                          ║
@@ -43,3 +43,4 @@ console.log('[Server] Endpoints:');
 console.log(`  - Health:  http://localhost:${port}/health`);
 console.log(`  - Markets: http://localhost:${port}/api/markets`);
 console.log(`  - Sync:    http://localhost:${port}/api/sync/status`);
+console.log(`  - Trading: http://localhost:${port}/api/trading/platforms`);

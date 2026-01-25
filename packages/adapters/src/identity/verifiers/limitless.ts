@@ -117,7 +117,7 @@ export class LimitlessVerifier implements IPlatformVerifier {
 
       // Check for trade history
       const trades = await this.getUserTrades(walletAddress);
-      return trades && trades.length > 0;
+      return trades !== null && trades.length > 0;
     } catch {
       return false;
     }
@@ -153,8 +153,11 @@ export class LimitlessVerifier implements IPlatformVerifier {
         return null;
       }
 
-      const data = await response.json();
-      return data.positions || data || [];
+      const data = await response.json() as { positions?: LimitlessPosition[] } | LimitlessPosition[];
+      if (Array.isArray(data)) {
+        return data;
+      }
+      return data.positions || [];
     } catch {
       return null;
     }
@@ -180,8 +183,11 @@ export class LimitlessVerifier implements IPlatformVerifier {
         return null;
       }
 
-      const data = await response.json();
-      return data.trades || data || [];
+      const data = await response.json() as { trades?: unknown[] } | unknown[];
+      if (Array.isArray(data)) {
+        return data;
+      }
+      return data.trades || [];
     } catch {
       return null;
     }
@@ -207,7 +213,7 @@ export class LimitlessVerifier implements IPlatformVerifier {
         return null;
       }
 
-      return await response.json();
+      return await response.json() as LimitlessUserProfile;
     } catch {
       return null;
     }
