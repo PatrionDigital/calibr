@@ -14,6 +14,7 @@ import { tradingRoutes } from './routes/trading';
 import { portfolioRoutes } from './routes/portfolio';
 import { forecastRoutes } from './routes/forecasts';
 import { attestationRoutes } from './routes/attestations';
+import { leaderboardRoutes } from './routes/leaderboard';
 import { syncScheduler } from './services/sync-scheduler';
 import { prisma } from './lib/prisma';
 
@@ -57,6 +58,7 @@ app.get('/', (c) => {
       portfolio: '/api/portfolio',
       forecasts: '/api/forecasts',
       attestations: '/api/attestations',
+      leaderboard: '/api/leaderboard',
     },
   });
 });
@@ -91,6 +93,7 @@ app.route('/api/trading', tradingRoutes);
 app.route('/api/portfolio', portfolioRoutes);
 app.route('/api/forecasts', forecastRoutes);
 app.route('/api/attestations', attestationRoutes);
+app.route('/api/leaderboard', leaderboardRoutes);
 
 // =============================================================================
 // Error Handling
