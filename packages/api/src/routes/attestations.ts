@@ -6,6 +6,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma';
+import type { Prisma } from '@prisma/client';
 
 export const attestationRoutes = new Hono();
 
@@ -148,7 +149,7 @@ attestationRoutes.post('/offchain', async (c) => {
       txHash: null,
       attester: userId,
       recipient: data.recipient,
-      data: data.data,
+      data: data.data as Prisma.InputJsonValue,
       userId,
       isOffchain: true,
       isPrivate: false,
@@ -216,9 +217,12 @@ attestationRoutes.post('/merkle', async (c) => {
       recipient: data.recipient,
       data: {
         merkleRoot: data.merkleRoot,
-        leaves: data.leaves,
+        leaves: data.leaves.map(leaf => ({
+          ...leaf,
+          value: leaf.value as Prisma.InputJsonValue,
+        })),
         proofs: data.proofs,
-      },
+      } as Prisma.InputJsonValue,
       userId,
       isOffchain: false,
       isPrivate: true,

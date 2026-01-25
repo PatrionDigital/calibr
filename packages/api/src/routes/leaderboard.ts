@@ -22,7 +22,8 @@ export const leaderboardRoutes = new Hono();
 // Types
 // =============================================================================
 
-interface LeaderboardEntry {
+// Local interface for API responses (differs from core LeaderboardEntry)
+interface ApiLeaderboardEntry {
   rank: number;
   previousRank: number | null;
   userId: string;
@@ -98,7 +99,7 @@ leaderboardRoutes.get('/', async (c) => {
   ]);
 
   // Transform to leaderboard entries
-  const entries: LeaderboardEntry[] = calibrations.map((cal, index) => {
+  const entries: ApiLeaderboardEntry[] = calibrations.map((cal, index) => {
     const rank = cal.globalRank ?? (offset + index + 1);
     const isPrivate = !cal.user.publicProfile;
 
@@ -421,7 +422,7 @@ function calculateTierProgress(
     return Math.min(progressInTier, 1);
   }
 
-  const nextTier = TIER_ORDER[tierIndex + 1];
+  const nextTier = TIER_ORDER[tierIndex + 1] as SuperforecasterTier;
   const currentThreshold = TIER_THRESHOLDS[currentTier];
   const nextThreshold = TIER_THRESHOLDS[nextTier];
 
@@ -484,13 +485,13 @@ leaderboardRoutes.get('/achievements', (c) => {
   let achievements = ACHIEVEMENT_DEFINITIONS;
 
   if (category) {
-    achievements = getAchievementsByCategory(category.toUpperCase() as any) || [];
+    achievements = getAchievementsByCategory(category.toUpperCase() as 'STREAK' | 'VOLUME' | 'ACCURACY' | 'CALIBRATION' | 'SPECIAL') || [];
   }
 
   return c.json({
     success: true,
     data: {
-      achievements: achievements.map((def) => ({
+      achievements: achievements.map((def: { id: string; name: string; description: string; category: string; tier: string; maxProgress: number }) => ({
         id: def.id,
         name: def.name,
         description: def.description,
@@ -541,8 +542,8 @@ leaderboardRoutes.get('/achievements/user/:userId', async (c) => {
 
   // Get achievements
   const allAchievements = checkAchievements(entry);
-  const unlocked = allAchievements.filter((a) => a.unlockedAt !== null);
-  const inProgress = allAchievements.filter((a) => a.unlockedAt === null && a.progress > 0);
+  const unlocked = allAchievements.filter((a: { unlockedAt: Date | null }) => a.unlockedAt !== null);
+  const inProgress = allAchievements.filter((a: { unlockedAt: Date | null; progress: number }) => a.unlockedAt === null && a.progress > 0);
 
   return c.json({
     success: true,
@@ -583,7 +584,7 @@ leaderboardRoutes.get('/achievements/stats', async (c) => {
 
   // Calculate category counts
   const categoryStats = Object.entries(ACHIEVEMENT_CATEGORY_LABELS).map(([key, label]) => {
-    const categoryAchievements = getAchievementsByCategory(key as any);
+    const categoryAchievements = getAchievementsByCategory(key as 'STREAK' | 'VOLUME' | 'ACCURACY' | 'CALIBRATION' | 'SPECIAL');
     return {
       category: key,
       label,
