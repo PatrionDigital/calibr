@@ -46,3 +46,12 @@ export * from './identity';
 
 // Position aggregation
 export * from './positions';
+
+// Token swap (Aerodrome DEX)
+export * from './swap';
+
+// Cross-chain bridge (Circle CCTP)
+export * from './bridge';
+
+// Cross-chain execution (E2E flow)
+export * from './cross-chain';
