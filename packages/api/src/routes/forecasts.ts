@@ -536,10 +536,10 @@ forecastRoutes.get('/:id/attest', async (c) => {
         schema: 'CalibrForecast',
         schemaString: 'uint256 probability,string marketId,string platform,uint256 confidence,string reasoning,bool isPublic',
         fields: {
-          probability: Math.round(forecast.probability * 100), // 1-99
+          probability: Math.round(forecast.probability * 10000), // 0-10000 basis points
           marketId: forecast.unifiedMarketId,
           platform: 'calibr',
-          confidence: Math.round(forecast.confidence * 100), // 0-100
+          confidence: Math.round(forecast.confidence * 10000), // 0-10000 basis points
           reasoning: forecast.commitMessage || '',
           isPublic: forecast.isPublic,
         },
@@ -607,10 +607,10 @@ forecastRoutes.post('/:id/attest', async (c) => {
         attester: userId, // In production, this would be the wallet address
         recipient: userId,
         data: {
-          probability: Math.round(forecast.probability * 100),
+          probability: Math.round(forecast.probability * 10000), // basis points
           marketId: forecast.unifiedMarketId,
           platform: 'calibr',
-          confidence: Math.round(forecast.confidence * 100),
+          confidence: Math.round(forecast.confidence * 10000), // basis points
           reasoning: forecast.commitMessage || '',
           isPublic: forecast.isPublic,
         },

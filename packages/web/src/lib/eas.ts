@@ -66,10 +66,10 @@ export function getForecastSchemaUid(chainId: number): `0x${string}` | undefined
 // =============================================================================
 
 export interface ForecastAttestationData {
-  probability: number; // 1-99 (percentage)
+  probability: number; // 0-10000 basis points (0.00% to 100.00%, e.g., 7525 = 75.25%)
   marketId: string;
   platform: string;
-  confidence: number; // 0-100
+  confidence: number; // 0-10000 basis points
   reasoning: string;
   isPublic: boolean;
 }

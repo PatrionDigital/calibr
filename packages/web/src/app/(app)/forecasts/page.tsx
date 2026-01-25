@@ -350,13 +350,13 @@ function ForecastCard({ forecast, formatDate, onAttestationComplete }: ForecastC
       }
 
       // Create the on-chain attestation via EAS
-      // Probability: 1-99 representing 0.01-0.99 (as expected by resolver)
-      // Confidence: 0-100 (as expected by resolver)
+      // Probability: 0-10000 basis points (0.00% to 100.00%, e.g., 7525 = 75.25%)
+      // Confidence: 0-10000 basis points
       const result = await createForecastAttestation({
-        probability: Math.round(forecast.probability * 100), // Convert to 1-99 range
+        probability: Math.round(forecast.probability * 10000), // Convert to basis points
         marketId: forecast.unifiedMarket?.id || '',
         platform: 'CALIBR',
-        confidence: Math.round((forecast.confidence ?? 0.5) * 100), // Convert to 0-100 range
+        confidence: Math.round((forecast.confidence ?? 0.5) * 10000), // Convert to basis points
         reasoning: forecast.commitMessage || '',
         isPublic: forecast.isPublic,
       });

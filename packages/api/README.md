@@ -4,7 +4,7 @@ Backend API services for the Calibr.xyz prediction market portfolio manager.
 
 ## Base URL
 
-```
+```bash
 http://localhost:3001
 ```
 
@@ -37,6 +37,7 @@ Error responses:
 Check API and service health status.
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -59,15 +60,17 @@ Base path: `/api/markets`
 List markets with optional filtering.
 
 **Query Parameters:**
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `limit` | number | 50 | Max results (max 100) |
-| `offset` | number | 0 | Pagination offset |
-| `category` | string | - | Filter by category |
-| `search` | string | - | Search in question text |
-| `active` | boolean | true | Only active markets |
+
+| Parameter  | Type    | Default | Description             |
+| ---------- | ------- | ------- | ----------------------- |
+| `limit`    | number  | 50      | Max results (max 100)   |
+| `offset`   | number  | 0       | Pagination offset       |
+| `category` | string  | -       | Filter by category      |
+| `search`   | string  | -       | Search in question text |
+| `active`   | boolean | true    | Only active markets     |
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -88,6 +91,7 @@ List markets with optional filtering.
 Get a single market by ID with full details including platform markets and recent forecasts.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -108,12 +112,14 @@ Get a single market by ID with full details including platform markets and recen
 Get price history for a market.
 
 **Query Parameters:**
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `limit` | number | 100 | Max snapshots (max 1000) |
-| `platform` | string | - | Filter by platform slug |
+
+| Parameter  | Type   | Default | Description              |
+| ---------- | ------ | ------- | ------------------------ |
+| `limit`    | number | 100     | Max snapshots (max 1000) |
+| `platform` | string | -       | Filter by platform slug  |
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -137,11 +143,13 @@ Get price history for a market.
 Search markets by query.
 
 **Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `q` | string | Yes | Search query (min 2 chars) |
+
+| Parameter | Type   | Required | Description                |
+| --------- | ------ | -------- | -------------------------- |
+| `q`       | string | Yes      | Search query (min 2 chars) |
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -165,6 +173,7 @@ Search markets by query.
 List available platforms with market counts.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -190,6 +199,7 @@ List available platforms with market counts.
 List market categories with counts.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -213,6 +223,7 @@ Base path: `/api/sync`
 Get current sync scheduler status.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -237,6 +248,7 @@ Get current sync scheduler status.
 Start the sync scheduler.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -250,6 +262,7 @@ Start the sync scheduler.
 Stop the sync scheduler.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -263,6 +276,7 @@ Stop the sync scheduler.
 Trigger manual market sync (fire and forget).
 
 **Response (202):**
+
 ```json
 {
   "success": true,
@@ -279,6 +293,7 @@ Trigger manual market sync (fire and forget).
 Trigger manual market sync and wait for completion.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -295,6 +310,7 @@ Trigger manual market sync and wait for completion.
 Trigger manual price sync.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -310,6 +326,7 @@ Trigger manual price sync.
 Get sync statistics.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -327,6 +344,7 @@ Get sync statistics.
 Health check for sync services.
 
 **Response (200/503):**
+
 ```json
 {
   "success": true,
@@ -345,6 +363,7 @@ Health check for sync services.
 Get recent sync errors.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -366,6 +385,7 @@ Get recent sync errors.
 Update scheduler configuration.
 
 **Request Body:**
+
 ```json
 {
   "marketSyncInterval": 300000,
@@ -375,6 +395,7 @@ Update scheduler configuration.
 ```
 
 **Constraints:**
+
 - `marketSyncInterval`: minimum 10000ms (10s)
 - `priceSyncInterval`: minimum 5000ms (5s)
 
@@ -389,21 +410,23 @@ Base path: `/api/portfolio`
 Get portfolio summary for a user or wallet.
 
 **Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `wallet` | string | * | Wallet address |
-| `userId` | string | * | User ID |
 
-*One of `wallet` or `userId` is required.
+| Parameter | Type   | Required | Description    |
+| --------- | ------ | -------- | -------------- |
+| `wallet`  | string | \_       | Wallet address |
+| `userId`  | string | \_       | User ID        |
+
+\*One of `wallet` or `userId` is required.
 
 **Response:**
+
 ```json
 {
   "success": true,
   "data": {
-    "totalValue": 1500.50,
-    "totalCost": 1200.00,
-    "unrealizedPnl": 300.50,
+    "totalValue": 1500.5,
+    "totalCost": 1200.0,
+    "unrealizedPnl": 300.5,
     "unrealizedPnlPct": 25.04,
     "positionCount": 5,
     "positions": [
@@ -416,11 +439,11 @@ Get portfolio summary for a user or wallet.
         "marketSlug": "will-x-happen",
         "outcome": "YES",
         "shares": 100,
-        "avgCostBasis": 0.50,
+        "avgCostBasis": 0.5,
         "currentPrice": 0.65,
-        "currentValue": 65.00,
-        "unrealizedPnl": 15.00,
-        "unrealizedPnlPct": 30.00,
+        "currentValue": 65.0,
+        "unrealizedPnl": 15.0,
+        "unrealizedPnlPct": 30.0,
         "isResolved": false,
         "resolution": null,
         "updatedAt": "2025-01-22T12:00:00.000Z"
@@ -433,7 +456,7 @@ Get portfolio summary for a user or wallet.
     "byOutcome": {
       "YES": 1000,
       "NO": 400,
-      "OTHER": 100.50
+      "OTHER": 100.5
     }
   }
 }
@@ -444,14 +467,16 @@ Get portfolio summary for a user or wallet.
 List all positions with optional filtering.
 
 **Query Parameters:**
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `wallet` | string | - | Wallet address |
-| `userId` | string | - | User ID |
-| `platform` | string | - | Filter by platform |
-| `active` | boolean | true | Only active markets |
+
+| Parameter  | Type    | Default | Description         |
+| ---------- | ------- | ------- | ------------------- |
+| `wallet`   | string  | -       | Wallet address      |
+| `userId`   | string  | -       | User ID             |
+| `platform` | string  | -       | Filter by platform  |
+| `active`   | boolean | true    | Only active markets |
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -466,6 +491,7 @@ List all positions with optional filtering.
 Add or update a position (manual entry).
 
 **Request Body:**
+
 ```json
 {
   "userId": "...",
@@ -474,11 +500,12 @@ Add or update a position (manual entry).
   "marketExternalId": "abc123",
   "outcome": "YES",
   "shares": 100,
-  "avgCostBasis": 0.50
+  "avgCostBasis": 0.5
 }
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -493,6 +520,7 @@ Add or update a position (manual entry).
 Delete a position.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -505,15 +533,17 @@ Delete a position.
 Get resolution alerts for recently resolved markets in user's portfolio.
 
 **Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `wallet` | string | * | Wallet address |
-| `userId` | string | * | User ID |
-| `days` | number | No | Days to look back (default: 7) |
 
-*One of `wallet` or `userId` is required.
+| Parameter | Type   | Required | Description                    |
+| --------- | ------ | -------- | ------------------------------ |
+| `wallet`  | string | \_       | Wallet address                 |
+| `userId`  | string | \_       | User ID                        |
+| `days`    | number | No       | Days to look back (default: 7) |
+
+\*One of `wallet` or `userId` is required.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -530,17 +560,17 @@ Get resolution alerts for recently resolved markets in user's portfolio.
         "resolution": "YES",
         "isWinner": true,
         "shares": 100,
-        "avgCostBasis": 0.50,
+        "avgCostBasis": 0.5,
         "payout": 100,
-        "realizedPnl": 50.00,
-        "realizedPnlPct": 100.00,
+        "realizedPnl": 50.0,
+        "realizedPnlPct": 100.0,
         "resolvedAt": "2025-01-22T12:00:00.000Z"
       }
     ],
     "count": 1,
     "wins": 1,
     "losses": 0,
-    "totalRealizedPnl": 50.00
+    "totalRealizedPnl": 50.0
   }
 }
 ```
@@ -550,6 +580,7 @@ Get resolution alerts for recently resolved markets in user's portfolio.
 Connect a wallet address to track positions.
 
 **Request Body:**
+
 ```json
 {
   "address": "0x...",
@@ -558,6 +589,7 @@ Connect a wallet address to track positions.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -577,11 +609,13 @@ Connect a wallet address to track positions.
 Get connected wallets for a user.
 
 **Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `userId` | string | Yes | User ID |
+
+| Parameter | Type   | Required | Description |
+| --------- | ------ | -------- | ----------- |
+| `userId`  | string | Yes      | User ID     |
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -611,7 +645,8 @@ Base path: `/api/trading`
 Most trading endpoints require authentication via session token.
 
 **Header:**
-```
+
+```text
 Authorization: Bearer <sessionId>
 ```
 
@@ -620,6 +655,7 @@ Authorization: Bearer <sessionId>
 Authenticate with a trading platform.
 
 **Request Body:**
+
 ```json
 {
   "platform": "POLYMARKET",
@@ -632,6 +668,7 @@ Authenticate with a trading platform.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -652,6 +689,7 @@ End trading session.
 **Headers:** Authorization required
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -666,6 +704,7 @@ Get current trading session status.
 **Headers:** Authorization optional
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -686,6 +725,7 @@ Get account balances.
 **Headers:** Authorization required
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -693,8 +733,8 @@ Get account balances.
     "balances": [
       {
         "asset": "USDC",
-        "available": 1000.00,
-        "locked": 50.00
+        "available": 1000.0,
+        "locked": 50.0
       }
     ]
   }
@@ -708,6 +748,7 @@ Get all positions.
 **Headers:** Authorization required
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -724,11 +765,13 @@ Get position for a specific market.
 **Headers:** Authorization required
 
 **Query Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
+
+| Parameter | Type          | Description      |
+| --------- | ------------- | ---------------- |
 | `outcome` | `YES` \| `NO` | Specific outcome |
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -745,6 +788,7 @@ Place a new order.
 **Headers:** Authorization required
 
 **Request Body:**
+
 ```json
 {
   "marketId": "...",
@@ -752,11 +796,12 @@ Place a new order.
   "side": "BUY",
   "type": "LIMIT",
   "size": 100,
-  "price": 0.50
+  "price": 0.5
 }
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -778,11 +823,13 @@ Get open orders.
 **Headers:** Authorization required
 
 **Query Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
+
+| Parameter  | Type   | Description      |
+| ---------- | ------ | ---------------- |
 | `marketId` | string | Filter by market |
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -799,6 +846,7 @@ Get a specific order.
 **Headers:** Authorization required
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -815,6 +863,7 @@ Cancel an order.
 **Headers:** Authorization required
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -829,11 +878,13 @@ Cancel all orders (optionally for a specific market).
 **Headers:** Authorization required
 
 **Query Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
+
+| Parameter  | Type   | Description                 |
+| ---------- | ------ | --------------------------- |
 | `marketId` | string | Cancel only for this market |
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -851,13 +902,15 @@ Get trade history.
 **Headers:** Authorization required
 
 **Query Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `marketId` | string | Filter by market |
-| `limit` | number | Max results |
-| `offset` | number | Pagination offset |
+
+| Parameter  | Type   | Description       |
+| ---------- | ------ | ----------------- |
+| `marketId` | string | Filter by market  |
+| `limit`    | number | Max results       |
+| `offset`   | number | Pagination offset |
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -874,12 +927,14 @@ Get best price for trading.
 **Headers:** Authorization required
 
 **Query Parameters:**
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `outcome` | `YES` \| `NO` | `YES` | Outcome to price |
-| `side` | `BUY` \| `SELL` | `BUY` | Order side |
+
+| Parameter | Type            | Default | Description      |
+| --------- | --------------- | ------- | ---------------- |
+| `outcome` | `YES` \| `NO`   | `YES`   | Outcome to price |
+| `side`    | `BUY` \| `SELL` | `BUY`   | Order side       |
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -897,6 +952,7 @@ Get best price for trading.
 List available trading platforms.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -930,6 +986,7 @@ List available trading platforms.
 Scan a wallet address for positions (no auth required).
 
 **Request Body:**
+
 ```json
 {
   "address": "0x...",
@@ -939,6 +996,7 @@ Scan a wallet address for positions (no auth required).
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -954,11 +1012,11 @@ Scan a wallet address for positions (no auth required).
         "outcomeLabel": "Yes",
         "balance": 100,
         "currentPrice": 0.65,
-        "estimatedValue": 65.00,
+        "estimatedValue": 65.0,
         "chainId": 8453
       }
     ],
-    "totalValue": 1500.00,
+    "totalValue": 1500.0,
     "scanTimestamp": "2025-01-22T12:00:00.000Z"
   }
 }
@@ -969,12 +1027,14 @@ Scan a wallet address for positions (no auth required).
 Quick scan for a wallet address.
 
 **Query Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `platforms` | string | Comma-separated: `LIMITLESS,POLYMARKET` |
-| `includeResolved` | boolean | Include resolved markets |
+
+| Parameter         | Type    | Description                             |
+| ----------------- | ------- | --------------------------------------- |
+| `platforms`       | string  | Comma-separated: `LIMITLESS,POLYMARKET` |
+| `includeResolved` | boolean | Include resolved markets                |
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -996,15 +1056,15 @@ Quick scan for a wallet address.
 
 ## Error Codes
 
-| Status | Description |
-|--------|-------------|
-| 200 | Success |
-| 400 | Bad Request - Invalid parameters |
-| 401 | Unauthorized - Authentication required |
-| 404 | Not Found - Resource doesn't exist |
-| 409 | Conflict - Operation already in progress |
-| 500 | Internal Server Error |
-| 503 | Service Unavailable - Health check failed |
+| Status | Description                               |
+| ------ | ----------------------------------------- |
+| 200    | Success                                   |
+| 400    | Bad Request - Invalid parameters          |
+| 401    | Unauthorized - Authentication required    |
+| 404    | Not Found - Resource doesn't exist        |
+| 409    | Conflict - Operation already in progress  |
+| 500    | Internal Server Error                     |
+| 503    | Service Unavailable - Health check failed |
 
 ---
 

@@ -157,10 +157,10 @@ export interface AttestationData {
 // =============================================================================
 
 export interface ForecastAttestationData {
-  probability: number; // 1-99 (scaled from 0.01-0.99)
+  probability: number; // 0-10000 basis points (0.00% to 100.00%, e.g., 7525 = 75.25%)
   marketId: string;
   platform: string;
-  confidence: number; // 0-100 (scaled from 0-1)
+  confidence: number; // 0-10000 basis points (0.00% to 100.00%)
   reasoning: string;
   isPublic: boolean;
 }

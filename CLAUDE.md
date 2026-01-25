@@ -48,6 +48,7 @@ Reference these files in /docs/spec/ for detailed specifications:
 - Keep components small and focused
 - Use IBM Plex Mono for all UI text
 - **No mock implementations** - Always write production-ready code. Never use placeholder data, fake UIDs, or simulated functionality. All features must work end-to-end.
+- Keep source files under 500 lines of code.
 
 ## Commands
 
@@ -56,12 +57,3 @@ Reference these files in /docs/spec/ for detailed specifications:
 - `pnpm test` - Run tests
 - `forge test` - Run Foundry tests
 - `forge build` - Build contracts
-
-## Specifications
-
-When implementing features, consult these documents:
-
-- Requirements: `docs/specs/CALIBR_Project_Requirements_v5.md`
-- Schema: `docs/specs/CALIBR_Data_Schema_v5.md`
-- Frontend: `docs/specs/CALIBR_Frontend_Guidelines_v5.md`
-- Tasks: `docs/specs/CALIBR_Project_Tasks_v5.md`

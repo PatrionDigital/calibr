@@ -127,12 +127,12 @@ export function ForecastForm({
         <div className="flex items-center gap-2">
           <input
             type="number"
-            min="1"
-            max="99"
-            step="1"
+            min="0.01"
+            max="99.99"
+            step="0.01"
             value={probability}
             onChange={(e) => setProbability(e.target.value)}
-            placeholder="Enter 1-99"
+            placeholder="Enter 0.01-99.99"
             className="flex-1 bg-transparent border border-[hsl(var(--border))] px-3 py-2 text-lg font-mono focus:border-[hsl(var(--primary))] focus:outline-none"
             required
           />
