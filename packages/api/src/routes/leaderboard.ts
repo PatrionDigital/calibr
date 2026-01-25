@@ -1,11 +1,23 @@
 /**
  * Leaderboard API Routes
- * Endpoints for superforecaster rankings and tier system
+ * Endpoints for superforecaster rankings, tier system, and achievements
  */
 
 import { Hono } from 'hono';
 import { prisma } from '../lib/prisma';
 import type { SuperforecasterTier } from '@prisma/client';
+import {
+  type LeaderboardEntry,
+  type Achievement,
+  ACHIEVEMENT_DEFINITIONS,
+  getAchievementsByCategory,
+  checkAchievements,
+  getUnlockedAchievements,
+  getInProgressAchievements,
+  calculateAchievementScore,
+  ACHIEVEMENT_TIER_COLORS,
+  ACHIEVEMENT_CATEGORY_LABELS,
+} from '@calibr/core/leaderboard';
 
 export const leaderboardRoutes = new Hono();
 
@@ -419,3 +431,175 @@ function calculateTierProgress(
   const progress = (compositeScore - currentThreshold) / (nextThreshold - currentThreshold);
   return Math.max(0, Math.min(progress, 1));
 }
+
+/**
+ * Convert database calibration to LeaderboardEntry for achievement checking
+ */
+function toLeaderboardEntry(calibration: {
+  userId: string;
+  avgBrierScore: number | null;
+  avgTimeWeightedBrier: number | null;
+  totalForecasts: number;
+  resolvedForecasts: number;
+  currentTier: SuperforecasterTier;
+  globalRank: number | null;
+  user: {
+    displayName: string | null;
+    publicProfile: boolean;
+  };
+}): LeaderboardEntry {
+  const compositeScore = calculateCompositeScore(calibration);
+  return {
+    address: '0x0000000000000000000000000000000000000000' as `0x${string}`,
+    ensName: null,
+    displayName: calibration.user.displayName || 'Forecaster',
+    brierScore: calibration.avgBrierScore ?? 0.5,
+    calibrationScore: 1 - (calibration.avgTimeWeightedBrier ?? 0.5),
+    totalForecasts: calibration.totalForecasts,
+    resolvedForecasts: calibration.resolvedForecasts,
+    accuracy: 0,
+    streakDays: 0, // TODO: Calculate from forecast history
+    joinedAt: new Date(),
+    lastForecastAt: new Date(),
+    tier: calibration.currentTier,
+    tierProgress: 0,
+    compositeScore,
+    rank: calibration.globalRank ?? 999,
+    previousRank: null,
+    isPrivate: !calibration.user.publicProfile,
+    externalReputations: [],
+    achievements: [],
+  };
+}
+
+// =============================================================================
+// Achievement Endpoints
+// =============================================================================
+
+/**
+ * GET /leaderboard/achievements
+ * Get all available achievement definitions
+ */
+leaderboardRoutes.get('/achievements', (c) => {
+  const query = c.req.query();
+  const category = query.category;
+
+  let achievements = ACHIEVEMENT_DEFINITIONS;
+
+  if (category) {
+    achievements = getAchievementsByCategory(category.toUpperCase() as any) || [];
+  }
+
+  return c.json({
+    success: true,
+    data: {
+      achievements: achievements.map((def) => ({
+        id: def.id,
+        name: def.name,
+        description: def.description,
+        category: def.category,
+        tier: def.tier,
+        maxProgress: def.maxProgress,
+      })),
+      categories: Object.entries(ACHIEVEMENT_CATEGORY_LABELS).map(([key, label]) => ({
+        key,
+        label,
+      })),
+      tierColors: ACHIEVEMENT_TIER_COLORS,
+    },
+  });
+});
+
+/**
+ * GET /leaderboard/achievements/user/:userId
+ * Get achievements for a specific user
+ */
+leaderboardRoutes.get('/achievements/user/:userId', async (c) => {
+  const userId = c.req.param('userId');
+
+  const calibration = await prisma.userCalibration.findUnique({
+    where: { userId },
+    include: {
+      user: {
+        select: {
+          displayName: true,
+          publicProfile: true,
+        },
+      },
+    },
+  });
+
+  if (!calibration) {
+    return c.json(
+      {
+        success: false,
+        error: 'User not found or has no calibration data',
+      },
+      404
+    );
+  }
+
+  // Convert to LeaderboardEntry for achievement checking
+  const entry = toLeaderboardEntry(calibration);
+
+  // Get achievements
+  const allAchievements = checkAchievements(entry);
+  const unlocked = allAchievements.filter((a) => a.unlockedAt !== null);
+  const inProgress = allAchievements.filter((a) => a.unlockedAt === null && a.progress > 0);
+
+  return c.json({
+    success: true,
+    data: {
+      userId,
+      displayName: entry.displayName,
+      achievementScore: calculateAchievementScore(unlocked),
+      unlockedCount: unlocked.length,
+      totalCount: ACHIEVEMENT_DEFINITIONS.length,
+      unlocked,
+      inProgress,
+    },
+  });
+});
+
+/**
+ * GET /leaderboard/achievements/recent
+ * Get recently unlocked achievements across all users
+ */
+leaderboardRoutes.get('/achievements/recent', async (c) => {
+  // This would require tracking achievement unlock times in the database
+  // For now, return a placeholder response
+  return c.json({
+    success: true,
+    data: {
+      recentUnlocks: [],
+      note: 'Achievement history tracking coming soon',
+    },
+  });
+});
+
+/**
+ * GET /leaderboard/achievements/stats
+ * Get achievement statistics
+ */
+leaderboardRoutes.get('/achievements/stats', async (c) => {
+  const totalUsers = await prisma.userCalibration.count();
+
+  // Calculate category counts
+  const categoryStats = Object.entries(ACHIEVEMENT_CATEGORY_LABELS).map(([key, label]) => {
+    const categoryAchievements = getAchievementsByCategory(key as any);
+    return {
+      category: key,
+      label,
+      achievementCount: categoryAchievements.length,
+    };
+  });
+
+  return c.json({
+    success: true,
+    data: {
+      totalAchievements: ACHIEVEMENT_DEFINITIONS.length,
+      categoryStats,
+      totalUsers,
+    },
+  });
+});

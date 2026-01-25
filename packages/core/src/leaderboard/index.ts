@@ -52,3 +52,21 @@ export {
   getTopForecasters,
   findForecasterPosition,
 } from './ranking';
+
+// Achievements
+export {
+  type AchievementDefinition,
+  ACHIEVEMENT_DEFINITIONS,
+  getAchievementDefinition,
+  getAllAchievementDefinitions,
+  getAchievementsByCategory,
+  checkAchievements,
+  checkNewlyUnlocked,
+  getUnlockedAchievements,
+  getInProgressAchievements,
+  calculateAchievementScore,
+  ACHIEVEMENT_TIER_COLORS,
+  ACHIEVEMENT_CATEGORY_LABELS,
+  getTierDisplayName,
+  formatAchievementProgress,
+} from './achievements';
