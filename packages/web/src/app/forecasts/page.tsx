@@ -354,7 +354,7 @@ function ForecastCard({ forecast, formatDate, onAttestationComplete }: ForecastC
       // Confidence: 0-100 (as expected by resolver)
       const result = await createForecastAttestation({
         probability: Math.round(forecast.probability * 100), // Convert to 1-99 range
-        marketId: forecast.unifiedMarket?.id || forecast.unifiedMarketId,
+        marketId: forecast.unifiedMarket?.id || '',
         platform: 'CALIBR',
         confidence: Math.round((forecast.confidence ?? 0.5) * 100), // Convert to 0-100 range
         reasoning: forecast.commitMessage || '',

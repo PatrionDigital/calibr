@@ -46,7 +46,7 @@ const STATUS_MAP: Record<string, OrderStatus> = {
   REJECTED: 'REJECTED',
 };
 
-export interface OrderBuilderConfig {
+export interface PolymarketOrderBuilderConfig {
   rpcUrl?: string;
   clobUrl?: string;
 }
@@ -56,11 +56,11 @@ export interface OrderBuilderConfig {
  * Constructs valid order structures for the CLOB
  */
 export class PolymarketOrderBuilder {
-  private config: OrderBuilderConfig;
+  private config: PolymarketOrderBuilderConfig;
   private authService: PolymarketAuthService;
   private clobClient: ClobClient | null = null;
 
-  constructor(config: OrderBuilderConfig = {}) {
+  constructor(config: PolymarketOrderBuilderConfig = {}) {
     this.config = {
       rpcUrl: config.rpcUrl || POLYGON_MAINNET_CONFIG.rpcUrl,
       clobUrl: config.clobUrl || POLYGON_MAINNET_CONFIG.clobUrl,

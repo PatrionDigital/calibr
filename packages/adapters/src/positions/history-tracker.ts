@@ -348,8 +348,8 @@ export class PositionHistoryTracker {
 
     const dateRange = this.portfolioSnapshots.length > 0
       ? {
-          start: this.portfolioSnapshots[0].timestamp,
-          end: this.portfolioSnapshots[this.portfolioSnapshots.length - 1].timestamp,
+          start: this.portfolioSnapshots[0]!.timestamp,
+          end: this.portfolioSnapshots[this.portfolioSnapshots.length - 1]!.timestamp,
         }
       : null;
 
@@ -396,7 +396,7 @@ export class PositionHistoryTracker {
 
     // Rebuild last position state from latest snapshot
     if (this.portfolioSnapshots.length > 0) {
-      const latest = this.portfolioSnapshots[this.portfolioSnapshots.length - 1];
+      const latest = this.portfolioSnapshots[this.portfolioSnapshots.length - 1]!;
       for (const posSnapshot of latest.positions) {
         this.lastPositionState.set(posSnapshot.position.id, { ...posSnapshot.position });
       }

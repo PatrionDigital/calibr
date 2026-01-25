@@ -175,7 +175,7 @@ export class PolymarketVerifier implements IPlatformVerifier {
         return null;
       }
 
-      const data = await response.json();
+      const data = await response.json() as PolymarketPosition[] | undefined;
       return data || [];
     } catch {
       return null;
@@ -202,7 +202,7 @@ export class PolymarketVerifier implements IPlatformVerifier {
         return null;
       }
 
-      return await response.json();
+      return await response.json() as PolymarketProfile;
     } catch {
       return null;
     }

@@ -5,11 +5,6 @@ import Link from 'next/link';
 import { api, type PortfolioSummary, type PortfolioPosition, type Forecast } from '@/lib/api';
 import { PortfolioKelly } from '@/components/portfolio-kelly';
 
-interface AnalyticsData {
-  portfolio: PortfolioSummary;
-  metrics: PerformanceMetrics;
-}
-
 interface PerformanceMetrics {
   winRate: number;
   avgWin: number;
@@ -80,7 +75,7 @@ export default function PortfolioAnalyticsPage() {
 
     // Calculate max drawdown (simplified - based on current positions)
     const sortedByPnlPct = [...positions].sort((a, b) => a.unrealizedPnlPct - b.unrealizedPnlPct);
-    const maxDrawdown = sortedByPnlPct.length > 0 ? Math.min(0, sortedByPnlPct[0].unrealizedPnlPct) : 0;
+    const maxDrawdown = sortedByPnlPct.length > 0 ? Math.min(0, sortedByPnlPct[0]!.unrealizedPnlPct) : 0;
 
     // Simplified Sharpe ratio (excess return / volatility)
     const avgReturn = positions.reduce((sum, p) => sum + p.unrealizedPnlPct, 0) / positions.length;
@@ -214,7 +209,7 @@ export default function PortfolioAnalyticsPage() {
                     data={platformEntries.map(([platform, data], i) => ({
                       label: platform,
                       value: data.value,
-                      color: PLATFORM_COLORS[i % PLATFORM_COLORS.length],
+                      color: PLATFORM_COLORS[i % PLATFORM_COLORS.length] || '#00ff00',
                     }))}
                     size={180}
                   />

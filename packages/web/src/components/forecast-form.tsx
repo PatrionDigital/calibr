@@ -70,7 +70,7 @@ export function ForecastForm({
   );
   const [confidence, setConfidence] = useState<string>('50');
   const [commitMessage, setCommitMessage] = useState<string>('');
-  const [isPublic, setIsPublic] = useState<boolean>(privacyStore.defaultForecastPrivacy === 'FULL_PUBLIC');
+  const [isPublic, setIsPublic] = useState<boolean>(privacyStore.defaultForecastPrivacy === 'PUBLIC');
   const [kellyFraction, setKellyFraction] = useState<number>(kellyStore.multiplier);
   const [executeRebalance, setExecuteRebalance] = useState<boolean>(false);
   const [attestationMode, setAttestationMode] = useState<AttestationMode>(privacyStore.defaultAttestationMode);
