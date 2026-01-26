@@ -309,7 +309,8 @@ contract CaliberEASResolver is SchemaResolver, AccessControl, Pausable, Reentran
 
     /**
      * @notice Process a forecast attestation
-     * @dev Schema: uint256 probability, string marketId, string platform, uint256 confidence, string reasoning, bool isPublic
+     * @dev Schema: uint256 probability, string marketId, string platform,
+     *      uint256 confidence, string reasoning, bool isPublic
      */
     function _processForecastAttestation(
         Attestation calldata attestation
@@ -353,7 +354,8 @@ contract CaliberEASResolver is SchemaResolver, AccessControl, Pausable, Reentran
 
     /**
      * @notice Process a calibration score attestation
-     * @dev Schema: uint256 brierScore, uint256 totalForecasts, uint256 timeWeightedScore, uint256 period, string category
+     * @dev Schema: uint256 brierScore, uint256 totalForecasts,
+     *      uint256 timeWeightedScore, uint256 period, string category
      */
     function _processCalibrationAttestation(
         Attestation calldata attestation

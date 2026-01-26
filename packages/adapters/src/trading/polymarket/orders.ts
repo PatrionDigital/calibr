@@ -86,12 +86,15 @@ export class PolymarketOrderBuilder {
       };
     }
 
-    // Initialize CLOB client - signer type compatibility handled via 'as any'
+    // Initialize CLOB client - signer type compatibility handled via type cast
+    // viem WalletClient is not directly compatible with ethers Signer expected by ClobClient
     this.clobClient = new ClobClient(
       this.config.clobUrl!,
       POLYGON_MAINNET_CONFIG.chainId,
-      signer as any, // Type workaround for signer compatibility
-      credentials as any // Credentials format handled internally
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      signer as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      credentials as any
     );
   }
 
@@ -202,7 +205,7 @@ export class PolymarketOrderBuilder {
 
     try {
       // Create order using CLOB client
-      // Using 'as any' to work around CLOB client type strictness
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const order = await (this.clobClient as any).createOrder({
         tokenID: orderParams.tokenId,
         side: orderParams.side as 'BUY' | 'SELL',

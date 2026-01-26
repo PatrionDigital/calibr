@@ -10,6 +10,7 @@ import {
   keccak256,
   toBytes,
   type Account,
+  type Log,
 } from 'viem';
 import { base, polygon, mainnet } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -495,7 +496,7 @@ export class CCTPBridgeService implements IBridgeService {
     }
   }
 
-  private extractMessageFromLogs(logs: readonly any[]): { message: string; messageHash: string } {
+  private extractMessageFromLogs(logs: readonly Log[]): { message: string; messageHash: string } {
     // Find MessageSent event
     const messageSentLog = logs.find(
       (log) =>

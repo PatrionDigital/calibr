@@ -158,7 +158,8 @@ export class PolymarketTradingAdapter extends BaseTradingAdapter {
       this.config.clobUrl!,
       this.config.chainId!,
       undefined, // Signer handled separately
-      clobCreds as any // Type cast for credential format compatibility
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      clobCreds as any
     );
 
     // Initialize order builder as well
@@ -304,7 +305,7 @@ export class PolymarketTradingAdapter extends BaseTradingAdapter {
 
     try {
       // Get balances which include position information
-      // Using 'as any' to work around CLOB client type limitations
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const balances = await (this.clobClient as any).getBalanceAllowance({
         asset_type: 'CONDITIONAL',
       });
@@ -394,7 +395,7 @@ export class PolymarketTradingAdapter extends BaseTradingAdapter {
     }
 
     try {
-      // Using 'as any' to work around CLOB client type limitations
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const client = this.clobClient as any;
       const [usdcBalance, collateralBalance] = await Promise.all([
         client.getBalanceAllowance({ asset_type: 'USDC' }),

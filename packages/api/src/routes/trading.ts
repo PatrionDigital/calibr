@@ -97,7 +97,8 @@ tradingRoutes.post('/auth', async (c) => {
       };
     }
 
-    // Authenticate
+    // Authenticate - type cast needed for dynamic credential building
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const authState = await adapter.authenticate(authCredentials as any);
 
     if (!authState.isAuthenticated) {
