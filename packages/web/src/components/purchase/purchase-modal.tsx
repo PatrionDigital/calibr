@@ -5,6 +5,7 @@ import { useAccount, useChainId, useBalance, useSwitchChain } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { type Hex } from 'viem';
 import { StepProgress, createPurchaseSteps, type ChainType } from './step-progress';
+import { FeeBreakdown, calculateFees } from './fee-breakdown';
 import { useBridgeStore } from '@/lib/stores/bridge-store';
 
 // =============================================================================
@@ -40,13 +41,7 @@ export interface PurchaseModalProps {
   onSuccess?: (txHash: string) => void;
 }
 
-interface FeeBreakdown {
-  swapFee: number;
-  bridgeFee: number;
-  tradingFee: number;
-  totalFees: number;
-  netAmount: number;
-}
+// FeeBreakdown type imported from ./fee-breakdown
 
 interface CompletedStep {
   txHash?: string;
@@ -65,11 +60,6 @@ void _BASE_USDC; // Reserved for swap implementation
 // Mock price for CALIBR token (in USD)
 const CALIBR_PRICE_USD = 0.10;
 
-// Fee estimates
-const SWAP_FEE_PERCENT = 0.003; // 0.3%
-const BRIDGE_FEE_USD = 0.10;
-const TRADING_FEE_PERCENT = 0.001; // 0.1%
-
 const MIN_AMOUNT = 1;
 
 // =============================================================================
@@ -84,23 +74,7 @@ function formatUsd(value: number): string {
   return `$${value.toFixed(2)}`;
 }
 
-function calculateFees(calibrAmount: number, _outcomePrice: number): FeeBreakdown {
-  const usdValue = calibrAmount * CALIBR_PRICE_USD;
-  const swapFee = usdValue * SWAP_FEE_PERCENT;
-  const bridgeFee = BRIDGE_FEE_USD;
-  const afterSwapAndBridge = usdValue - swapFee - bridgeFee;
-  const tradingFee = afterSwapAndBridge * TRADING_FEE_PERCENT;
-  const totalFees = swapFee + bridgeFee + tradingFee;
-  const netAmount = usdValue - totalFees;
-
-  return {
-    swapFee,
-    bridgeFee,
-    tradingFee,
-    totalFees,
-    netAmount,
-  };
-}
+// calculateFees imported from ./fee-breakdown
 
 function calculateShares(netAmount: number, outcomePrice: number): number {
   if (outcomePrice === 0) return 0;
@@ -154,7 +128,7 @@ export function PurchaseModal({
   const amountNum = parseFloat(amount) || 0;
   const usdEquivalent = amountNum * CALIBR_PRICE_USD;
   const outcomePrice = market.outcomes[selectedOutcome]?.price ?? 0.5;
-  const fees = useMemo(() => calculateFees(amountNum, outcomePrice), [amountNum, outcomePrice]);
+  const fees = useMemo(() => calculateFees(amountNum, usdEquivalent), [amountNum, usdEquivalent]);
   const expectedShares = calculateShares(fees.netAmount, outcomePrice);
 
   // Validation
@@ -429,33 +403,11 @@ export function PurchaseModal({
 
             {/* Fee Breakdown */}
             {amountNum > 0 && (
-              <div className="border border-[hsl(var(--border))] p-3 space-y-2">
-                <div className="text-xs font-bold text-[hsl(var(--muted-foreground))]">
-                  FEE BREAKDOWN
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-[hsl(var(--muted-foreground))]">Swap fee (0.3%):</span>
-                  <span>{formatUsd(fees.swapFee)}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-[hsl(var(--muted-foreground))]">Bridge fee:</span>
-                  <span>{formatUsd(fees.bridgeFee)}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-[hsl(var(--muted-foreground))]">Trading fee (0.1%):</span>
-                  <span>{formatUsd(fees.tradingFee)}</span>
-                </div>
-                <div className="flex justify-between text-xs pt-2 border-t border-[hsl(var(--border))]">
-                  <span className="text-[hsl(var(--muted-foreground))]">Total fees:</span>
-                  <span className="text-[hsl(var(--warning))]">{formatUsd(fees.totalFees)}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-[hsl(var(--muted-foreground))]">You receive:</span>
-                  <span className="font-bold text-[hsl(var(--primary))]">
-                    ~{expectedShares.toFixed(2)} shares
-                  </span>
-                </div>
-              </div>
+              <FeeBreakdown
+                calibrAmount={amountNum}
+                usdcEstimate={usdEquivalent}
+                outcomePrice={outcomePrice}
+              />
             )}
 
             {/* Step Progress Preview */}

@@ -207,7 +207,7 @@ describe('PurchaseModal', () => {
       const input = screen.getByTestId('amount-input');
       fireEvent.change(input, { target: { value: '100' } });
 
-      expect(screen.getByText(/you.*receive/i)).toBeInTheDocument();
+      expect(screen.getByText(/expected shares/i)).toBeInTheDocument();
     });
   });
 

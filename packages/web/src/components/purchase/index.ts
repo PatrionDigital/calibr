@@ -3,3 +3,6 @@ export type { PurchaseStep, StepStatus, ChainType, StepProgressProps } from './s
 
 export { PurchaseModal } from './purchase-modal';
 export type { PurchaseModalProps, MarketInfo, MarketOutcome, PurchaseState } from './purchase-modal';
+
+export { FeeBreakdown, calculateFees } from './fee-breakdown';
+export type { FeeBreakdownProps, Fees } from './fee-breakdown';
