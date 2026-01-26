@@ -3,7 +3,17 @@
  * High-level service for creating, querying, and managing attestations
  */
 
-import { EAS, SchemaRegistry } from '@ethereum-attestation-service/eas-sdk';
+// ESM build of eas-sdk has broken exports (index.js is empty)
+// Import types separately, then use require for runtime values
+import type { EAS as EASType, SchemaRegistry as SchemaRegistryType } from '@ethereum-attestation-service/eas-sdk';
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const easSdk = require('@ethereum-attestation-service/eas-sdk') as {
+  EAS: typeof import('@ethereum-attestation-service/eas-sdk').EAS;
+  SchemaRegistry: typeof import('@ethereum-attestation-service/eas-sdk').SchemaRegistry;
+};
+const { EAS, SchemaRegistry } = easSdk;
+type EAS = EASType;
+type SchemaRegistry = SchemaRegistryType;
 import type { Signer } from 'ethers';
 import type {
   AttestationData,

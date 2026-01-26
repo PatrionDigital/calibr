@@ -3,7 +3,14 @@
  * Provides type-safe encoding/decoding of attestation data
  */
 
-import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk';
+// ESM build of eas-sdk has broken exports (index.js is empty)
+// Import type separately, then use require for runtime value
+import type { SchemaEncoder as SchemaEncoderType } from '@ethereum-attestation-service/eas-sdk';
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const { SchemaEncoder } = require('@ethereum-attestation-service/eas-sdk') as {
+  SchemaEncoder: typeof import('@ethereum-attestation-service/eas-sdk').SchemaEncoder;
+};
+type SchemaEncoder = SchemaEncoderType;
 import type {
   ForecastAttestationData,
   CalibrationAttestationData,
