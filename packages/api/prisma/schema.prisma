@@ -741,6 +741,28 @@ model UserPrivacySettings {
   @@map("user_privacy_settings")
 }
 
+model AchievementUnlock {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Achievement details
+  achievementId String @map("achievement_id")
+  category      String
+  tier          String
+
+  // Attestation
+  easAttestationUid String?   @map("eas_attestation_uid")
+  easAttestedAt     DateTime? @map("eas_attested_at")
+
+  // User relation
+  userId String @map("user_id")
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([achievementId])
+  @@map("achievement_unlocks")
+}
+
 model DataDeletionRequest {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now()) @map("created_at")

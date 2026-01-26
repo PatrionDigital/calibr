@@ -70,3 +70,21 @@ export {
   getTierDisplayName,
   formatAchievementProgress,
 } from './achievements';
+
+// Tier Calculator
+export {
+  type TierChangeDirection,
+  type TierChangeResult,
+  getTierIndex,
+  calculateTierDelta,
+  detectTierChange,
+} from './tier-calculator';
+
+// Tier Badge
+export {
+  type CelebrationMetadata,
+  type TierBadgeData,
+  type CreateTierBadgeParams,
+  createTierBadgeData,
+  formatTierBadgeForAttestation,
+} from './tier-badge';

@@ -14,6 +14,10 @@ import {
   calculateAchievementScore,
   ACHIEVEMENT_TIER_COLORS,
   ACHIEVEMENT_CATEGORY_LABELS,
+  detectTierChange,
+  createTierBadgeData,
+  formatTierBadgeForAttestation,
+  type Achievement,
 } from '@calibr/core/leaderboard';
 
 export const leaderboardRoutes = new Hono();
@@ -560,22 +564,6 @@ leaderboardRoutes.get('/achievements/user/:userId', async (c) => {
 });
 
 /**
- * GET /leaderboard/achievements/recent
- * Get recently unlocked achievements across all users
- */
-leaderboardRoutes.get('/achievements/recent', async (c) => {
-  // This would require tracking achievement unlock times in the database
-  // For now, return a placeholder response
-  return c.json({
-    success: true,
-    data: {
-      recentUnlocks: [],
-      note: 'Achievement history tracking coming soon',
-    },
-  });
-});
-
-/**
  * GET /leaderboard/achievements/stats
  * Get achievement statistics
  */
@@ -601,3 +589,226 @@ leaderboardRoutes.get('/achievements/stats', async (c) => {
     },
   });
 });
+
+// =============================================================================
+// Achievement Unlock Persistence
+// =============================================================================
+
+/**
+ * POST /leaderboard/achievements/check/:userId
+ * Check and unlock achievements for a user, returning newly unlocked ones
+ */
+leaderboardRoutes.post('/achievements/check/:userId', async (c) => {
+  const userId = c.req.param('userId');
+
+  // Get user calibration data
+  const calibration = await prisma.userCalibration.findUnique({
+    where: { userId },
+    include: {
+      user: {
+        select: {
+          displayName: true,
+          publicProfile: true,
+        },
+      },
+    },
+  });
+
+  if (!calibration) {
+    return c.json(
+      {
+        success: false,
+        error: 'User not found or has no calibration data',
+      },
+      404
+    );
+  }
+
+  // Get already unlocked achievements from DB
+  const existingUnlocks = await prisma.achievementUnlock.findMany({
+    where: { userId },
+    select: { achievementId: true },
+  });
+
+  const unlockedIds = new Set(existingUnlocks.map((u) => u.achievementId));
+
+  // Convert to LeaderboardEntry for achievement checking
+  const entry = toLeaderboardEntry(calibration);
+
+  // Get current achievement state
+  const allAchievements = checkAchievements(entry);
+
+  // Find newly unlocked achievements
+  const newlyUnlocked = allAchievements.filter(
+    (a: Achievement) => a.unlockedAt !== null && !unlockedIds.has(a.id)
+  );
+
+  // Persist new unlocks
+  if (newlyUnlocked.length > 0) {
+    await prisma.achievementUnlock.createMany({
+      data: newlyUnlocked.map((a: Achievement) => ({
+        achievementId: a.id,
+        category: a.category,
+        tier: a.tier,
+        userId,
+      })),
+      skipDuplicates: true,
+    });
+  }
+
+  return c.json({
+    success: true,
+    data: {
+      userId,
+      newlyUnlocked: newlyUnlocked.map((a: Achievement) => ({
+        id: a.id,
+        name: a.name,
+        description: a.description,
+        category: a.category,
+        tier: a.tier,
+      })),
+      totalUnlocked: unlockedIds.size + newlyUnlocked.length,
+    },
+  });
+});
+
+/**
+ * GET /leaderboard/achievements/recent
+ * Get recently unlocked achievements across all users
+ */
+leaderboardRoutes.get('/achievements/recent', async (c) => {
+  const query = c.req.query();
+  const limit = Math.min(parseInt(query.limit || '20'), 50);
+
+  const recentUnlocks = await prisma.achievementUnlock.findMany({
+    take: limit,
+    orderBy: { createdAt: 'desc' },
+    select: {
+      achievementId: true,
+      category: true,
+      tier: true,
+      createdAt: true,
+      userId: true,
+    },
+  });
+
+  // Get achievement definitions for the unlocked achievements
+  const unlockDetails = recentUnlocks.map((unlock) => {
+    const def = ACHIEVEMENT_DEFINITIONS.find((d) => d.id === unlock.achievementId);
+    return {
+      achievementId: unlock.achievementId,
+      name: def?.name || unlock.achievementId,
+      description: def?.description || '',
+      category: unlock.category,
+      tier: unlock.tier,
+      unlockedAt: unlock.createdAt.toISOString(),
+      userId: unlock.userId,
+    };
+  });
+
+  return c.json({
+    success: true,
+    data: {
+      recentUnlocks: unlockDetails,
+    },
+  });
+});
+
+// =============================================================================
+// Tier Change Detection
+// =============================================================================
+
+/**
+ * POST /leaderboard/tier/check/:userId
+ * Check if user's tier has changed and return celebration data if promoted
+ */
+leaderboardRoutes.post('/tier/check/:userId', async (c) => {
+  const userId = c.req.param('userId');
+
+  // Get user calibration data
+  const calibration = await prisma.userCalibration.findUnique({
+    where: { userId },
+    include: {
+      user: {
+        select: {
+          displayName: true,
+        },
+      },
+    },
+  });
+
+  if (!calibration) {
+    return c.json(
+      {
+        success: false,
+        error: 'User not found or has no calibration data',
+      },
+      404
+    );
+  }
+
+  // Calculate current composite score and determine tier
+  const compositeScore = calculateCompositeScore(calibration);
+  const calculatedTier = calculateTierFromScore(compositeScore);
+
+  // Detect tier change
+  const tierChange = detectTierChange(calibration.currentTier, calculatedTier);
+
+  // If tier changed, update the database
+  if (tierChange.changed) {
+    await prisma.userCalibration.update({
+      where: { userId },
+      data: {
+        currentTier: calculatedTier,
+        tierPromotedAt: new Date(),
+      },
+    });
+
+    // Create badge data if needed
+    const badgeData = createTierBadgeData({
+      tierChange,
+      compositeScore,
+      rank: calibration.globalRank || 999,
+      category: 'OVERALL',
+    });
+
+    return c.json({
+      success: true,
+      data: {
+        tierChanged: true,
+        tierChange: {
+          previousTier: tierChange.previousTier,
+          newTier: tierChange.newTier,
+          direction: tierChange.direction,
+          delta: tierChange.delta,
+        },
+        celebration: tierChange.shouldCelebrate ? {
+          show: true,
+          previousTier: tierChange.previousTier,
+          newTier: tierChange.newTier,
+        } : null,
+        attestationData: badgeData ? formatTierBadgeForAttestation(badgeData) : null,
+      },
+    });
+  }
+
+  return c.json({
+    success: true,
+    data: {
+      tierChanged: false,
+      currentTier: calibration.currentTier,
+      compositeScore,
+    },
+  });
+});
+
+/**
+ * Calculate tier from composite score
+ */
+function calculateTierFromScore(score: number): SuperforecasterTier {
+  if (score >= 800) return 'GRANDMASTER';
+  if (score >= 600) return 'MASTER';
+  if (score >= 400) return 'EXPERT';
+  if (score >= 200) return 'JOURNEYMAN';
+  return 'APPRENTICE';
+}
