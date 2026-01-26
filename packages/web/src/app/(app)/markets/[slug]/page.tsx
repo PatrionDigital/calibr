@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useMemo } from 'react';
 import Link from 'next/link';
 import { api, type UnifiedMarket } from '@/lib/api';
 import { TradingPanel } from '@/components/trading-panel';
+import { PurchaseModal, type MarketInfo } from '@/components/purchase';
 
 // Platform badge configuration
 const PLATFORM_BADGES: Record<string, { icon: string; label: string; color: string }> = {
@@ -35,6 +36,7 @@ export default function MarketDetailPage({
   const [market, setMarket] = useState<UnifiedMarket | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   useEffect(() => {
     async function fetchMarket() {
@@ -111,6 +113,31 @@ export default function MarketDetailPage({
 
   // Find the best platform to trade on (prefer Limitless)
   const tradingPlatform = platforms.find((p) => p.slug === 'LIMITLESS') || platforms[0];
+
+  // Check if market is on Polymarket (supports $CALIBR purchase flow)
+  const polymarketPlatform = platforms.find((p) => p.slug === 'POLYMARKET');
+
+  // Transform market data for PurchaseModal
+  const purchaseMarketInfo: MarketInfo | null = useMemo(() => {
+    if (!market || !polymarketPlatform) return null;
+
+    // Normalize prices to 0-1 range
+    const normalizePrice = (price: number | null | undefined) => {
+      if (price === null || price === undefined) return 0.5;
+      return price > 1 ? price / 100 : price;
+    };
+
+    return {
+      id: polymarketPlatform.externalId,
+      question: market.question,
+      platform: 'POLYMARKET',
+      currentPrice: normalizePrice(polymarketPlatform.yesPrice),
+      outcomes: [
+        { label: 'Yes', price: normalizePrice(polymarketPlatform.yesPrice) },
+        { label: 'No', price: normalizePrice(polymarketPlatform.noPrice) },
+      ],
+    };
+  }, [market, polymarketPlatform]);
 
   return (
     <main className="min-h-screen p-8">
@@ -264,6 +291,21 @@ export default function MarketDetailPage({
               </div>
             )}
 
+            {/* Buy with CALIBR Button (Polymarket only) */}
+            {purchaseMarketInfo && market.isActive && (
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowPurchaseModal(true)}
+                  className="w-full py-3 text-sm font-bold border border-[hsl(var(--primary))] text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))] hover:text-black transition-colors"
+                >
+                  BUY WITH $CALIBR
+                </button>
+                <p className="text-[10px] text-[hsl(var(--muted-foreground))] text-center mt-2">
+                  Swap $CALIBR → Bridge USDC → Trade on Polymarket
+                </p>
+              </div>
+            )}
+
             {/* Kelly Calculator Link */}
             <div className="mt-4 text-center">
               <Link
@@ -276,6 +318,19 @@ export default function MarketDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Purchase Modal */}
+      {purchaseMarketInfo && (
+        <PurchaseModal
+          market={purchaseMarketInfo}
+          isOpen={showPurchaseModal}
+          onClose={() => setShowPurchaseModal(false)}
+          onSuccess={(txHash) => {
+            console.log('[MarketDetail] Purchase success:', txHash);
+            setShowPurchaseModal(false);
+          }}
+        />
+      )}
     </main>
   );
 }

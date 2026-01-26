@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { api, type UnifiedMarket, type SyncStatus } from '@/lib/api';
 import { MarketCard } from '@/components/market-card';
@@ -8,6 +8,7 @@ import { SyncStatusPanel } from '@/components/sync-status';
 import { KellyCalculator } from '@/components/kelly-calculator';
 import { KellySettingsPanel } from '@/components/kelly-settings-panel';
 import { TradingPanel } from '@/components/trading-panel';
+import { PurchaseModal, type MarketInfo } from '@/components/purchase';
 
 // =============================================================================
 // Category & Platform Definitions
@@ -410,6 +411,35 @@ function getMarketOutcomes(market: UnifiedMarket): {
 
 function MarketDetailModal({ market, onClose }: MarketDetailModalProps) {
   const { isBinary, outcomes } = getMarketOutcomes(market);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+
+  // Check if market is on Polymarket
+  const polymarketPlatform = useMemo(() => {
+    return market.platformMarkets?.find(
+      (pm) => pm.platformConfig?.slug?.toUpperCase() === 'POLYMARKET'
+    );
+  }, [market.platformMarkets]);
+
+  // Transform for PurchaseModal
+  const purchaseMarketInfo: MarketInfo | null = useMemo(() => {
+    if (!polymarketPlatform) return null;
+
+    const normalizePrice = (price: number | null | undefined) => {
+      if (price === null || price === undefined) return 0.5;
+      return price > 1 ? price / 100 : price;
+    };
+
+    return {
+      id: polymarketPlatform.externalId,
+      question: market.question,
+      platform: 'POLYMARKET',
+      currentPrice: normalizePrice(polymarketPlatform.yesPrice),
+      outcomes: [
+        { label: 'Yes', price: normalizePrice(polymarketPlatform.yesPrice) },
+        { label: 'No', price: normalizePrice(polymarketPlatform.noPrice) },
+      ],
+    };
+  }, [market.question, polymarketPlatform]);
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
@@ -536,6 +566,21 @@ function MarketDetailModal({ market, onClose }: MarketDetailModalProps) {
           return null;
         })()}
 
+        {/* Buy with CALIBR Button (Polymarket only) */}
+        {purchaseMarketInfo && market.isActive && (
+          <div className="mb-6">
+            <button
+              onClick={() => setShowPurchaseModal(true)}
+              className="w-full py-3 text-sm font-bold border border-[hsl(var(--primary))] text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))] hover:text-black transition-colors"
+            >
+              BUY WITH $CALIBR
+            </button>
+            <p className="text-[10px] text-[hsl(var(--muted-foreground))] text-center mt-2">
+              Swap $CALIBR → Bridge USDC → Trade on Polymarket
+            </p>
+          </div>
+        )}
+
         {/* Kelly Criterion Calculator */}
         {isBinary && market.isActive && (
           <KellyCalculator
@@ -604,6 +649,19 @@ function MarketDetailModal({ market, onClose }: MarketDetailModalProps) {
           </button>
         </div>
       </div>
+
+      {/* Purchase Modal */}
+      {purchaseMarketInfo && (
+        <PurchaseModal
+          market={purchaseMarketInfo}
+          isOpen={showPurchaseModal}
+          onClose={() => setShowPurchaseModal(false)}
+          onSuccess={(txHash) => {
+            console.log('[MarketDetailModal] Purchase success:', txHash);
+            setShowPurchaseModal(false);
+          }}
+        />
+      )}
     </div>
   );
 }
