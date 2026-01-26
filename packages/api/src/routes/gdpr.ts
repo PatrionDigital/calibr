@@ -4,6 +4,7 @@
  */
 
 import { Hono } from 'hono';
+import type { Context } from 'hono';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma';
 import {
@@ -35,7 +36,7 @@ const createDeletionRequestSchema = z.object({
 /**
  * Get user ID from request header (temporary until auth is implemented)
  */
-function getUserId(c: Parameters<Parameters<typeof gdprRoutes.get>[1]>[0]): string {
+function getUserId(c: Context): string {
   return c.req.header('x-user-id') || 'demo-user';
 }
 
@@ -63,13 +64,13 @@ gdprRoutes.get('/export', async (c) => {
     prisma.user.findUnique({
       where: { id: userId },
     }),
-    prisma.privacySettings.findUnique({
+    prisma.userPrivacySettings.findUnique({
       where: { userId },
     }),
-    prisma.calibration.findUnique({
+    prisma.userCalibration.findUnique({
       where: { userId },
     }),
-    prisma.wallet.findMany({
+    prisma.walletConnection.findMany({
       where: { userId },
     }),
     prisma.forecast.findMany({
@@ -93,8 +94,8 @@ gdprRoutes.get('/export', async (c) => {
         position: { userId },
       },
     }),
-    prisma.userAttestation.findMany({
-      where: { userId },
+    prisma.eASAttestation.findMany({
+      where: { attester: userId },
     }),
   ]);
 
@@ -115,8 +116,8 @@ gdprRoutes.get('/export', async (c) => {
     positions,
     transactions,
     attestations: attestations.map((a) => ({
-      uid: a.easUid,
-      schemaName: a.schemaType,
+      uid: a.uid,
+      schemaName: a.schemaName,
       createdAt: a.createdAt,
       revoked: a.revoked,
       isOffchain: a.isOffchain,
@@ -150,13 +151,13 @@ gdprRoutes.get('/export/download', async (c) => {
     prisma.user.findUnique({
       where: { id: userId },
     }),
-    prisma.privacySettings.findUnique({
+    prisma.userPrivacySettings.findUnique({
       where: { userId },
     }),
-    prisma.calibration.findUnique({
+    prisma.userCalibration.findUnique({
       where: { userId },
     }),
-    prisma.wallet.findMany({
+    prisma.walletConnection.findMany({
       where: { userId },
     }),
     prisma.forecast.findMany({
@@ -180,8 +181,8 @@ gdprRoutes.get('/export/download', async (c) => {
         position: { userId },
       },
     }),
-    prisma.userAttestation.findMany({
-      where: { userId },
+    prisma.eASAttestation.findMany({
+      where: { attester: userId },
     }),
   ]);
 
@@ -201,8 +202,8 @@ gdprRoutes.get('/export/download', async (c) => {
     positions,
     transactions,
     attestations: attestations.map((a) => ({
-      uid: a.easUid,
-      schemaName: a.schemaType,
+      uid: a.uid,
+      schemaName: a.schemaName,
       createdAt: a.createdAt,
       revoked: a.revoked,
       isOffchain: a.isOffchain,
@@ -334,8 +335,8 @@ gdprRoutes.post('/delete-requests', async (c) => {
       prisma.forecast.count({ where: { userId } }),
       prisma.position.count({ where: { userId } }),
       prisma.transaction.count({ where: { position: { userId } } }),
-      prisma.userAttestation.count({ where: { userId } }),
-      prisma.wallet.count({ where: { userId } }),
+      prisma.eASAttestation.count({ where: { attester: userId } }),
+      prisma.walletConnection.count({ where: { userId } }),
     ]);
 
   const counts = {
