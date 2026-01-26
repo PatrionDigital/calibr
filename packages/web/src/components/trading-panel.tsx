@@ -208,11 +208,36 @@ export function TradingPanel({
   });
 
   // Cross-chain bridge support
-  const { hasPendingBridges, selectedBridgeId } = useBridgeStore();
+  const { hasPendingBridges, selectedBridgeId, activeBridges, refreshAllBridges } = useBridgeStore();
   const [showBridgePanel, setShowBridgePanel] = useState(false);
+  const [bridgeJustCompleted, setBridgeJustCompleted] = useState(false);
+  const [lastCompletedBridgeAmount, setLastCompletedBridgeAmount] = useState<string | null>(null);
 
   // Check if market is on Polygon (Polymarket)
   const isPolygonMarket = platform === 'POLYMARKET';
+
+  // Track bridge completion for post-bridge trading prompt
+  useEffect(() => {
+    if (!selectedBridgeId) return;
+
+    const bridge = activeBridges[selectedBridgeId];
+    if (bridge?.phase === 'completed') {
+      setBridgeJustCompleted(true);
+      setLastCompletedBridgeAmount(bridge.amountUsd);
+      setShowBridgePanel(false);
+    }
+  }, [selectedBridgeId, activeBridges]);
+
+  // Refresh bridge statuses periodically when we have active bridges
+  useEffect(() => {
+    if (!hasPendingBridges()) return;
+
+    const interval = setInterval(() => {
+      refreshAllBridges();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [hasPendingBridges, refreshAllBridges]);
 
   // USDC balances on both chains
   const { data: baseUsdcBalance } = useBalance({
@@ -280,17 +305,36 @@ export function TradingPanel({
   const [marketContractAddress, setMarketContractAddress] = useState<Hex | null>(null);
   const [isAmmMarket, setIsAmmMarket] = useState<boolean>(false);
 
+  // Calculate trade cost
+  const tradeCost = useMemo(() => {
+    const sizeNum = parseFloat(size) || 0;
+    const priceNum = (parseFloat(price) || 50) / 100;
+    return sizeNum * priceNum;
+  }, [size, price]);
+
+  // Suggested bridge amount (trade cost + 10% buffer for fees)
+  const suggestedBridgeAmount = useMemo(() => {
+    const buffer = 1.1; // 10% buffer for fees and slippage
+    return Math.ceil(tradeCost * buffer * 100) / 100; // Round up to 2 decimals
+  }, [tradeCost]);
+
   // Determine if user needs to bridge for Polymarket trading
   const needsBridge = useMemo(() => {
     if (!isPolygonMarket || !address) return false;
 
     const polygonBalance = polygonUsdcBalance ? parseFloat(polygonUsdcBalance.formatted) : 0;
     const baseBalance = baseUsdcBalance ? parseFloat(baseUsdcBalance.formatted) : 0;
-    const requiredAmount = parseFloat(size) * (parseFloat(price) / 100) || 0;
 
     // Need bridge if: Polygon balance is insufficient AND Base balance is sufficient
-    return polygonBalance < requiredAmount && baseBalance >= requiredAmount;
-  }, [isPolygonMarket, address, polygonUsdcBalance, baseUsdcBalance, size, price]);
+    return polygonBalance < tradeCost && baseBalance >= tradeCost;
+  }, [isPolygonMarket, address, polygonUsdcBalance, baseUsdcBalance, tradeCost]);
+
+  // Check if user has enough after recent bridge
+  const canTradeAfterBridge = useMemo(() => {
+    if (!bridgeJustCompleted || !lastCompletedBridgeAmount) return false;
+    const bridgedAmount = parseFloat(lastCompletedBridgeAmount) || 0;
+    return bridgedAmount >= tradeCost;
+  }, [bridgeJustCompleted, lastCompletedBridgeAmount, tradeCost]);
 
   // Read USDC allowance for AMM markets
   const { data: usdcAllowance, refetch: refetchAllowance } = useReadContract({
@@ -601,11 +645,42 @@ export function TradingPanel({
             </button>
             <BridgePanel
               walletAddress={address}
-              defaultAmount={size}
+              defaultAmount={suggestedBridgeAmount.toString()}
               onBridgeInitiated={(trackingId) => {
                 console.log('[TradingPanel] Bridge initiated:', trackingId);
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Post-Bridge Trade Prompt */}
+      {bridgeJustCompleted && canTradeAfterBridge && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <div className="relative max-w-md w-full mx-4 ascii-box p-4 space-y-4">
+            <h3 className="text-sm font-bold text-[hsl(var(--success))]">
+              ✓ BRIDGE COMPLETE
+            </h3>
+            <p className="text-xs text-[hsl(var(--muted-foreground))]">
+              ${lastCompletedBridgeAmount} USDC has arrived on Polygon. You can now trade on Polymarket.
+            </p>
+            <div className="flex gap-2">
+              <a
+                href={`https://polymarket.com/event/${marketId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setBridgeJustCompleted(false)}
+                className="flex-1 py-3 text-sm font-bold text-center border border-[hsl(var(--primary))] text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))] hover:text-black transition-colors"
+              >
+                TRADE ON POLYMARKET
+              </a>
+              <button
+                onClick={() => setBridgeJustCompleted(false)}
+                className="px-4 py-3 text-sm font-bold border border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))] hover:border-[hsl(var(--primary))] transition-colors"
+              >
+                LATER
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -617,6 +692,42 @@ export function TradingPanel({
       ) : isPolygonMarket ? (
         // Polymarket: Show bridge option or redirect
         <div className="space-y-4">
+          {/* Trade Calculator */}
+          <div className="border border-[hsl(var(--border))] p-3 space-y-3">
+            <div className="text-xs font-bold text-[hsl(var(--muted-foreground))]">
+              TRADE CALCULATOR
+            </div>
+            <div>
+              <label className="text-[10px] text-[hsl(var(--muted-foreground))]">SHARES</label>
+              <input
+                type="number"
+                value={size}
+                onChange={(e) => setSize(e.target.value)}
+                min="1"
+                step="1"
+                className="w-full bg-black border border-[hsl(var(--border))] px-3 py-2 text-sm font-mono focus:border-[hsl(var(--primary))] focus:outline-none"
+                placeholder="10"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] text-[hsl(var(--muted-foreground))]">PRICE (%)</label>
+              <input
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                min="0.1"
+                max="99.9"
+                step="0.1"
+                className="w-full bg-black border border-[hsl(var(--border))] px-3 py-2 text-sm font-mono focus:border-[hsl(var(--primary))] focus:outline-none"
+                placeholder="50.0"
+              />
+            </div>
+            <div className="flex justify-between text-xs pt-2 border-t border-[hsl(var(--border))]">
+              <span className="text-[hsl(var(--muted-foreground))]">Est. Cost:</span>
+              <span className="font-bold text-[hsl(var(--primary))]">${tradeCost.toFixed(2)} USDC</span>
+            </div>
+          </div>
+
           {/* Balance Info */}
           <div className="border border-[hsl(var(--border))] p-3 space-y-2">
             <div className="text-xs font-bold text-[hsl(var(--muted-foreground))]">
@@ -624,13 +735,13 @@ export function TradingPanel({
             </div>
             <div className="flex justify-between text-xs">
               <span>Base:</span>
-              <span className="font-mono">
+              <span className={`font-mono ${needsBridge ? 'text-[hsl(var(--primary))]' : ''}`}>
                 ${baseUsdcBalance ? parseFloat(baseUsdcBalance.formatted).toFixed(2) : '0.00'}
               </span>
             </div>
             <div className="flex justify-between text-xs">
               <span>Polygon:</span>
-              <span className="font-mono">
+              <span className={`font-mono ${!needsBridge ? 'text-[hsl(var(--success))]' : 'text-[hsl(var(--warning))]'}`}>
                 ${polygonUsdcBalance ? parseFloat(polygonUsdcBalance.formatted).toFixed(2) : '0.00'}
               </span>
             </div>
@@ -639,22 +750,32 @@ export function TradingPanel({
           {needsBridge ? (
             // Show bridge option
             <div className="space-y-3">
-              <div className="border border-[hsl(var(--warning))] p-3 text-xs text-[hsl(var(--warning))]">
-                Insufficient USDC on Polygon. Bridge from Base to trade on Polymarket.
+              <div className="border border-[hsl(var(--warning))] p-3 space-y-2">
+                <div className="text-xs text-[hsl(var(--warning))] font-bold">
+                  BRIDGE REQUIRED
+                </div>
+                <div className="text-[10px] text-[hsl(var(--muted-foreground))]">
+                  Your Polygon balance (${polygonUsdcBalance ? parseFloat(polygonUsdcBalance.formatted).toFixed(2) : '0.00'})
+                  is less than the trade cost (${tradeCost.toFixed(2)}).
+                </div>
+                <div className="flex justify-between text-xs pt-2 border-t border-[hsl(var(--border))]">
+                  <span>Suggested bridge:</span>
+                  <span className="font-bold">${suggestedBridgeAmount.toFixed(2)} USDC</span>
+                </div>
               </div>
               <button
                 onClick={() => setShowBridgePanel(true)}
                 className="w-full py-3 text-sm font-bold border border-[hsl(var(--primary))] text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))] hover:text-black transition-colors"
               >
-                BRIDGE & TRADE
+                BRIDGE ${suggestedBridgeAmount.toFixed(2)} & TRADE
               </button>
             </div>
           ) : (
             // Show Polymarket redirect
             <div className="space-y-3">
-              <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                Polymarket trades require their native interface for CLOB order book integration.
-              </p>
+              <div className="border border-[hsl(var(--success))] p-3 text-xs text-[hsl(var(--success))]">
+                ✓ Sufficient balance on Polygon for this trade
+              </div>
               <a
                 href={`https://polymarket.com/event/${marketId}`}
                 target="_blank"
@@ -673,6 +794,29 @@ export function TradingPanel({
           >
             BRIDGE USDC (BASE → POLYGON)
           </button>
+
+          {/* Active Bridges Indicator */}
+          {hasPendingBridges() && (
+            <div className="border border-[hsl(var(--primary))] p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[hsl(var(--primary))] animate-pulse" />
+                  <span className="text-xs font-bold text-[hsl(var(--primary))]">
+                    BRIDGE IN PROGRESS
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowBridgePanel(true)}
+                  className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]"
+                >
+                  VIEW
+                </button>
+              </div>
+              <div className="text-[10px] text-[hsl(var(--muted-foreground))]">
+                Your USDC is being bridged. You&apos;ll be prompted to trade once complete.
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
