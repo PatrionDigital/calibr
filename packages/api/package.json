@@ -7,7 +7,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "node --env-file=../../.env --import=tsx/esm --watch src/server.ts",
     "build": "echo 'BUILD v2' && prisma generate && tsup src/index.ts src/server.ts --format esm --dts",
     "start": "node dist/server.js",
     "lint": "eslint src --ext .ts",
@@ -22,10 +22,11 @@
     "sync:markets": "tsx -e \"import { polymarketSync } from './src/services/polymarket-sync'; polymarketSync.syncMarkets().then(console.log)\""
   },
   "dependencies": {
-    "@calibr/core": "workspace:*",
     "@calibr/adapters": "workspace:*",
+    "@calibr/core": "workspace:*",
     "@hono/node-server": "^1.8.0",
     "@prisma/client": "^5.10.0",
+    "dotenv": "^17.2.3",
     "hono": "^4.0.0",
     "ioredis": "^5.3.0",
     "zod": "^3.22.0"

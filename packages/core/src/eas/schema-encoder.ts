@@ -4,9 +4,10 @@
  */
 
 // ESM build of eas-sdk has broken exports (index.js is empty)
-// Import type separately, then use require for runtime value
+// Use createRequire to load the CommonJS build properly
+import { createRequire } from 'module';
 import type { SchemaEncoder as SchemaEncoderType } from '@ethereum-attestation-service/eas-sdk';
-// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const require = createRequire(import.meta.url);
 const { SchemaEncoder } = require('@ethereum-attestation-service/eas-sdk') as {
   SchemaEncoder: typeof import('@ethereum-attestation-service/eas-sdk').SchemaEncoder;
 };

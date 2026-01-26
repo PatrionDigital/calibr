@@ -6,4 +6,7 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
+  // Mark eas-sdk as external since we use createRequire for CommonJS interop
+  // Also exclude node:module builtin
+  external: ["@ethereum-attestation-service/eas-sdk", "module"],
 });
