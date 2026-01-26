@@ -39,3 +39,6 @@ export {
   type PortfolioKellyResult,
 } from "./scoring";
 export type { Forecast as ScoringForecast, SuperforecasterTier } from "./scoring";
+
+// GDPR compliance
+export * from "./gdpr";

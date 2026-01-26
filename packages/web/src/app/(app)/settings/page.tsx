@@ -481,9 +481,123 @@ function KellySettings({ kelly }: KellySettingsProps) {
   );
 }
 
+type DeletionType = 'FULL_ACCOUNT' | 'FORECASTS_ONLY' | 'PII_ONLY';
+
+const DELETION_OPTIONS: Record<DeletionType, { label: string; description: string }> = {
+  FULL_ACCOUNT: {
+    label: 'Full Account Deletion',
+    description: 'Delete all data including forecasts, positions, and attestations',
+  },
+  FORECASTS_ONLY: {
+    label: 'Forecasts Only',
+    description: 'Delete forecasts and reset calibration, keep account and positions',
+  },
+  PII_ONLY: {
+    label: 'Remove PII Only',
+    description: 'Anonymize personal info, keep forecasting history for statistics',
+  },
+};
+
 function AccountSettings() {
+  const [isExporting, setIsExporting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletionType, setDeletionType] = useState<DeletionType>('FULL_ACCOUNT');
+  const [deletionReason, setDeletionReason] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+  const handleExportData = async () => {
+    setIsExporting(true);
+    setStatusMessage(null);
+    try {
+      const response = await fetch(`${apiUrl}/api/gdpr/export`, {
+        headers: { 'x-user-id': 'demo-user' },
+      });
+
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+
+      const { data } = await response.json();
+
+      // Create downloadable file
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `calibr-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setStatusMessage({ type: 'success', text: 'Data exported successfully' });
+    } catch {
+      setStatusMessage({ type: 'error', text: 'Failed to export data' });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleDeleteRequest = async () => {
+    setIsDeleting(true);
+    setStatusMessage(null);
+    try {
+      const response = await fetch(`${apiUrl}/api/gdpr/delete-requests`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': 'demo-user',
+        },
+        body: JSON.stringify({
+          requestType: deletionType,
+          reason: deletionReason || undefined,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Deletion request failed');
+      }
+
+      setShowDeleteDialog(false);
+      setStatusMessage({
+        type: 'success',
+        text: `Deletion request submitted. Est. time: ${result.data.timeEstimate.description}`,
+      });
+    } catch (err) {
+      setStatusMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Failed to submit deletion request',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Status Message */}
+      {statusMessage && (
+        <div
+          className={`p-3 border ${
+            statusMessage.type === 'success'
+              ? 'border-[hsl(var(--success))] text-[hsl(var(--success))]'
+              : 'border-[hsl(var(--error))] text-[hsl(var(--error))]'
+          }`}
+        >
+          {statusMessage.text}
+        </div>
+      )}
+
       {/* Connected Wallets */}
       <section className="ascii-box p-4">
         <h2 className="text-sm font-bold mb-4">[CONNECTED WALLETS]</h2>
@@ -522,18 +636,114 @@ function AccountSettings() {
         </div>
       </section>
 
+      {/* Data Portability (GDPR) */}
+      <section className="ascii-box p-4">
+        <h2 className="text-sm font-bold mb-4">[DATA PORTABILITY]</h2>
+        <p className="text-xs text-[hsl(var(--muted-foreground))] mb-4">
+          Export all your data in JSON format (GDPR Article 20)
+        </p>
+        <button
+          onClick={handleExportData}
+          disabled={isExporting}
+          className="w-full text-sm px-4 py-2 border border-[hsl(var(--info))] text-[hsl(var(--info))] hover:bg-[hsl(var(--info))] hover:text-white transition-colors disabled:opacity-50"
+        >
+          {isExporting ? 'EXPORTING...' : 'EXPORT ALL DATA'}
+        </button>
+      </section>
+
       {/* Danger Zone */}
       <section className="ascii-box p-4 border-[hsl(var(--error))]">
         <h2 className="text-sm font-bold text-[hsl(var(--error))] mb-4">[DANGER ZONE]</h2>
-        <div className="space-y-3">
-          <button className="w-full text-sm px-4 py-2 border border-[hsl(var(--error))] text-[hsl(var(--error))] hover:bg-[hsl(var(--error))] hover:text-white transition-colors">
-            EXPORT ALL DATA
-          </button>
-          <button className="w-full text-sm px-4 py-2 border border-[hsl(var(--error))] text-[hsl(var(--error))] hover:bg-[hsl(var(--error))] hover:text-white transition-colors">
-            DELETE ACCOUNT
-          </button>
-        </div>
+        <p className="text-xs text-[hsl(var(--muted-foreground))] mb-4">
+          Request data deletion (GDPR Article 17 - Right to Erasure)
+        </p>
+        <button
+          onClick={() => setShowDeleteDialog(true)}
+          className="w-full text-sm px-4 py-2 border border-[hsl(var(--error))] text-[hsl(var(--error))] hover:bg-[hsl(var(--error))] hover:text-white transition-colors"
+        >
+          REQUEST DATA DELETION
+        </button>
       </section>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteDialog && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="ascii-box p-6 max-w-lg w-full bg-[hsl(var(--background))]">
+            <h2 className="text-lg font-bold text-[hsl(var(--error))] mb-4">
+              [REQUEST DATA DELETION]
+            </h2>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs text-[hsl(var(--muted-foreground))] block mb-2">
+                  DELETION TYPE
+                </label>
+                {(Object.entries(DELETION_OPTIONS) as [DeletionType, typeof DELETION_OPTIONS[DeletionType]][]).map(
+                  ([key, { label, description }]) => (
+                    <label
+                      key={key}
+                      className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors mb-2 ${
+                        deletionType === key
+                          ? 'border-[hsl(var(--error))] bg-[hsl(var(--error)/0.1)]'
+                          : 'border-[hsl(var(--border))] hover:border-[hsl(var(--error)/0.5)]'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="deletionType"
+                        value={key}
+                        checked={deletionType === key}
+                        onChange={() => setDeletionType(key)}
+                        className="mt-1 accent-[hsl(var(--error))]"
+                      />
+                      <div>
+                        <div className="text-sm font-bold">{label}</div>
+                        <div className="text-xs text-[hsl(var(--muted-foreground))]">{description}</div>
+                      </div>
+                    </label>
+                  )
+                )}
+              </div>
+
+              <div>
+                <label className="text-xs text-[hsl(var(--muted-foreground))] block mb-2">
+                  REASON (OPTIONAL)
+                </label>
+                <textarea
+                  value={deletionReason}
+                  onChange={(e) => setDeletionReason(e.target.value)}
+                  placeholder="Why are you deleting your data?"
+                  className="w-full bg-transparent border border-[hsl(var(--border))] px-3 py-2 text-sm focus:border-[hsl(var(--error))] focus:outline-none font-mono h-20 resize-none"
+                  maxLength={1000}
+                />
+              </div>
+
+              <div className="p-3 border border-[hsl(var(--warning))] bg-[hsl(var(--warning)/0.1)]">
+                <div className="text-xs text-[hsl(var(--warning))]">
+                  <strong>Warning:</strong> This action cannot be undone. On-chain attestations
+                  will be revoked but the revocation records remain on the blockchain.
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteDialog(false)}
+                  className="flex-1 text-sm px-4 py-2 border border-[hsl(var(--border))] hover:border-[hsl(var(--foreground))] transition-colors"
+                >
+                  CANCEL
+                </button>
+                <button
+                  onClick={handleDeleteRequest}
+                  disabled={isDeleting}
+                  className="flex-1 text-sm px-4 py-2 bg-[hsl(var(--error))] text-white hover:opacity-90 transition-colors disabled:opacity-50"
+                >
+                  {isDeleting ? 'SUBMITTING...' : 'CONFIRM DELETION'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
