@@ -337,7 +337,7 @@ function D3Chart({ data, chartType, width, height }: D3ChartProps) {
 // =============================================================================
 
 export function PriceChart({
-  marketId,
+  marketId: _marketId,
   data,
   timeRange: initialTimeRange = '24H',
   chartType: initialChartType = 'line',

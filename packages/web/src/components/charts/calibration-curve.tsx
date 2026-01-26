@@ -52,15 +52,6 @@ export function CalibrationCurve({
   const innerWidth = width - MARGIN.left - MARGIN.right;
   const innerHeight = height - MARGIN.top - MARGIN.bottom;
 
-  // Get CSS variable values
-  const getCssVar = (name: string): string => {
-    if (typeof window === 'undefined') return '';
-    const value = getComputedStyle(document.documentElement)
-      .getPropertyValue(name)
-      .trim();
-    return value ? `hsl(${value})` : '';
-  };
-
   const colors = useMemo(() => ({
     primary: 'hsl(120, 100%, 50%)',
     muted: 'hsl(120, 100%, 25%)',
