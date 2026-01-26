@@ -11,6 +11,7 @@ import { prettyJSON } from 'hono/pretty-json';
 import { syncRoutes } from './routes/sync';
 import { marketRoutes } from './routes/markets';
 import { tradingRoutes } from './routes/trading';
+import { bridgeRoutes } from './routes/bridge';
 import { portfolioRoutes } from './routes/portfolio';
 import { forecastRoutes } from './routes/forecasts';
 import { attestationRoutes } from './routes/attestations';
@@ -58,6 +59,7 @@ app.get('/', (c) => {
       markets: '/api/markets',
       sync: '/api/sync',
       trading: '/api/trading',
+      bridge: '/api/bridge',
       portfolio: '/api/portfolio',
       forecasts: '/api/forecasts',
       attestations: '/api/attestations',
@@ -110,6 +112,7 @@ app.get('/health', async (c) => {
 app.route('/api/sync', syncRoutes);
 app.route('/api/markets', marketRoutes);
 app.route('/api/trading', tradingRoutes);
+app.route('/api/bridge', bridgeRoutes);
 app.route('/api/portfolio', portfolioRoutes);
 app.route('/api/forecasts', forecastRoutes);
 app.route('/api/attestations', attestationRoutes);
