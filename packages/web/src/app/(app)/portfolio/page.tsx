@@ -2,10 +2,26 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { api, type PortfolioSummary, type PortfolioPosition, type AlertsResponse, type ResolutionAlert, type WalletScanResponse } from '@/lib/api';
+import { useRouter } from 'next/navigation';
+import { api, type PortfolioSummary as APIPortfolioSummary, type AlertsResponse, type ResolutionAlert, type WalletScanResponse } from '@/lib/api';
+import {
+  toPositions,
+  toExposureByPlatform,
+  calculateExposureByCategory,
+  toPortfolioSummaryProps,
+  filterPositions,
+} from '@/lib/portfolio-adapters';
+import {
+  PortfolioSummary,
+  PositionTable,
+  ExposureBreakdown,
+  type Position,
+  type PositionFilter,
+} from '@/components/portfolio';
 
 export default function PortfolioPage() {
-  const [portfolio, setPortfolio] = useState<PortfolioSummary | null>(null);
+  const router = useRouter();
+  const [portfolio, setPortfolio] = useState<APIPortfolioSummary | null>(null);
   const [alerts, setAlerts] = useState<AlertsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,6 +31,14 @@ export default function PortfolioPage() {
   const [showAlerts, setShowAlerts] = useState(true);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<WalletScanResponse | null>(null);
+
+  // Position filtering and sorting state
+  const [positionFilter, setPositionFilter] = useState<PositionFilter | undefined>();
+  const [sortKey, setSortKey] = useState<string | undefined>();
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  // Exposure breakdown state
+  const [exposureGroupBy, setExposureGroupBy] = useState<'category' | 'platform'>('platform');
 
   const fetchPortfolio = useCallback(async (wallet: string) => {
     if (!wallet) return;
@@ -106,6 +130,45 @@ export default function PortfolioPage() {
     }
   };
 
+  // Transform portfolio data for components
+  const positions: Position[] = portfolio ? toPositions(portfolio.positions) : [];
+  const filteredPositions = filterPositions(positions, positionFilter, sortKey, sortDirection);
+
+  const exposureByPlatform = portfolio
+    ? toExposureByPlatform(portfolio.byPlatform, portfolio.totalValue)
+    : [];
+  const exposureByCategory = portfolio
+    ? calculateExposureByCategory(portfolio.positions)
+    : [];
+
+  const summaryProps = portfolio ? toPortfolioSummaryProps(portfolio) : null;
+
+  // Handlers for components
+  const handlePositionClick = (position: Position) => {
+    router.push(`/portfolio/position/${position.id}`);
+  };
+
+  const handleSort = (key: string, direction: 'asc' | 'desc') => {
+    setSortKey(key);
+    setSortDirection(direction);
+  };
+
+  const handleFilter = (filter: PositionFilter) => {
+    setPositionFilter(filter);
+  };
+
+  const handleExposureItemClick = (name: string, type: 'category' | 'platform') => {
+    if (type === 'platform') {
+      setPositionFilter({ platform: name });
+    } else {
+      setPositionFilter({ category: name });
+    }
+  };
+
+  const clearFilter = () => {
+    setPositionFilter(undefined);
+  };
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -193,67 +256,7 @@ export default function PortfolioPage() {
 
             {/* Scan Result */}
             {scanResult && (
-              <div className={`ascii-box p-4 ${scanResult.scan.errors.length > 0 ? 'border-[hsl(var(--warning))]' : 'border-[hsl(var(--success))]'}`}>
-                <h3 className="text-sm font-bold mb-2">
-                  [SCAN COMPLETE]
-                </h3>
-                <div className="grid grid-cols-3 gap-4 text-center mb-3">
-                  <div>
-                    <div className="text-xs text-[hsl(var(--muted-foreground))]">POSITIONS FOUND</div>
-                    <div className="text-lg font-bold text-[hsl(var(--primary))]">
-                      {scanResult.scan.positionsFound}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-[hsl(var(--muted-foreground))]">TOTAL VALUE</div>
-                    <div className="text-lg font-bold">
-                      ${scanResult.scan.totalValue.toFixed(2)}
-                    </div>
-                  </div>
-                  {scanResult.import && (
-                    <div>
-                      <div className="text-xs text-[hsl(var(--muted-foreground))]">IMPORTED</div>
-                      <div className="text-lg font-bold text-[hsl(var(--success))]">
-                        {scanResult.import.imported}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {scanResult.positions.length > 0 && (
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {scanResult.positions.map((pos, idx) => (
-                      <div key={idx} className="flex items-center justify-between text-xs p-2 bg-[hsl(var(--background))] border border-[hsl(var(--border))]">
-                        <div className="flex-1 min-w-0">
-                          <div className="truncate font-medium">{pos.marketQuestion}</div>
-                          <div className="text-[hsl(var(--muted-foreground))]">
-                            {pos.outcomeLabel} • {pos.balanceFormatted.toFixed(2)} shares
-                          </div>
-                        </div>
-                        {pos.currentPrice !== undefined && (
-                          <div className="text-right ml-2">
-                            <div className="font-mono">${(pos.balanceFormatted * pos.currentPrice).toFixed(2)}</div>
-                            <div className="text-[hsl(var(--muted-foreground))]">@ ${pos.currentPrice.toFixed(3)}</div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {scanResult.scan.errors.length > 0 && (
-                  <div className="mt-3 text-xs text-[hsl(var(--warning))]">
-                    {scanResult.scan.errors.length} error(s) during scan
-                  </div>
-                )}
-
-                <button
-                  onClick={() => setScanResult(null)}
-                  className="mt-3 text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-                >
-                  DISMISS
-                </button>
-              </div>
+              <ScanResultCard scanResult={scanResult} onDismiss={() => setScanResult(null)} />
             )}
 
             {error && (
@@ -266,151 +269,48 @@ export default function PortfolioPage() {
               <div className="ascii-box p-8 text-center">
                 <div className="terminal-glow cursor-blink">LOADING PORTFOLIO</div>
               </div>
-            ) : portfolio ? (
+            ) : portfolio && summaryProps ? (
               <>
-                {/* Summary Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <SummaryCard
-                    label="TOTAL VALUE"
-                    value={`$${portfolio.totalValue.toFixed(2)}`}
-                    variant="default"
-                  />
-                  <SummaryCard
-                    label="TOTAL COST"
-                    value={`$${portfolio.totalCost.toFixed(2)}`}
-                    variant="muted"
-                  />
-                  <SummaryCard
-                    label="UNREALIZED P&L"
-                    value={`${portfolio.unrealizedPnl >= 0 ? '+' : ''}$${portfolio.unrealizedPnl.toFixed(2)}`}
-                    subValue={`${portfolio.unrealizedPnlPct >= 0 ? '+' : ''}${portfolio.unrealizedPnlPct.toFixed(1)}%`}
-                    variant={portfolio.unrealizedPnl >= 0 ? 'bullish' : 'bearish'}
-                  />
-                  <SummaryCard
-                    label="POSITIONS"
-                    value={String(portfolio.positionCount)}
-                    variant="default"
-                  />
-                </div>
+                {/* Portfolio Summary */}
+                <PortfolioSummary {...summaryProps} />
 
                 {/* Resolution Alerts */}
                 {alerts && alerts.count > 0 && showAlerts && (
-                  <div className="ascii-box p-4 border-[hsl(var(--warning))]">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-bold text-[hsl(var(--warning))]">
-                        [RESOLUTION ALERTS] - {alerts.count} market{alerts.count !== 1 ? 's' : ''} resolved
-                      </h3>
-                      <button
-                        onClick={() => setShowAlerts(false)}
-                        className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-                      >
-                        DISMISS
-                      </button>
-                    </div>
-
-                    {/* Alert Summary */}
-                    <div className="grid grid-cols-3 gap-4 mb-4 text-center">
-                      <div>
-                        <div className="text-xs text-[hsl(var(--muted-foreground))]">WINS</div>
-                        <div className="text-lg font-bold text-[hsl(var(--bullish))]">{alerts.wins}</div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-[hsl(var(--muted-foreground))]">LOSSES</div>
-                        <div className="text-lg font-bold text-[hsl(var(--bearish))]">{alerts.losses}</div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-[hsl(var(--muted-foreground))]">REALIZED P&L</div>
-                        <div className={`text-lg font-bold ${alerts.totalRealizedPnl >= 0 ? 'text-[hsl(var(--bullish))]' : 'text-[hsl(var(--bearish))]'}`}>
-                          {alerts.totalRealizedPnl >= 0 ? '+' : ''}${alerts.totalRealizedPnl.toFixed(2)}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Individual Alerts */}
-                    <div className="space-y-2 max-h-60 overflow-y-auto">
-                      {alerts.alerts.map((alert) => (
-                        <AlertRow key={alert.id} alert={alert} />
-                      ))}
-                    </div>
-                  </div>
+                  <AlertsCard alerts={alerts} onDismiss={() => setShowAlerts(false)} />
                 )}
 
-                {/* Platform Breakdown */}
-                {Object.keys(portfolio.byPlatform).length > 0 && (
-                  <div className="ascii-box p-4">
-                    <h3 className="text-sm font-bold mb-3">[BY PLATFORM]</h3>
-                    <div className="space-y-2">
-                      {Object.entries(portfolio.byPlatform).map(([platform, data]) => (
-                        <div key={platform} className="flex items-center justify-between text-sm">
-                          <span className="text-[hsl(var(--muted-foreground))]">{platform}</span>
-                          <div className="flex items-center gap-4">
-                            <span>${data.value.toFixed(2)}</span>
-                            <span className={data.value - data.cost >= 0 ? 'text-[hsl(var(--bullish))]' : 'text-[hsl(var(--bearish))]'}>
-                              {data.value - data.cost >= 0 ? '+' : ''}${(data.value - data.cost).toFixed(2)}
-                            </span>
-                            <span className="text-[hsl(var(--muted-foreground))]">{data.count} pos</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                {/* Exposure Breakdown */}
+                <ExposureBreakdown
+                  byCategory={exposureByCategory}
+                  byPlatform={exposureByPlatform}
+                  groupBy={exposureGroupBy}
+                  onGroupByChange={setExposureGroupBy}
+                  onItemClick={handleExposureItemClick}
+                />
+
+                {/* Active Filter Indicator */}
+                {positionFilter && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-[hsl(var(--muted-foreground))]">Filtering by:</span>
+                    <span className="px-2 py-1 bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))]">
+                      {positionFilter.platform || positionFilter.category}
+                    </span>
+                    <button
+                      onClick={clearFilter}
+                      className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                    >
+                      [CLEAR]
+                    </button>
                   </div>
                 )}
-
-                {/* Outcome Breakdown */}
-                <div className="ascii-box p-4">
-                  <h3 className="text-sm font-bold mb-3">[BY OUTCOME]</h3>
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <div className="text-xs text-[hsl(var(--muted-foreground))]">YES</div>
-                      <div className="text-lg font-bold text-[hsl(var(--bullish))]">
-                        ${portfolio.byOutcome.YES.toFixed(2)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-[hsl(var(--muted-foreground))]">NO</div>
-                      <div className="text-lg font-bold text-[hsl(var(--bearish))]">
-                        ${portfolio.byOutcome.NO.toFixed(2)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-[hsl(var(--muted-foreground))]">OTHER</div>
-                      <div className="text-lg font-bold text-[hsl(var(--primary))]">
-                        ${portfolio.byOutcome.OTHER.toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
                 {/* Positions Table */}
-                <div className="ascii-box p-4">
-                  <h3 className="text-sm font-bold mb-3">[POSITIONS]</h3>
-                  {portfolio.positions.length === 0 ? (
-                    <p className="text-sm text-[hsl(var(--muted-foreground))] text-center py-4">
-                      No positions found. Add positions manually or import from your wallet.
-                    </p>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="text-left text-xs text-[hsl(var(--muted-foreground))] border-b border-[hsl(var(--border))]">
-                            <th className="pb-2 pr-4">MARKET</th>
-                            <th className="pb-2 pr-4">OUTCOME</th>
-                            <th className="pb-2 pr-4 text-right">SHARES</th>
-                            <th className="pb-2 pr-4 text-right">AVG COST</th>
-                            <th className="pb-2 pr-4 text-right">CURRENT</th>
-                            <th className="pb-2 pr-4 text-right">VALUE</th>
-                            <th className="pb-2 text-right">P&L</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {portfolio.positions.map((pos) => (
-                            <PositionRow key={pos.id} position={pos} />
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
+                <PositionTable
+                  positions={filteredPositions}
+                  onPositionClick={handlePositionClick}
+                  onSort={handleSort}
+                  onFilter={handleFilter}
+                />
 
                 {/* Refresh Button */}
                 <div className="flex justify-center">
@@ -438,94 +338,124 @@ export default function PortfolioPage() {
 }
 
 // =============================================================================
-// Components
+// Sub-components
 // =============================================================================
 
-interface SummaryCardProps {
-  label: string;
-  value: string;
-  subValue?: string;
-  variant: 'default' | 'muted' | 'bullish' | 'bearish';
+interface ScanResultCardProps {
+  scanResult: WalletScanResponse;
+  onDismiss: () => void;
 }
 
-function SummaryCard({ label, value, subValue, variant }: SummaryCardProps) {
-  const valueColor = {
-    default: 'text-[hsl(var(--foreground))]',
-    muted: 'text-[hsl(var(--muted-foreground))]',
-    bullish: 'text-[hsl(var(--bullish))]',
-    bearish: 'text-[hsl(var(--bearish))]',
-  }[variant];
-
+function ScanResultCard({ scanResult, onDismiss }: ScanResultCardProps) {
   return (
-    <div className="ascii-box p-4">
-      <div className="text-xs text-[hsl(var(--muted-foreground))] mb-1">{label}</div>
-      <div className={`text-xl font-bold ${valueColor}`}>{value}</div>
-      {subValue && (
-        <div className={`text-xs ${valueColor}`}>{subValue}</div>
+    <div className={`ascii-box p-4 ${scanResult.scan.errors.length > 0 ? 'border-[hsl(var(--warning))]' : 'border-[hsl(var(--success))]'}`}>
+      <h3 className="text-sm font-bold mb-2">[SCAN COMPLETE]</h3>
+      <div className="grid grid-cols-3 gap-4 text-center mb-3">
+        <div>
+          <div className="text-xs text-[hsl(var(--muted-foreground))]">POSITIONS FOUND</div>
+          <div className="text-lg font-bold text-[hsl(var(--primary))]">
+            {scanResult.scan.positionsFound}
+          </div>
+        </div>
+        <div>
+          <div className="text-xs text-[hsl(var(--muted-foreground))]">TOTAL VALUE</div>
+          <div className="text-lg font-bold">${scanResult.scan.totalValue.toFixed(2)}</div>
+        </div>
+        {scanResult.import && (
+          <div>
+            <div className="text-xs text-[hsl(var(--muted-foreground))]">IMPORTED</div>
+            <div className="text-lg font-bold text-[hsl(var(--success))]">
+              {scanResult.import.imported}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {scanResult.positions.length > 0 && (
+        <div className="space-y-2 max-h-40 overflow-y-auto">
+          {scanResult.positions.map((pos, idx) => (
+            <div
+              key={idx}
+              className="flex items-center justify-between text-xs p-2 bg-[hsl(var(--background))] border border-[hsl(var(--border))]"
+            >
+              <div className="flex-1 min-w-0">
+                <div className="truncate font-medium">{pos.marketQuestion}</div>
+                <div className="text-[hsl(var(--muted-foreground))]">
+                  {pos.outcomeLabel} • {pos.balanceFormatted.toFixed(2)} shares
+                </div>
+              </div>
+              {pos.currentPrice !== undefined && (
+                <div className="text-right ml-2">
+                  <div className="font-mono">${(pos.balanceFormatted * pos.currentPrice).toFixed(2)}</div>
+                  <div className="text-[hsl(var(--muted-foreground))]">@ ${pos.currentPrice.toFixed(3)}</div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
+
+      {scanResult.scan.errors.length > 0 && (
+        <div className="mt-3 text-xs text-[hsl(var(--warning))]">
+          {scanResult.scan.errors.length} error(s) during scan
+        </div>
+      )}
+
+      <button
+        onClick={onDismiss}
+        className="mt-3 text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+      >
+        DISMISS
+      </button>
     </div>
   );
 }
 
-interface PositionRowProps {
-  position: PortfolioPosition;
+interface AlertsCardProps {
+  alerts: AlertsResponse;
+  onDismiss: () => void;
 }
 
-function PositionRow({ position }: PositionRowProps) {
-  const pnlColor = position.unrealizedPnl >= 0
-    ? 'text-[hsl(var(--bullish))]'
-    : 'text-[hsl(var(--bearish))]';
-
-  const outcomeColor = position.outcome.toUpperCase() === 'YES'
-    ? 'text-[hsl(var(--bullish))]'
-    : position.outcome.toUpperCase() === 'NO'
-      ? 'text-[hsl(var(--bearish))]'
-      : 'text-[hsl(var(--primary))]';
-
+function AlertsCard({ alerts, onDismiss }: AlertsCardProps) {
   return (
-    <tr className="border-b border-[hsl(var(--border))] last:border-0 hover:bg-[hsl(var(--muted))/0.3] transition-colors cursor-pointer group">
-      <td className="py-3 pr-4">
-        <Link href={`/portfolio/position/${position.id}`} className="block">
-          <div className="max-w-[200px]">
-            <div className="truncate font-medium group-hover:text-[hsl(var(--primary))]">{position.marketQuestion}</div>
-            <div className="text-xs text-[hsl(var(--muted-foreground))]">{position.platformName}</div>
+    <div className="ascii-box p-4 border-[hsl(var(--warning))]">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-bold text-[hsl(var(--warning))]">
+          [RESOLUTION ALERTS] - {alerts.count} market{alerts.count !== 1 ? 's' : ''} resolved
+        </h3>
+        <button
+          onClick={onDismiss}
+          className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+        >
+          DISMISS
+        </button>
+      </div>
+
+      {/* Alert Summary */}
+      <div className="grid grid-cols-3 gap-4 mb-4 text-center">
+        <div>
+          <div className="text-xs text-[hsl(var(--muted-foreground))]">WINS</div>
+          <div className="text-lg font-bold text-[hsl(var(--bullish))]">{alerts.wins}</div>
+        </div>
+        <div>
+          <div className="text-xs text-[hsl(var(--muted-foreground))]">LOSSES</div>
+          <div className="text-lg font-bold text-[hsl(var(--bearish))]">{alerts.losses}</div>
+        </div>
+        <div>
+          <div className="text-xs text-[hsl(var(--muted-foreground))]">REALIZED P&L</div>
+          <div className={`text-lg font-bold ${alerts.totalRealizedPnl >= 0 ? 'text-[hsl(var(--bullish))]' : 'text-[hsl(var(--bearish))]'}`}>
+            {alerts.totalRealizedPnl >= 0 ? '+' : ''}${alerts.totalRealizedPnl.toFixed(2)}
           </div>
-        </Link>
-      </td>
-      <td className={`py-3 pr-4 font-bold ${outcomeColor}`}>
-        <Link href={`/portfolio/position/${position.id}`} className="block">
-          {position.outcome.toUpperCase()}
-        </Link>
-      </td>
-      <td className="py-3 pr-4 text-right font-mono">
-        <Link href={`/portfolio/position/${position.id}`} className="block">
-          {position.shares.toFixed(2)}
-        </Link>
-      </td>
-      <td className="py-3 pr-4 text-right font-mono">
-        <Link href={`/portfolio/position/${position.id}`} className="block">
-          ${position.avgCostBasis.toFixed(3)}
-        </Link>
-      </td>
-      <td className="py-3 pr-4 text-right font-mono">
-        <Link href={`/portfolio/position/${position.id}`} className="block">
-          {position.currentPrice !== null ? `$${position.currentPrice.toFixed(3)}` : '--'}
-        </Link>
-      </td>
-      <td className="py-3 pr-4 text-right font-mono">
-        <Link href={`/portfolio/position/${position.id}`} className="block">
-          ${position.currentValue.toFixed(2)}
-        </Link>
-      </td>
-      <td className={`py-3 text-right font-mono ${pnlColor}`}>
-        <Link href={`/portfolio/position/${position.id}`} className="block">
-          <div>{position.unrealizedPnl >= 0 ? '+' : ''}${position.unrealizedPnl.toFixed(2)}</div>
-          <div className="text-xs">
-            {position.unrealizedPnlPct >= 0 ? '+' : ''}{position.unrealizedPnlPct.toFixed(1)}%
-          </div>
-        </Link>
-      </td>
-    </tr>
+        </div>
+      </div>
+
+      {/* Individual Alerts */}
+      <div className="space-y-2 max-h-60 overflow-y-auto">
+        {alerts.alerts.map((alert) => (
+          <AlertRow key={alert.id} alert={alert} />
+        ))}
+      </div>
+    </div>
   );
 }
 
