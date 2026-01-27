@@ -99,7 +99,7 @@ describe('ASCIITable', () => {
         {
           key: 'market',
           label: 'MARKET',
-          render: (value) => <span data-testid="custom-cell">{value}</span>,
+          render: (value) => <span data-testid="custom-cell">{String(value)}</span>,
         },
       ];
       render(<ASCIITable columns={columnsWithRender} data={data} />);

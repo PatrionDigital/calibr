@@ -47,20 +47,20 @@ describe('StatusBar', () => {
     it('triggers action when shortcut key is pressed', () => {
       render(<StatusBar shortcuts={shortcuts} />);
       fireEvent.keyDown(window, { key: 'F1' });
-      expect(shortcuts[0].action).toHaveBeenCalled();
+      expect(shortcuts[0]!.action).toHaveBeenCalled();
     });
 
     it('triggers correct action for each key', () => {
       render(<StatusBar shortcuts={shortcuts} />);
       fireEvent.keyDown(window, { key: 'F5' });
-      expect(shortcuts[2].action).toHaveBeenCalled();
-      expect(shortcuts[0].action).not.toHaveBeenCalled();
+      expect(shortcuts[2]!.action).toHaveBeenCalled();
+      expect(shortcuts[0]!.action).not.toHaveBeenCalled();
     });
 
     it('handles Escape key', () => {
       render(<StatusBar shortcuts={shortcuts} />);
       fireEvent.keyDown(window, { key: 'Escape' });
-      expect(shortcuts[3].action).toHaveBeenCalled();
+      expect(shortcuts[3]!.action).toHaveBeenCalled();
     });
 
     it('ignores unregistered keys', () => {
@@ -74,7 +74,7 @@ describe('StatusBar', () => {
     it('triggers action when shortcut is clicked', () => {
       render(<StatusBar shortcuts={shortcuts} />);
       fireEvent.click(screen.getByText('F1').closest('button')!);
-      expect(shortcuts[0].action).toHaveBeenCalled();
+      expect(shortcuts[0]!.action).toHaveBeenCalled();
     });
   });
 
@@ -113,7 +113,7 @@ describe('StatusBar', () => {
     it('disables keyboard shortcuts when disabled', () => {
       render(<StatusBar shortcuts={shortcuts} disabled />);
       fireEvent.keyDown(window, { key: 'F1' });
-      expect(shortcuts[0].action).not.toHaveBeenCalled();
+      expect(shortcuts[0]!.action).not.toHaveBeenCalled();
     });
 
     it('applies disabled styling', () => {
@@ -128,7 +128,7 @@ describe('StatusBar', () => {
       const { unmount } = render(<StatusBar shortcuts={shortcuts} />);
       unmount();
       fireEvent.keyDown(window, { key: 'F1' });
-      expect(shortcuts[0].action).not.toHaveBeenCalled();
+      expect(shortcuts[0]!.action).not.toHaveBeenCalled();
     });
   });
 });

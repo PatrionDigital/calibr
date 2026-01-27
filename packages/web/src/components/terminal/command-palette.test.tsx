@@ -140,7 +140,7 @@ describe('CommandPalette', () => {
       const onOpenChange = vi.fn();
       render(<CommandPalette commands={commands} open onOpenChange={onOpenChange} />);
       fireEvent.keyDown(screen.getByPlaceholderText('Type a command...'), { key: 'Enter' });
-      expect(commands[0].action).toHaveBeenCalled();
+      expect(commands[0]!.action).toHaveBeenCalled();
       expect(onOpenChange).toHaveBeenCalledWith(false);
     });
   });
@@ -157,7 +157,7 @@ describe('CommandPalette', () => {
       const onOpenChange = vi.fn();
       render(<CommandPalette commands={commands} open onOpenChange={onOpenChange} />);
       fireEvent.click(screen.getByText('View Portfolio'));
-      expect(commands[1].action).toHaveBeenCalled();
+      expect(commands[1]!.action).toHaveBeenCalled();
       expect(onOpenChange).toHaveBeenCalledWith(false);
     });
   });
