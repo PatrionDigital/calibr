@@ -57,3 +57,10 @@ Reference these files in /docs/spec/ for detailed specifications:
 - `pnpm test` - Run tests
 - `forge test` - Run Foundry tests
 - `forge build` - Build contracts
+
+## Deployment Profiles
+
+- **Vercel (calibr-web)**: Frontend deployment at `/packages/web/`
+- **Railway (calibr-api)**: API deployment at `/packages/api/`
+
+Do NOT create new Vercel projects at the root level. The `.vercel/` directory at root is gitignored.
