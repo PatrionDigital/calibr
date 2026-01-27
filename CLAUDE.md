@@ -58,6 +58,15 @@ Reference these files in /docs/spec/ for detailed specifications:
 - `forge test` - Run Foundry tests
 - `forge build` - Build contracts
 
+## Versioning
+
+Follow semantic versioning (X.Y.Z) in `/packages/web/package.json`:
+- **X (Major)**: Breaking changes
+- **Y (Minor)**: New features - bump when adding new functionality
+- **Z (Patch)**: Bug fixes and updates - bump for fixes, refactors, tests
+
+Display format in header: `vX.Y.Z-<git_hash>` (e.g., `v0.2.0-abc123`)
+
 ## Deployment Profiles
 
 - **Vercel (calibr-web)**: Frontend deployment at `/packages/web/`

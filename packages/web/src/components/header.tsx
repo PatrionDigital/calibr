@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ConnectWallet } from './connect-wallet';
+import { getVersionString } from '@/lib/version';
 
 const NAV_ITEMS = [
   { href: '/', label: 'HOME' },
@@ -19,10 +20,15 @@ export function Header() {
   return (
     <header className="border-b border-[hsl(var(--border))] bg-black/90 backdrop-blur sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="text-[hsl(var(--primary))] font-bold text-lg">
-          CALIBR.XYZ
-        </Link>
+        {/* Logo + Version */}
+        <div className="flex items-center gap-3">
+          <Link href="/" className="text-[hsl(var(--primary))] font-bold text-lg">
+            CALIBR.XYZ
+          </Link>
+          <span className="text-[hsl(var(--muted-foreground))] text-xs font-mono">
+            {getVersionString()}
+          </span>
+        </div>
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center gap-4">
