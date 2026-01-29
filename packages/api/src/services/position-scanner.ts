@@ -9,6 +9,13 @@ import {
   ERC1155Scanner,
   type MarketTokenMapping,
 } from '@calibr/adapters';
+import {
+  batchFindPositionsByWalletIds,
+  batchLookupPlatformConfigs,
+  batchLookupPlatformMarkets,
+  batchUpsertPositions,
+  type PositionUpsertData,
+} from '../lib/batch-queries';
 
 // =============================================================================
 // Types
@@ -116,6 +123,7 @@ export class PositionScanner {
 
   /**
    * Get existing positions from database for a wallet
+   * OPTIMIZED: Uses batch query to fetch all wallet positions in single DB call
    */
   private async getExistingPositions(
     address: string,
@@ -138,29 +146,16 @@ export class PositionScanner {
     });
 
     if (walletConnections.length === 0) {
-      // No wallet connections found - return empty
-      // In production, we'd scan on-chain instead
       return [];
     }
 
-    // Get positions for these wallet connections
-    for (const wallet of walletConnections) {
-      const dbPositions = await prisma.position.findMany({
-        where: {
-          walletConnectionId: wallet.id,
-          platform: platform as Platform,
-          shares: { gt: 0 },
-        },
-        include: {
-          platformMarket: {
-            include: {
-              platformConfig: true,
-            },
-          },
-        },
-      });
+    // OPTIMIZED: Batch fetch positions for all wallets in a single query
+    const walletIds = walletConnections.map((w) => w.id);
+    const positionsByWallet = await batchFindPositionsByWalletIds(walletIds, platform);
 
-      for (const pos of dbPositions) {
+    // Process all positions from all wallets
+    for (const walletPositions of positionsByWallet.values()) {
+      for (const pos of walletPositions) {
         const chainId = platform === 'LIMITLESS' ? 8453 : 137; // Base vs Polygon
         const platformData = pos.platformMarket.platformData as Record<string, unknown> | null;
 
@@ -370,6 +365,7 @@ export class PositionScanner {
 
   /**
    * Import scanned positions into the database for a user
+   * OPTIMIZED: Uses batch lookups and batch upserts instead of N+1 queries
    */
   async importPositions(
     userId: string,
@@ -377,72 +373,75 @@ export class PositionScanner {
     walletConnectionId?: string
   ): Promise<{ imported: number; errors: string[] }> {
     const errors: string[] = [];
-    let imported = 0;
 
-    for (const position of scanResult.positions) {
-      try {
-        // Find the platform market
-        const platformConfig = await prisma.platformConfig.findFirst({
-          where: {
-            slug: position.platform.toLowerCase(),
-            isActive: true,
-          },
-        });
+    if (scanResult.positions.length === 0) {
+      return { imported: 0, errors };
+    }
 
-        if (!platformConfig) {
-          errors.push(`Platform config not found for ${position.platform}`);
-          continue;
-        }
+    // STEP 1: Batch lookup all platform configs (cached)
+    const platformSlugs = [...new Set(scanResult.positions.map((p) => p.platform.toLowerCase()))];
+    const platformConfigs = await batchLookupPlatformConfigs(platformSlugs);
 
-        const platformMarket = await prisma.platformMarket.findFirst({
-          where: {
-            platformConfigId: platformConfig.id,
-            externalId: position.marketId,
-          },
-        });
-
-        if (!platformMarket) {
-          errors.push(`Market not found: ${position.marketId}`);
-          continue;
-        }
-
-        // Upsert the position
-        await prisma.position.upsert({
-          where: {
-            userId_platformMarketId_outcome: {
-              userId,
-              platformMarketId: platformMarket.id,
-              outcome: position.outcome,
-            },
-          },
-          create: {
-            userId,
-            platformMarketId: platformMarket.id,
-            outcome: position.outcome,
-            shares: position.balanceFormatted,
-            avgCostBasis: position.costBasis || 0,
-            currentPrice: position.currentPrice,
-            currentValue: position.balanceFormatted * (position.currentPrice || 0),
-            unrealizedPnl: position.unrealizedPnl,
-            platform: position.platform as Platform,
-            walletConnectionId,
-          },
-          update: {
-            shares: position.balanceFormatted,
-            currentPrice: position.currentPrice,
-            currentValue: position.balanceFormatted * (position.currentPrice || 0),
-            unrealizedPnl: position.unrealizedPnl,
-            updatedAt: new Date(),
-          },
-        });
-        imported++;
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        errors.push(`Failed to import position ${position.marketId}: ${message}`);
+    // Validate all platform configs exist
+    for (const slug of platformSlugs) {
+      if (!platformConfigs.has(slug)) {
+        errors.push(`Platform config not found for ${slug}`);
       }
     }
 
-    return { imported, errors };
+    // STEP 2: Batch lookup all platform markets
+    const marketLookupKeys: Array<{ platformConfigId: string; externalId: string }> = [];
+    for (const position of scanResult.positions) {
+      const config = platformConfigs.get(position.platform.toLowerCase());
+      if (config) {
+        marketLookupKeys.push({
+          platformConfigId: config.id,
+          externalId: position.marketId,
+        });
+      }
+    }
+
+    const platformMarkets = await batchLookupPlatformMarkets(marketLookupKeys);
+
+    // STEP 3: Build batch upsert data
+    const upsertData: PositionUpsertData[] = [];
+
+    for (const position of scanResult.positions) {
+      const config = platformConfigs.get(position.platform.toLowerCase());
+      if (!config) {
+        continue; // Already logged error above
+      }
+
+      const marketKey = `${config.id}:${position.marketId}`;
+      const platformMarket = platformMarkets.get(marketKey);
+
+      if (!platformMarket) {
+        errors.push(`Market not found: ${position.marketId}`);
+        continue;
+      }
+
+      upsertData.push({
+        userId,
+        platformMarketId: platformMarket.id,
+        outcome: position.outcome,
+        shares: position.balanceFormatted,
+        avgCostBasis: position.costBasis || 0,
+        currentPrice: position.currentPrice,
+        currentValue: position.balanceFormatted * (position.currentPrice || 0),
+        unrealizedPnl: position.unrealizedPnl,
+        platform: position.platform as Platform,
+        walletConnectionId,
+      });
+    }
+
+    // STEP 4: Batch upsert all positions in a transaction
+    const result = await batchUpsertPositions(upsertData);
+
+    if (!result.success && result.error) {
+      errors.push(`Batch upsert failed: ${result.error}`);
+    }
+
+    return { imported: result.count, errors };
   }
 
   /**
