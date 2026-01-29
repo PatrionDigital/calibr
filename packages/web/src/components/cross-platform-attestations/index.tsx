@@ -239,7 +239,7 @@ interface AttestationPreviewProps {
 
 export function AttestationPreview({ attestation }: AttestationPreviewProps) {
   const tier = attestation.data.tier;
-  const colors = TIER_COLORS[tier] || TIER_COLORS.APPRENTICE;
+  const colors = TIER_COLORS[tier] ?? TIER_COLORS.APPRENTICE!;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(attestation.uid);
@@ -417,7 +417,7 @@ export function AttestationBadge({
   compact,
 }: AttestationBadgeProps) {
   const tier = attestation.data.tier;
-  const colors = TIER_COLORS[tier] || TIER_COLORS.APPRENTICE;
+  const colors = TIER_COLORS[tier] ?? TIER_COLORS.APPRENTICE!;
 
   return (
     <div
