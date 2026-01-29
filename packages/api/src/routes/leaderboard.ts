@@ -219,16 +219,17 @@ leaderboardRoutes.get('/user/:userId', async (c) => {
     );
   }
 
-  // Get surrounding forecasters
-  const totalAbove = calibration.globalRank
-    ? await prisma.userCalibration.count({
-        where: { globalRank: { lt: calibration.globalRank } },
-      })
-    : 0;
-
-  const total = await prisma.userCalibration.count({
-    where: { user: { showOnLeaderboard: true } },
-  });
+  // OPTIMIZED: Get counts in parallel instead of sequentially
+  const [totalAbove, total] = await Promise.all([
+    calibration.globalRank
+      ? prisma.userCalibration.count({
+          where: { globalRank: { lt: calibration.globalRank } },
+        })
+      : Promise.resolve(0),
+    prisma.userCalibration.count({
+      where: { user: { showOnLeaderboard: true } },
+    }),
+  ]);
 
   const percentile = total > 0 ? ((total - (calibration.globalRank || total)) / total) * 100 : 0;
 
@@ -601,18 +602,24 @@ leaderboardRoutes.get('/achievements/stats', async (c) => {
 leaderboardRoutes.post('/achievements/check/:userId', async (c) => {
   const userId = c.req.param('userId');
 
-  // Get user calibration data
-  const calibration = await prisma.userCalibration.findUnique({
-    where: { userId },
-    include: {
-      user: {
-        select: {
-          displayName: true,
-          publicProfile: true,
+  // OPTIMIZED: Fetch calibration and existing unlocks in parallel
+  const [calibration, existingUnlocks] = await Promise.all([
+    prisma.userCalibration.findUnique({
+      where: { userId },
+      include: {
+        user: {
+          select: {
+            displayName: true,
+            publicProfile: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.achievementUnlock.findMany({
+      where: { userId },
+      select: { achievementId: true },
+    }),
+  ]);
 
   if (!calibration) {
     return c.json(
@@ -623,12 +630,6 @@ leaderboardRoutes.post('/achievements/check/:userId', async (c) => {
       404
     );
   }
-
-  // Get already unlocked achievements from DB
-  const existingUnlocks = await prisma.achievementUnlock.findMany({
-    where: { userId },
-    select: { achievementId: true },
-  });
 
   const unlockedIds = new Set(existingUnlocks.map((u) => u.achievementId));
 
