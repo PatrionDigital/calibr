@@ -16,3 +16,14 @@ export type { AchievementProgressProps } from './achievement-progress';
 
 // Re-export shared types
 export type { Achievement, AchievementTier, AchievementCategory } from './types';
+
+// Notification components and hooks
+export {
+  AchievementNotification,
+  AchievementNotificationStack,
+  useAchievementNotifications,
+} from './notifications';
+export type {
+  AchievementNotificationProps,
+  AchievementNotificationStackProps,
+} from './notifications';
