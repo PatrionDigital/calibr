@@ -6,6 +6,7 @@
 import { Hono } from 'hono';
 import { prisma } from '../lib/prisma';
 import { positionScanner } from '../services/position-scanner';
+import { batchLookupPlatformConfigs } from '../lib/batch-queries';
 
 export const portfolioRoutes = new Hono();
 
@@ -286,10 +287,9 @@ portfolioRoutes.post('/positions', async (c) => {
   }
 
   try {
-    // Find the platform config
-    const platformConfig = await prisma.platformConfig.findUnique({
-      where: { slug: platform.toLowerCase() },
-    });
+    // OPTIMIZED: Use cached platform config lookup
+    const platformConfigs = await batchLookupPlatformConfigs([platform.toLowerCase()]);
+    const platformConfig = platformConfigs.get(platform.toLowerCase());
 
     if (!platformConfig) {
       return c.json({ success: false, error: 'Platform not found' }, 404);
@@ -590,14 +590,28 @@ portfolioRoutes.get('/alerts', async (c) => {
       };
     });
 
+    // OPTIMIZED: Single pass instead of 3 separate array iterations
+    const stats = alerts.reduce(
+      (acc, a) => {
+        if (a.isWinner) {
+          acc.wins++;
+        } else {
+          acc.losses++;
+        }
+        acc.totalRealizedPnl += a.realizedPnl;
+        return acc;
+      },
+      { wins: 0, losses: 0, totalRealizedPnl: 0 }
+    );
+
     return c.json({
       success: true,
       data: {
         alerts,
         count: alerts.length,
-        wins: alerts.filter((a) => a.isWinner).length,
-        losses: alerts.filter((a) => !a.isWinner).length,
-        totalRealizedPnl: alerts.reduce((sum, a) => sum + a.realizedPnl, 0),
+        wins: stats.wins,
+        losses: stats.losses,
+        totalRealizedPnl: stats.totalRealizedPnl,
       },
     });
   } catch (error) {
