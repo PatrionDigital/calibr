@@ -127,7 +127,7 @@ describe('CoinbaseVerificationBadge', () => {
 // =============================================================================
 
 describe('CoinbaseAttestationCard', () => {
-  const mockAttestation = mockAttestations[0];
+  const mockAttestation = mockAttestations[0]!;
 
   it('should render card', () => {
     render(<CoinbaseAttestationCard attestation={mockAttestation} />);
@@ -176,7 +176,7 @@ describe('CoinbaseAttestationCard', () => {
   });
 
   it('should show metadata when available', () => {
-    const attestationWithMeta = mockAttestations[1];
+    const attestationWithMeta = mockAttestations[1]!;
     render(<CoinbaseAttestationCard attestation={attestationWithMeta} />);
     expect(screen.getByText(/US/)).toBeInTheDocument();
   });
@@ -326,9 +326,9 @@ describe('CoinbaseAttestationList', () => {
   });
 
   it('should filter by status', () => {
-    const mixedAttestations = [
+    const mixedAttestations: CoinbaseAttestation[] = [
       ...mockAttestations,
-      { ...mockAttestations[0], id: 'cb4', status: 'expired' as const },
+      { ...mockAttestations[0]!, id: 'cb4', status: 'expired' as const },
     ];
     render(<CoinbaseAttestationList attestations={mixedAttestations} filter="active" />);
     expect(screen.getAllByTestId('coinbase-attestation-card')).toHaveLength(3);
@@ -541,7 +541,7 @@ describe('Verification Level Styling', () => {
 describe('Edge Cases', () => {
   it('should handle expired attestations gracefully', () => {
     const expiredAttestation: CoinbaseAttestation = {
-      ...mockAttestations[0],
+      ...mockAttestations[0]!,
       status: 'expired',
       expiresAt: Date.now() - 86400000,
     };
@@ -551,7 +551,7 @@ describe('Edge Cases', () => {
 
   it('should handle revoked attestations', () => {
     const revokedAttestation: CoinbaseAttestation = {
-      ...mockAttestations[0],
+      ...mockAttestations[0]!,
       status: 'revoked',
     };
     render(<CoinbaseAttestationCard attestation={revokedAttestation} />);
@@ -560,7 +560,7 @@ describe('Edge Cases', () => {
 
   it('should handle missing metadata', () => {
     const noMetaAttestation: CoinbaseAttestation = {
-      ...mockAttestations[0],
+      ...mockAttestations[0]!,
       metadata: undefined,
     };
     render(<CoinbaseAttestationCard attestation={noMetaAttestation} />);
