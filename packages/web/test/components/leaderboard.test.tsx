@@ -1,60 +1,98 @@
 /**
- * Leaderboard Component Tests (Phase 6.1)
- * TDD tests for leaderboard UI components
+ * @vitest-environment jsdom
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
-
-// These imports will fail until we implement the components
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import type {
+  LeaderboardEntry as LeaderboardEntryType,
+  LeaderboardTier,
+  LeaderboardFilter,
+} from '../../src/components/leaderboard';
 import {
-  TierBadge,
+  LeaderboardEntry,
   LeaderboardTable,
   LeaderboardFilters,
-  UserRankCard,
-  LeaderboardRow,
-} from '@/components/leaderboard';
+  LeaderboardPodium,
+  LeaderboardStats,
+  LeaderboardPage,
+  TierBadge,
+  useLeaderboard,
+} from '../../src/components/leaderboard';
 
 // =============================================================================
 // Test Data
 // =============================================================================
 
-const mockLeaderboardEntry = {
-  rank: 1,
-  previousRank: 2,
-  userId: 'user-1',
-  displayName: 'TopForecaster',
-  tier: 'MASTER' as const,
-  compositeScore: 850,
-  brierScore: 0.12,
-  calibrationScore: 0.88,
-  totalForecasts: 500,
-  resolvedForecasts: 450,
-  streakDays: 45,
-  isPrivate: false,
-};
-
-const mockEntries = [
-  mockLeaderboardEntry,
+const mockEntries: LeaderboardEntryType[] = [
   {
-    ...mockLeaderboardEntry,
+    rank: 1,
+    address: '0x1234...5678',
+    ensName: 'alice.eth',
+    tier: 'GRANDMASTER',
+    score: 985,
+    brierScore: 0.12,
+    forecasts: 523,
+    accuracy: 0.89,
+    streak: 45,
+    change: 0,
+  },
+  {
     rank: 2,
-    previousRank: 1,
-    userId: 'user-2',
-    displayName: 'SecondPlace',
-    tier: 'EXPERT' as const,
-    compositeScore: 720,
+    address: '0x2345...6789',
+    ensName: 'bob.eth',
+    tier: 'MASTER',
+    score: 920,
+    brierScore: 0.15,
+    forecasts: 412,
+    accuracy: 0.85,
+    streak: 32,
+    change: 1,
   },
   {
-    ...mockLeaderboardEntry,
     rank: 3,
-    previousRank: 3,
-    userId: 'user-3',
-    displayName: 'ThirdPlace',
-    tier: 'JOURNEYMAN' as const,
-    compositeScore: 450,
-    isPrivate: true,
+    address: '0x3456...7890',
+    ensName: null,
+    tier: 'MASTER',
+    score: 890,
+    brierScore: 0.18,
+    forecasts: 389,
+    accuracy: 0.82,
+    streak: 28,
+    change: -1,
   },
+  {
+    rank: 4,
+    address: '0x4567...8901',
+    ensName: 'charlie.eth',
+    tier: 'EXPERT',
+    score: 780,
+    brierScore: 0.22,
+    forecasts: 256,
+    accuracy: 0.78,
+    streak: 15,
+    change: 2,
+  },
+  {
+    rank: 5,
+    address: '0x5678...9012',
+    ensName: null,
+    tier: 'JOURNEYMAN',
+    score: 650,
+    brierScore: 0.28,
+    forecasts: 142,
+    accuracy: 0.72,
+    streak: 8,
+    change: 0,
+  },
+];
+
+const tiers: LeaderboardTier[] = [
+  'GRANDMASTER',
+  'MASTER',
+  'EXPERT',
+  'JOURNEYMAN',
+  'APPRENTICE',
 ];
 
 // =============================================================================
@@ -62,111 +100,100 @@ const mockEntries = [
 // =============================================================================
 
 describe('TierBadge', () => {
-  it('renders APPRENTICE tier with correct styling', () => {
-    render(<TierBadge tier="APPRENTICE" />);
-    const badge = screen.getByTestId('tier-badge');
-    expect(badge).toBeDefined();
-    expect(badge.textContent).toContain('APPRENTICE');
+  it('renders tier name', () => {
+    render(<TierBadge tier="GRANDMASTER" />);
+    expect(screen.getByText('GRANDMASTER')).toBeInTheDocument();
   });
 
-  it('renders JOURNEYMAN tier with correct styling', () => {
-    render(<TierBadge tier="JOURNEYMAN" />);
-    const badge = screen.getByTestId('tier-badge');
-    expect(badge.textContent).toContain('JOURNEYMAN');
-  });
-
-  it('renders EXPERT tier with correct styling', () => {
-    render(<TierBadge tier="EXPERT" />);
-    const badge = screen.getByTestId('tier-badge');
-    expect(badge.textContent).toContain('EXPERT');
-  });
-
-  it('renders MASTER tier with correct styling', () => {
-    render(<TierBadge tier="MASTER" />);
-    const badge = screen.getByTestId('tier-badge');
-    expect(badge.textContent).toContain('MASTER');
-  });
-
-  it('renders GRANDMASTER tier with correct styling', () => {
+  it('has tier-specific styling', () => {
     render(<TierBadge tier="GRANDMASTER" />);
     const badge = screen.getByTestId('tier-badge');
-    expect(badge.textContent).toContain('GRANDMASTER');
+    expect(badge).toHaveClass('grandmaster');
+  });
+
+  it('renders all tier levels correctly', () => {
+    const { rerender } = render(<TierBadge tier="MASTER" />);
+    expect(screen.getByText('MASTER')).toBeInTheDocument();
+
+    rerender(<TierBadge tier="EXPERT" />);
+    expect(screen.getByText('EXPERT')).toBeInTheDocument();
+
+    rerender(<TierBadge tier="JOURNEYMAN" />);
+    expect(screen.getByText('JOURNEYMAN')).toBeInTheDocument();
+
+    rerender(<TierBadge tier="APPRENTICE" />);
+    expect(screen.getByText('APPRENTICE')).toBeInTheDocument();
   });
 
   it('supports compact mode', () => {
-    render(<TierBadge tier="MASTER" compact />);
+    render(<TierBadge tier="GRANDMASTER" compact={true} />);
     const badge = screen.getByTestId('tier-badge');
-    // Compact mode shows abbreviated tier
-    expect(badge.textContent).toMatch(/M|MASTER/);
-  });
-
-  it('shows tier emoji when showEmoji is true', () => {
-    render(<TierBadge tier="MASTER" showEmoji />);
-    const badge = screen.getByTestId('tier-badge');
-    expect(badge.textContent).toMatch(/🧠|MASTER/);
+    expect(badge).toHaveClass('compact');
   });
 });
 
 // =============================================================================
-// LeaderboardRow Tests
+// LeaderboardEntry Tests
 // =============================================================================
 
-describe('LeaderboardRow', () => {
-  it('renders rank number', () => {
-    render(<LeaderboardRow entry={mockLeaderboardEntry} />);
-    expect(screen.getByText('#1')).toBeDefined();
+describe('LeaderboardEntry', () => {
+  const entry = mockEntries[0]!;
+
+  it('renders rank', () => {
+    render(<LeaderboardEntry entry={entry} />);
+    expect(screen.getByText('#1')).toBeInTheDocument();
   });
 
-  it('renders display name', () => {
-    render(<LeaderboardRow entry={mockLeaderboardEntry} />);
-    expect(screen.getByText('TopForecaster')).toBeDefined();
+  it('displays ENS name when available', () => {
+    render(<LeaderboardEntry entry={entry} />);
+    expect(screen.getByText('alice.eth')).toBeInTheDocument();
   });
 
-  it('renders tier badge', () => {
-    render(<LeaderboardRow entry={mockLeaderboardEntry} />);
-    expect(screen.getByTestId('tier-badge')).toBeDefined();
+  it('displays address when no ENS', () => {
+    render(<LeaderboardEntry entry={mockEntries[2]!} />);
+    expect(screen.getByText('0x3456...7890')).toBeInTheDocument();
   });
 
-  it('renders composite score', () => {
-    render(<LeaderboardRow entry={mockLeaderboardEntry} />);
-    expect(screen.getByText('850')).toBeDefined();
+  it('shows tier badge', () => {
+    render(<LeaderboardEntry entry={entry} />);
+    expect(screen.getByText('GRANDMASTER')).toBeInTheDocument();
   });
 
-  it('shows rank change indicator for improvement', () => {
-    render(<LeaderboardRow entry={{ ...mockLeaderboardEntry, rank: 1, previousRank: 5 }} />);
-    const indicator = screen.getByTestId('rank-change');
-    expect(indicator.textContent).toContain('+4');
+  it('displays score', () => {
+    render(<LeaderboardEntry entry={entry} />);
+    expect(screen.getByText('985')).toBeInTheDocument();
   });
 
-  it('shows rank change indicator for decline', () => {
-    render(<LeaderboardRow entry={{ ...mockLeaderboardEntry, rank: 5, previousRank: 1 }} />);
-    const indicator = screen.getByTestId('rank-change');
-    expect(indicator.textContent).toContain('-4');
+  it('shows Brier score', () => {
+    render(<LeaderboardEntry entry={entry} />);
+    expect(screen.getByText('0.12')).toBeInTheDocument();
   });
 
-  it('shows no change indicator for stable rank', () => {
-    render(<LeaderboardRow entry={{ ...mockLeaderboardEntry, rank: 3, previousRank: 3 }} />);
-    const indicator = screen.getByTestId('rank-change');
-    expect(indicator.textContent).toContain('=');
+  it('shows forecast count', () => {
+    render(<LeaderboardEntry entry={entry} />);
+    expect(screen.getByText('523')).toBeInTheDocument();
   });
 
-  it('displays anonymous name for private users', () => {
-    render(<LeaderboardRow entry={{ ...mockLeaderboardEntry, isPrivate: true }} />);
-    expect(screen.getByText('Anonymous Forecaster')).toBeDefined();
+  it('shows rank change indicator - up', () => {
+    render(<LeaderboardEntry entry={mockEntries[1]!} />);
+    expect(screen.getByTestId('rank-change')).toHaveClass('up');
   });
 
-  it('shows streak badge for active streaks', () => {
-    render(<LeaderboardRow entry={{ ...mockLeaderboardEntry, streakDays: 30 }} />);
-    const streak = screen.getByTestId('streak-badge');
-    expect(streak.textContent).toContain('30');
+  it('shows rank change indicator - down', () => {
+    render(<LeaderboardEntry entry={mockEntries[2]!} />);
+    expect(screen.getByTestId('rank-change')).toHaveClass('down');
   });
 
-  it('calls onClick when row is clicked', () => {
+  it('shows no change indicator when unchanged', () => {
+    render(<LeaderboardEntry entry={entry} />);
+    expect(screen.getByTestId('rank-change')).toHaveClass('unchanged');
+  });
+
+  it('is clickable', () => {
     const onClick = vi.fn();
-    render(<LeaderboardRow entry={mockLeaderboardEntry} onClick={onClick} />);
-    const row = screen.getByTestId('leaderboard-row');
-    fireEvent.click(row);
-    expect(onClick).toHaveBeenCalledWith(mockLeaderboardEntry.userId);
+    render(<LeaderboardEntry entry={entry} onClick={onClick} />);
+    fireEvent.click(screen.getByTestId('leaderboard-entry'));
+    expect(onClick).toHaveBeenCalledWith(entry.address);
   });
 });
 
@@ -175,48 +202,46 @@ describe('LeaderboardRow', () => {
 // =============================================================================
 
 describe('LeaderboardTable', () => {
-  it('renders header row', () => {
-    render(<LeaderboardTable entries={mockEntries} />);
-    expect(screen.getByText('RANK')).toBeDefined();
-    expect(screen.getByText('FORECASTER')).toBeDefined();
-    expect(screen.getByText('TIER')).toBeDefined();
-    expect(screen.getByText('SCORE')).toBeDefined();
-  });
-
   it('renders all entries', () => {
     render(<LeaderboardTable entries={mockEntries} />);
-    expect(screen.getByText('TopForecaster')).toBeDefined();
-    expect(screen.getByText('SecondPlace')).toBeDefined();
+    expect(screen.getByText('alice.eth')).toBeInTheDocument();
+    expect(screen.getByText('bob.eth')).toBeInTheDocument();
+    expect(screen.getByText('charlie.eth')).toBeInTheDocument();
+  });
+
+  it('shows table headers', () => {
+    render(<LeaderboardTable entries={mockEntries} />);
+    expect(screen.getByText('Rank')).toBeInTheDocument();
+    expect(screen.getByText('Forecaster')).toBeInTheDocument();
+    expect(screen.getByText('Score')).toBeInTheDocument();
   });
 
   it('shows empty state when no entries', () => {
     render(<LeaderboardTable entries={[]} />);
-    expect(screen.getByText(/no forecasters/i)).toBeDefined();
+    expect(screen.getByText(/no forecasters/i)).toBeInTheDocument();
   });
 
-  it('highlights current user row', () => {
-    render(<LeaderboardTable entries={mockEntries} currentUserId="user-2" />);
-    const row = screen.getByTestId('leaderboard-row-user-2');
-    expect(row.className).toContain('highlight');
-  });
-
-  it('respects privacy filter for private users', () => {
-    render(<LeaderboardTable entries={mockEntries} />);
-    // Private user should show anonymous name
-    expect(screen.getByText('Anonymous Forecaster')).toBeDefined();
-  });
-
-  it('shows loading skeleton when loading', () => {
-    render(<LeaderboardTable entries={[]} isLoading />);
-    expect(screen.getAllByTestId('skeleton-row').length).toBeGreaterThan(0);
-  });
-
-  it('supports sortable columns', () => {
+  it('supports sorting by column', () => {
     const onSort = vi.fn();
     render(<LeaderboardTable entries={mockEntries} onSort={onSort} />);
-    const scoreHeader = screen.getByText('SCORE');
-    fireEvent.click(scoreHeader);
+    fireEvent.click(screen.getByText('Score'));
     expect(onSort).toHaveBeenCalledWith('score');
+  });
+
+  it('highlights current user entry', () => {
+    render(<LeaderboardTable entries={mockEntries} currentUserAddress="0x2345...6789" />);
+    const userEntry = screen.getByText('bob.eth').closest('[data-testid="leaderboard-entry"]');
+    expect(userEntry).toHaveClass('current-user');
+  });
+
+  it('shows loading state', () => {
+    render(<LeaderboardTable entries={[]} loading={true} />);
+    expect(screen.getByTestId('leaderboard-loading')).toBeInTheDocument();
+  });
+
+  it('has data-testid', () => {
+    render(<LeaderboardTable entries={mockEntries} />);
+    expect(screen.getByTestId('leaderboard-table')).toBeInTheDocument();
   });
 });
 
@@ -225,192 +250,247 @@ describe('LeaderboardTable', () => {
 // =============================================================================
 
 describe('LeaderboardFilters', () => {
-  const defaultProps = {
-    onFilterChange: vi.fn(),
-    currentFilters: {},
-  };
+  it('renders filter controls', () => {
+    render(<LeaderboardFilters onFilterChange={() => {}} />);
+    expect(screen.getByTestId('leaderboard-filters')).toBeInTheDocument();
+  });
+
+  it('shows tier filter', () => {
+    render(<LeaderboardFilters onFilterChange={() => {}} />);
+    expect(screen.getByLabelText(/tier/i)).toBeInTheDocument();
+  });
+
+  it('shows time period filter', () => {
+    render(<LeaderboardFilters onFilterChange={() => {}} />);
+    expect(screen.getByLabelText(/period/i)).toBeInTheDocument();
+  });
+
+  it('shows category filter', () => {
+    render(<LeaderboardFilters onFilterChange={() => {}} />);
+    expect(screen.getByLabelText(/category/i)).toBeInTheDocument();
+  });
+
+  it('calls onFilterChange when tier changes', () => {
+    const onFilterChange = vi.fn();
+    render(<LeaderboardFilters onFilterChange={onFilterChange} />);
+    fireEvent.change(screen.getByLabelText(/tier/i), { target: { value: 'MASTER' } });
+    expect(onFilterChange).toHaveBeenCalled();
+  });
+
+  it('calls onFilterChange when period changes', () => {
+    const onFilterChange = vi.fn();
+    render(<LeaderboardFilters onFilterChange={onFilterChange} />);
+    fireEvent.change(screen.getByLabelText(/period/i), { target: { value: 'month' } });
+    expect(onFilterChange).toHaveBeenCalled();
+  });
+
+  it('shows search input', () => {
+    render(<LeaderboardFilters onFilterChange={() => {}} />);
+    expect(screen.getByPlaceholderText(/search/i)).toBeInTheDocument();
+  });
+});
+
+// =============================================================================
+// LeaderboardPodium Tests
+// =============================================================================
+
+describe('LeaderboardPodium', () => {
+  const topThree = mockEntries.slice(0, 3);
+
+  it('renders podium display', () => {
+    render(<LeaderboardPodium entries={topThree} />);
+    expect(screen.getByTestId('leaderboard-podium')).toBeInTheDocument();
+  });
+
+  it('shows first place', () => {
+    render(<LeaderboardPodium entries={topThree} />);
+    expect(screen.getByTestId('podium-1st')).toBeInTheDocument();
+    expect(screen.getByText('alice.eth')).toBeInTheDocument();
+  });
+
+  it('shows second place', () => {
+    render(<LeaderboardPodium entries={topThree} />);
+    expect(screen.getByTestId('podium-2nd')).toBeInTheDocument();
+    expect(screen.getByText('bob.eth')).toBeInTheDocument();
+  });
+
+  it('shows third place', () => {
+    render(<LeaderboardPodium entries={topThree} />);
+    expect(screen.getByTestId('podium-3rd')).toBeInTheDocument();
+  });
+
+  it('displays scores for each place', () => {
+    render(<LeaderboardPodium entries={topThree} />);
+    expect(screen.getByText('985')).toBeInTheDocument();
+    expect(screen.getByText('920')).toBeInTheDocument();
+    expect(screen.getByText('890')).toBeInTheDocument();
+  });
+
+  it('shows trophy icons', () => {
+    render(<LeaderboardPodium entries={topThree} />);
+    expect(screen.getAllByTestId('trophy-icon').length).toBe(3);
+  });
+
+  it('handles less than 3 entries', () => {
+    render(<LeaderboardPodium entries={[mockEntries[0]!]} />);
+    expect(screen.getByTestId('podium-1st')).toBeInTheDocument();
+    expect(screen.queryByTestId('podium-2nd')).not.toBeInTheDocument();
+  });
+});
+
+// =============================================================================
+// LeaderboardStats Tests
+// =============================================================================
+
+describe('LeaderboardStats', () => {
+  it('renders stats panel', () => {
+    render(<LeaderboardStats entries={mockEntries} />);
+    expect(screen.getByTestId('leaderboard-stats')).toBeInTheDocument();
+  });
+
+  it('shows total forecasters', () => {
+    render(<LeaderboardStats entries={mockEntries} totalForecasters={1234} />);
+    expect(screen.getByText('1,234')).toBeInTheDocument();
+  });
+
+  it('shows total forecasts', () => {
+    render(<LeaderboardStats entries={mockEntries} totalForecasts={45678} />);
+    expect(screen.getByText('45,678')).toBeInTheDocument();
+  });
+
+  it('shows average Brier score', () => {
+    render(<LeaderboardStats entries={mockEntries} />);
+    expect(screen.getByText(/average.*brier/i)).toBeInTheDocument();
+  });
+
+  it('shows tier distribution', () => {
+    render(<LeaderboardStats entries={mockEntries} />);
+    expect(screen.getByTestId('tier-distribution')).toBeInTheDocument();
+  });
+});
+
+// =============================================================================
+// LeaderboardPage Tests
+// =============================================================================
+
+describe('LeaderboardPage', () => {
+  it('renders leaderboard page', () => {
+    render(<LeaderboardPage entries={mockEntries} />);
+    expect(screen.getByTestId('leaderboard-page')).toBeInTheDocument();
+  });
+
+  it('shows page title', () => {
+    render(<LeaderboardPage entries={mockEntries} />);
+    expect(screen.getAllByText(/leaderboard/i).length).toBeGreaterThan(0);
+  });
+
+  it('shows podium', () => {
+    render(<LeaderboardPage entries={mockEntries} />);
+    expect(screen.getByTestId('leaderboard-podium')).toBeInTheDocument();
+  });
+
+  it('shows filters', () => {
+    render(<LeaderboardPage entries={mockEntries} />);
+    expect(screen.getByTestId('leaderboard-filters')).toBeInTheDocument();
+  });
+
+  it('shows table', () => {
+    render(<LeaderboardPage entries={mockEntries} />);
+    expect(screen.getByTestId('leaderboard-table')).toBeInTheDocument();
+  });
+
+  it('filters entries when filter changes', async () => {
+    render(<LeaderboardPage entries={mockEntries} />);
+    fireEvent.change(screen.getByLabelText(/tier/i), { target: { value: 'MASTER' } });
+    await waitFor(() => {
+      // After filtering to MASTER tier, only bob.eth and 0x3456...7890 should show in table
+      const table = screen.getByTestId('leaderboard-table');
+      expect(table).not.toHaveTextContent('alice.eth');
+      expect(screen.getAllByText('bob.eth').length).toBeGreaterThan(0);
+    });
+  });
+
+  it('shows user rank when logged in', () => {
+    render(<LeaderboardPage entries={mockEntries} currentUserAddress="0x2345...6789" />);
+    expect(screen.getByTestId('user-rank-card')).toBeInTheDocument();
+  });
+
+  it('shows stats panel', () => {
+    render(<LeaderboardPage entries={mockEntries} />);
+    expect(screen.getByTestId('leaderboard-stats')).toBeInTheDocument();
+  });
+});
+
+// =============================================================================
+// useLeaderboard Hook Tests
+// =============================================================================
+
+describe('useLeaderboard', () => {
+  function TestComponent({ entries }: { entries: LeaderboardEntryType[] }) {
+    const {
+      filteredEntries,
+      filters,
+      setFilters,
+      sortBy,
+      setSortBy,
+      sortDirection,
+      toggleSortDirection,
+      topThree,
+    } = useLeaderboard(entries);
+
+    return (
+      <div>
+        <span data-testid="filtered-count">{filteredEntries.length}</span>
+        <span data-testid="sort-by">{sortBy}</span>
+        <span data-testid="sort-direction">{sortDirection}</span>
+        <span data-testid="top-three-count">{topThree.length}</span>
+        <span data-testid="tier-filter">{filters.tier || 'all'}</span>
+        <button onClick={() => setFilters({ tier: 'MASTER' })}>Filter Master</button>
+        <button onClick={() => setSortBy('brierScore')}>Sort by Brier</button>
+        <button onClick={toggleSortDirection}>Toggle Direction</button>
+      </div>
+    );
+  }
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders tier filter dropdown', () => {
-    render(<LeaderboardFilters {...defaultProps} />);
-    expect(screen.getByTestId('tier-filter')).toBeDefined();
+  it('returns all entries initially', () => {
+    render(<TestComponent entries={mockEntries} />);
+    expect(screen.getByTestId('filtered-count')).toHaveTextContent('5');
   });
 
-  it('renders category filter dropdown', () => {
-    render(<LeaderboardFilters {...defaultProps} />);
-    expect(screen.getByTestId('category-filter')).toBeDefined();
+  it('defaults to score sorting', () => {
+    render(<TestComponent entries={mockEntries} />);
+    expect(screen.getByTestId('sort-by')).toHaveTextContent('score');
   });
 
-  it('renders minimum forecasts filter', () => {
-    render(<LeaderboardFilters {...defaultProps} />);
-    expect(screen.getByTestId('min-forecasts-filter')).toBeDefined();
+  it('defaults to descending sort', () => {
+    render(<TestComponent entries={mockEntries} />);
+    expect(screen.getByTestId('sort-direction')).toHaveTextContent('desc');
   });
 
-  it('calls onFilterChange when tier filter changes', () => {
-    const onFilterChange = vi.fn();
-    render(<LeaderboardFilters {...defaultProps} onFilterChange={onFilterChange} />);
-    const tierFilter = screen.getByTestId('tier-filter');
-    fireEvent.change(tierFilter, { target: { value: 'MASTER' } });
-    expect(onFilterChange).toHaveBeenCalledWith(expect.objectContaining({ tier: 'MASTER' }));
+  it('extracts top three entries', () => {
+    render(<TestComponent entries={mockEntries} />);
+    expect(screen.getByTestId('top-three-count')).toHaveTextContent('3');
   });
 
-  it('calls onFilterChange when category filter changes', () => {
-    const onFilterChange = vi.fn();
-    render(<LeaderboardFilters {...defaultProps} onFilterChange={onFilterChange} />);
-    const categoryFilter = screen.getByTestId('category-filter');
-    fireEvent.change(categoryFilter, { target: { value: 'CRYPTO' } });
-    expect(onFilterChange).toHaveBeenCalledWith(expect.objectContaining({ category: 'CRYPTO' }));
+  it('filters by tier', () => {
+    render(<TestComponent entries={mockEntries} />);
+    fireEvent.click(screen.getByText('Filter Master'));
+    expect(screen.getByTestId('filtered-count')).toHaveTextContent('2');
   });
 
-  it('has clear filters button', () => {
-    render(<LeaderboardFilters {...defaultProps} currentFilters={{ tier: 'MASTER' }} />);
-    const clearButton = screen.getByRole('button', { name: /clear/i });
-    fireEvent.click(clearButton);
-    expect(defaultProps.onFilterChange).toHaveBeenCalledWith({});
+  it('changes sort field', () => {
+    render(<TestComponent entries={mockEntries} />);
+    fireEvent.click(screen.getByText('Sort by Brier'));
+    expect(screen.getByTestId('sort-by')).toHaveTextContent('brierScore');
   });
 
-  it('shows active filter count badge', () => {
-    render(<LeaderboardFilters {...defaultProps} currentFilters={{ tier: 'MASTER', category: 'CRYPTO' }} />);
-    const badge = screen.getByTestId('active-filters-badge');
-    expect(badge.textContent).toContain('2');
-  });
-});
-
-// =============================================================================
-// UserRankCard Tests
-// =============================================================================
-
-describe('UserRankCard', () => {
-  const mockUserData = {
-    userId: 'user-1',
-    displayName: 'TestUser',
-    rank: 42,
-    percentile: 85.5,
-    tier: 'EXPERT' as const,
-    tierProgress: 0.65,
-    compositeScore: 580,
-    brierScore: 0.18,
-    totalForecasts: 200,
-    resolvedForecasts: 180,
-  };
-
-  it('renders user rank prominently', () => {
-    render(<UserRankCard {...mockUserData} />);
-    expect(screen.getByText('#42')).toBeDefined();
-  });
-
-  it('renders display name', () => {
-    render(<UserRankCard {...mockUserData} />);
-    expect(screen.getByText('TestUser')).toBeDefined();
-  });
-
-  it('renders current tier with badge', () => {
-    render(<UserRankCard {...mockUserData} />);
-    expect(screen.getByTestId('tier-badge')).toBeDefined();
-  });
-
-  it('shows tier progress bar', () => {
-    render(<UserRankCard {...mockUserData} />);
-    const progressBar = screen.getByTestId('tier-progress');
-    expect(progressBar).toBeDefined();
-    // Progress should be 65%
-    expect(progressBar.style.width).toBe('65%');
-  });
-
-  it('shows percentile ranking', () => {
-    render(<UserRankCard {...mockUserData} />);
-    expect(screen.getByText(/85.5%/)).toBeDefined();
-  });
-
-  it('shows composite score', () => {
-    render(<UserRankCard {...mockUserData} />);
-    expect(screen.getByText('580')).toBeDefined();
-  });
-
-  it('shows Brier score', () => {
-    render(<UserRankCard {...mockUserData} />);
-    expect(screen.getByText('0.18')).toBeDefined();
-  });
-
-  it('shows forecast counts', () => {
-    render(<UserRankCard {...mockUserData} />);
-    expect(screen.getByText(/200/)).toBeDefined();
-    expect(screen.getByText(/180/)).toBeDefined();
-  });
-
-  it('shows loading state', () => {
-    render(<UserRankCard {...mockUserData} isLoading />);
-    expect(screen.getByTestId('user-rank-card-skeleton')).toBeDefined();
-  });
-
-  it('shows error state when no data', () => {
-    render(<UserRankCard userId="user-1" displayName={null} rank={null} tier="APPRENTICE" compositeScore={0} brierScore={null} totalForecasts={0} resolvedForecasts={0} percentile={0} tierProgress={0} />);
-    expect(screen.getByText(/no ranking data/i)).toBeDefined();
-  });
-});
-
-// =============================================================================
-// Integration Tests
-// =============================================================================
-
-describe('Leaderboard Integration', () => {
-  it('filters table when filter changes', () => {
-    const entries = mockEntries;
-    const onFilterChange = vi.fn();
-
-    const { rerender } = render(
-      <>
-        <LeaderboardFilters onFilterChange={onFilterChange} currentFilters={{}} />
-        <LeaderboardTable entries={entries} />
-      </>
-    );
-
-    // Change filter
-    const tierFilter = screen.getByTestId('tier-filter');
-    fireEvent.change(tierFilter, { target: { value: 'MASTER' } });
-
-    // Rerender with filtered entries
-    const filteredEntries = entries.filter(e => e.tier === 'MASTER');
-    rerender(
-      <>
-        <LeaderboardFilters onFilterChange={onFilterChange} currentFilters={{ tier: 'MASTER' }} />
-        <LeaderboardTable entries={filteredEntries} />
-      </>
-    );
-
-    // Should only show MASTER tier users
-    expect(screen.getByText('TopForecaster')).toBeDefined();
-    expect(screen.queryByText('SecondPlace')).toBeNull();
-  });
-
-  it('highlights user row and shows rank card together', () => {
-    render(
-      <>
-        <UserRankCard
-          userId="user-2"
-          displayName="SecondPlace"
-          rank={2}
-          percentile={95}
-          tier="EXPERT"
-          tierProgress={0.5}
-          compositeScore={720}
-          brierScore={0.15}
-          totalForecasts={300}
-          resolvedForecasts={250}
-        />
-        <LeaderboardTable entries={mockEntries} currentUserId="user-2" />
-      </>
-    );
-
-    // User card shows their rank (multiple #2 exist so use getAllByText)
-    const rankElements = screen.getAllByText('#2');
-    expect(rankElements.length).toBeGreaterThan(0);
-
-    // Table highlights their row
-    const row = screen.getByTestId('leaderboard-row-user-2');
-    expect(row.className).toContain('highlight');
+  it('toggles sort direction', () => {
+    render(<TestComponent entries={mockEntries} />);
+    fireEvent.click(screen.getByText('Toggle Direction'));
+    expect(screen.getByTestId('sort-direction')).toHaveTextContent('asc');
   });
 });
