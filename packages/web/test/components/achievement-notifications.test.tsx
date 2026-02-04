@@ -1,275 +1,348 @@
 /**
- * Achievement Notifications Tests
- * TDD tests for achievement notification system
+ * @vitest-environment jsdom
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import {
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import type {
   AchievementNotification,
-  AchievementNotificationStack,
+} from '../../src/components/achievement-notifications';
+import {
+  NotificationToast,
+  NotificationStack,
+  NotificationHistory,
+  NotificationBell,
+  NotificationPreferences,
+  NotificationCenter,
   useAchievementNotifications,
-} from '@/components/achievements/notifications';
-import type { Achievement } from '@/components/achievements';
+} from '../../src/components/achievement-notifications';
 
 // =============================================================================
 // Test Data
 // =============================================================================
 
-const mockAchievement: Achievement = {
-  id: 'STREAK_7',
-  name: 'Week Warrior',
-  description: 'Made forecasts for 7 consecutive days',
-  category: 'STREAK',
-  tier: 'BRONZE',
-  unlockedAt: new Date('2024-01-15'),
-  progress: 7,
-  maxProgress: 7,
-};
-
-const mockGoldAchievement: Achievement = {
-  id: 'FORECASTS_100',
-  name: 'Century Forecaster',
-  description: 'Make 100 forecasts',
-  category: 'VOLUME',
-  tier: 'GOLD',
-  unlockedAt: new Date('2024-01-20'),
-  progress: 100,
-  maxProgress: 100,
-};
-
-const mockDiamondAchievement: Achievement = {
-  id: 'BRIER_ELITE',
-  name: 'Elite Forecaster',
-  description: 'Achieve a Brier score below 0.10',
-  category: 'ACCURACY',
-  tier: 'DIAMOND',
-  unlockedAt: new Date('2024-01-25'),
-  progress: 1,
-  maxProgress: 1,
-};
+const mockNotifications: AchievementNotification[] = [
+  {
+    id: 'notif-1',
+    achievementId: 'streak-7',
+    achievementName: '7 Day Streak',
+    achievementIcon: '🔥',
+    type: 'unlock',
+    message: 'You earned the 7 Day Streak badge!',
+    timestamp: '2025-01-10T12:00:00Z',
+    read: false,
+  },
+  {
+    id: 'notif-2',
+    achievementId: 'forecasts-10',
+    achievementName: 'Getting Started',
+    achievementIcon: '📊',
+    type: 'unlock',
+    message: 'You earned the Getting Started badge!',
+    timestamp: '2025-01-08T10:00:00Z',
+    read: true,
+  },
+  {
+    id: 'notif-3',
+    achievementId: 'accuracy-80',
+    achievementName: 'Sharp Shooter',
+    achievementIcon: '🎯',
+    type: 'progress',
+    message: '90% progress towards Sharp Shooter',
+    timestamp: '2025-01-12T09:00:00Z',
+    read: false,
+  },
+  {
+    id: 'notif-4',
+    achievementId: 'streak-30',
+    achievementName: '30 Day Streak',
+    achievementIcon: '🔥',
+    type: 'milestone',
+    message: 'Halfway to 30 Day Streak!',
+    timestamp: '2025-01-11T08:00:00Z',
+    read: true,
+  },
+];
 
 // =============================================================================
-// AchievementNotification Component Tests
+// NotificationToast Tests
 // =============================================================================
 
-describe('AchievementNotification', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('should render notification with achievement name', () => {
+describe('NotificationToast', () => {
+  it('renders toast', () => {
     render(
-      <AchievementNotification
-        achievement={mockAchievement}
-        onDismiss={() => {}}
-      />
+      <NotificationToast notification={mockNotifications[0]!} onDismiss={() => {}} />
     );
-    expect(screen.getByText('Week Warrior')).toBeInTheDocument();
+    expect(screen.getByTestId('notification-toast')).toBeInTheDocument();
   });
 
-  it('should render notification with achievement description', () => {
+  it('shows achievement name', () => {
     render(
-      <AchievementNotification
-        achievement={mockAchievement}
-        onDismiss={() => {}}
-      />
+      <NotificationToast notification={mockNotifications[0]!} onDismiss={() => {}} />
     );
-    expect(screen.getByText('Made forecasts for 7 consecutive days')).toBeInTheDocument();
+    expect(screen.getByText('7 Day Streak')).toBeInTheDocument();
   });
 
-  it('should show "ACHIEVEMENT UNLOCKED" header', () => {
+  it('shows message', () => {
     render(
-      <AchievementNotification
-        achievement={mockAchievement}
-        onDismiss={() => {}}
-      />
+      <NotificationToast notification={mockNotifications[0]!} onDismiss={() => {}} />
     );
-    expect(screen.getByText(/ACHIEVEMENT UNLOCKED/i)).toBeInTheDocument();
+    expect(screen.getByText(/earned/i)).toBeInTheDocument();
   });
 
-  it('should display category icon', () => {
+  it('shows icon', () => {
     render(
-      <AchievementNotification
-        achievement={mockAchievement}
-        onDismiss={() => {}}
-      />
+      <NotificationToast notification={mockNotifications[0]!} onDismiss={() => {}} />
     );
-    expect(screen.getByTestId('notification-category-icon')).toHaveTextContent('🔥');
+    expect(screen.getByText('🔥')).toBeInTheDocument();
   });
 
-  it('should display tier badge', () => {
-    render(
-      <AchievementNotification
-        achievement={mockAchievement}
-        onDismiss={() => {}}
-      />
-    );
-    expect(screen.getByTestId('notification-tier-badge')).toHaveTextContent('BRONZE');
-  });
-
-  it('should apply tier-specific styling for GOLD', () => {
-    render(
-      <AchievementNotification
-        achievement={mockGoldAchievement}
-        onDismiss={() => {}}
-      />
-    );
-    const badge = screen.getByTestId('notification-tier-badge');
-    expect(badge).toHaveTextContent('GOLD');
-  });
-
-  it('should apply tier-specific styling for DIAMOND', () => {
-    render(
-      <AchievementNotification
-        achievement={mockDiamondAchievement}
-        onDismiss={() => {}}
-      />
-    );
-    const badge = screen.getByTestId('notification-tier-badge');
-    expect(badge).toHaveTextContent('DIAMOND');
-  });
-
-  it('should call onDismiss when close button clicked', () => {
+  it('calls onDismiss when clicked', () => {
     const onDismiss = vi.fn();
     render(
-      <AchievementNotification
-        achievement={mockAchievement}
-        onDismiss={onDismiss}
-      />
+      <NotificationToast notification={mockNotifications[0]!} onDismiss={onDismiss} />
     );
-    const closeButton = screen.getByTestId('notification-close-button');
-    fireEvent.click(closeButton);
-    expect(onDismiss).toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('dismiss-toast'));
+    expect(onDismiss).toHaveBeenCalledWith('notif-1');
   });
 
-  it('should auto-dismiss after specified duration', () => {
-    const onDismiss = vi.fn();
+  it('shows unlock type styling', () => {
     render(
-      <AchievementNotification
-        achievement={mockAchievement}
-        onDismiss={onDismiss}
-        duration={3000}
-      />
+      <NotificationToast notification={mockNotifications[0]!} onDismiss={() => {}} />
     );
-    act(() => {
-      vi.advanceTimersByTime(3500);
-    });
-    expect(onDismiss).toHaveBeenCalled();
+    const toast = screen.getByTestId('notification-toast');
+    expect(toast.className).toContain('unlock');
   });
 
-  it('should show progress bar that decreases over time', () => {
+  it('shows progress type styling', () => {
     render(
-      <AchievementNotification
-        achievement={mockAchievement}
-        onDismiss={() => {}}
-        duration={5000}
-      />
+      <NotificationToast notification={mockNotifications[2]!} onDismiss={() => {}} />
     );
-    expect(screen.getByTestId('notification-progress-bar')).toBeInTheDocument();
-  });
-
-  it('should have data-testid for notification container', () => {
-    render(
-      <AchievementNotification
-        achievement={mockAchievement}
-        onDismiss={() => {}}
-      />
-    );
-    expect(screen.getByTestId('achievement-notification')).toBeInTheDocument();
+    const toast = screen.getByTestId('notification-toast');
+    expect(toast.className).toContain('progress');
   });
 });
 
 // =============================================================================
-// AchievementNotificationStack Tests
+// NotificationStack Tests
 // =============================================================================
 
-describe('AchievementNotificationStack', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('should render no notifications when queue is empty', () => {
-    render(<AchievementNotificationStack notifications={[]} onDismiss={() => {}} />);
-    expect(screen.queryByTestId('achievement-notification')).not.toBeInTheDocument();
-  });
-
-  it('should render single notification', () => {
+describe('NotificationStack', () => {
+  it('renders stack', () => {
     render(
-      <AchievementNotificationStack
-        notifications={[mockAchievement]}
-        onDismiss={() => {}}
-      />
+      <NotificationStack notifications={mockNotifications} onDismiss={() => {}} />
     );
-    expect(screen.getByTestId('achievement-notification')).toBeInTheDocument();
+    expect(screen.getByTestId('notification-stack')).toBeInTheDocument();
   });
 
-  it('should render multiple notifications stacked', () => {
+  it('shows all notifications', () => {
     render(
-      <AchievementNotificationStack
-        notifications={[mockAchievement, mockGoldAchievement]}
-        onDismiss={() => {}}
-      />
+      <NotificationStack notifications={mockNotifications} onDismiss={() => {}} />
     );
-    const notifications = screen.getAllByTestId('achievement-notification');
-    expect(notifications).toHaveLength(2);
+    const toasts = screen.getAllByTestId('notification-toast');
+    expect(toasts.length).toBe(4);
   });
 
-  it('should limit visible notifications to maxVisible', () => {
+  it('limits displayed notifications', () => {
     render(
-      <AchievementNotificationStack
-        notifications={[mockAchievement, mockGoldAchievement, mockDiamondAchievement]}
-        onDismiss={() => {}}
-        maxVisible={2}
-      />
+      <NotificationStack notifications={mockNotifications} onDismiss={() => {}} maxVisible={2} />
     );
-    const notifications = screen.getAllByTestId('achievement-notification');
-    expect(notifications).toHaveLength(2);
+    const toasts = screen.getAllByTestId('notification-toast');
+    expect(toasts.length).toBe(2);
   });
 
-  it('should show overflow indicator when more notifications than maxVisible', () => {
+  it('shows empty state', () => {
     render(
-      <AchievementNotificationStack
-        notifications={[mockAchievement, mockGoldAchievement, mockDiamondAchievement]}
-        onDismiss={() => {}}
-        maxVisible={2}
-      />
+      <NotificationStack notifications={[]} onDismiss={() => {}} />
     );
-    expect(screen.getByTestId('notification-overflow')).toBeInTheDocument();
-    expect(screen.getByTestId('notification-overflow')).toHaveTextContent('+1');
+    expect(screen.queryByTestId('notification-toast')).not.toBeInTheDocument();
   });
 
-  it('should call onDismiss with achievement id when notification dismissed', () => {
+  it('calls onDismiss with notification id', () => {
     const onDismiss = vi.fn();
     render(
-      <AchievementNotificationStack
-        notifications={[mockAchievement]}
-        onDismiss={onDismiss}
-      />
+      <NotificationStack notifications={mockNotifications} onDismiss={onDismiss} />
     );
-    const closeButton = screen.getByTestId('notification-close-button');
-    fireEvent.click(closeButton);
-    expect(onDismiss).toHaveBeenCalledWith('STREAK_7');
+    const buttons = screen.getAllByTestId('dismiss-toast');
+    fireEvent.click(buttons[0]!);
+    expect(onDismiss).toHaveBeenCalledWith('notif-1');
+  });
+});
+
+// =============================================================================
+// NotificationHistory Tests
+// =============================================================================
+
+describe('NotificationHistory', () => {
+  it('renders history', () => {
+    render(<NotificationHistory notifications={mockNotifications} />);
+    expect(screen.getByTestId('notification-history')).toBeInTheDocument();
   });
 
-  it('should have fixed position in bottom-right corner', () => {
+  it('shows all notifications', () => {
+    render(<NotificationHistory notifications={mockNotifications} />);
+    const items = screen.getAllByTestId('history-item');
+    expect(items.length).toBe(4);
+  });
+
+  it('shows notification messages', () => {
+    render(<NotificationHistory notifications={mockNotifications} />);
+    expect(screen.getAllByText(/7 Day Streak/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Getting Started/).length).toBeGreaterThan(0);
+  });
+
+  it('shows empty state', () => {
+    render(<NotificationHistory notifications={[]} />);
+    expect(screen.getByText(/no notifications/i)).toBeInTheDocument();
+  });
+
+  it('marks unread notifications', () => {
+    render(<NotificationHistory notifications={mockNotifications} />);
+    const items = screen.getAllByTestId('history-item');
+    const unread = items.filter((el) => el.classList.contains('unread'));
+    expect(unread.length).toBe(2);
+  });
+
+  it('shows timestamp', () => {
+    render(<NotificationHistory notifications={mockNotifications} />);
+    expect(screen.getAllByText(/jan/i).length).toBeGreaterThan(0);
+  });
+
+  it('calls onMarkRead when clicked', () => {
+    const onMarkRead = vi.fn();
+    render(<NotificationHistory notifications={mockNotifications} onMarkRead={onMarkRead} />);
+    const items = screen.getAllByTestId('history-item');
+    fireEvent.click(items[0]!);
+    expect(onMarkRead).toHaveBeenCalledWith('notif-1');
+  });
+});
+
+// =============================================================================
+// NotificationBell Tests
+// =============================================================================
+
+describe('NotificationBell', () => {
+  it('renders bell', () => {
+    render(<NotificationBell unreadCount={3} onClick={() => {}} />);
+    expect(screen.getByTestId('notification-bell')).toBeInTheDocument();
+  });
+
+  it('shows unread count', () => {
+    render(<NotificationBell unreadCount={3} onClick={() => {}} />);
+    expect(screen.getByText('3')).toBeInTheDocument();
+  });
+
+  it('hides count when zero', () => {
+    render(<NotificationBell unreadCount={0} onClick={() => {}} />);
+    expect(screen.queryByTestId('unread-badge')).not.toBeInTheDocument();
+  });
+
+  it('calls onClick', () => {
+    const onClick = vi.fn();
+    render(<NotificationBell unreadCount={2} onClick={onClick} />);
+    fireEvent.click(screen.getByTestId('notification-bell'));
+    expect(onClick).toHaveBeenCalled();
+  });
+
+  it('shows active state', () => {
+    render(<NotificationBell unreadCount={5} onClick={() => {}} />);
+    const bell = screen.getByTestId('notification-bell');
+    expect(bell.className).toContain('has-unread');
+  });
+});
+
+// =============================================================================
+// NotificationPreferences Tests
+// =============================================================================
+
+describe('NotificationPreferences', () => {
+  const defaultPrefs = {
+    unlocks: true,
+    progress: true,
+    milestones: true,
+  };
+
+  it('renders preferences', () => {
+    render(<NotificationPreferences preferences={defaultPrefs} onChange={() => {}} />);
+    expect(screen.getByTestId('notification-preferences')).toBeInTheDocument();
+  });
+
+  it('shows toggle for unlocks', () => {
+    render(<NotificationPreferences preferences={defaultPrefs} onChange={() => {}} />);
+    expect(screen.getAllByText(/unlock/i).length).toBeGreaterThan(0);
+  });
+
+  it('shows toggle for progress', () => {
+    render(<NotificationPreferences preferences={defaultPrefs} onChange={() => {}} />);
+    expect(screen.getAllByText(/progress/i).length).toBeGreaterThan(0);
+  });
+
+  it('shows toggle for milestones', () => {
+    render(<NotificationPreferences preferences={defaultPrefs} onChange={() => {}} />);
+    expect(screen.getAllByText(/milestone/i).length).toBeGreaterThan(0);
+  });
+
+  it('calls onChange when toggled', () => {
+    const onChange = vi.fn();
+    render(<NotificationPreferences preferences={defaultPrefs} onChange={onChange} />);
+    fireEvent.click(screen.getByTestId('toggle-unlocks'));
+    expect(onChange).toHaveBeenCalledWith({ ...defaultPrefs, unlocks: false });
+  });
+
+  it('reflects disabled state', () => {
+    const prefs = { unlocks: false, progress: true, milestones: true };
+    render(<NotificationPreferences preferences={prefs} onChange={() => {}} />);
+    const toggle = screen.getByTestId('toggle-unlocks');
+    expect(toggle.className).toContain('off');
+  });
+});
+
+// =============================================================================
+// NotificationCenter Tests
+// =============================================================================
+
+describe('NotificationCenter', () => {
+  it('renders center', () => {
+    render(<NotificationCenter notifications={mockNotifications} />);
+    expect(screen.getByTestId('notification-center')).toBeInTheDocument();
+  });
+
+  it('shows notification history', () => {
+    render(<NotificationCenter notifications={mockNotifications} />);
+    expect(screen.getByTestId('notification-history')).toBeInTheDocument();
+  });
+
+  it('shows title', () => {
+    render(<NotificationCenter notifications={mockNotifications} />);
+    expect(screen.getAllByText(/notification/i).length).toBeGreaterThan(0);
+  });
+
+  it('shows unread count', () => {
+    render(<NotificationCenter notifications={mockNotifications} />);
+    const center = screen.getByTestId('notification-center');
+    expect(center).toHaveTextContent('2 unread');
+  });
+
+  it('shows mark all read button', () => {
+    render(<NotificationCenter notifications={mockNotifications} />);
+    expect(screen.getByTestId('mark-all-read')).toBeInTheDocument();
+  });
+
+  it('calls onMarkAllRead', () => {
+    const onMarkAllRead = vi.fn();
     render(
-      <AchievementNotificationStack
-        notifications={[mockAchievement]}
-        onDismiss={() => {}}
+      <NotificationCenter
+        notifications={mockNotifications}
+        onMarkAllRead={onMarkAllRead}
       />
     );
-    const stack = screen.getByTestId('notification-stack');
-    expect(stack).toHaveClass('fixed');
+    fireEvent.click(screen.getByTestId('mark-all-read'));
+    expect(onMarkAllRead).toHaveBeenCalled();
+  });
+
+  it('shows loading state', () => {
+    render(<NotificationCenter notifications={[]} loading={true} />);
+    expect(screen.getByTestId('loading-indicator')).toBeInTheDocument();
   });
 });
 
@@ -278,85 +351,83 @@ describe('AchievementNotificationStack', () => {
 // =============================================================================
 
 describe('useAchievementNotifications', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  function TestComponent() {
-    const { notifications, notify, dismiss, dismissAll, isActive } = useAchievementNotifications();
+  function TestComponent({
+    initial,
+  }: {
+    initial: AchievementNotification[];
+  }) {
+    const {
+      notifications,
+      unreadCount,
+      dismiss,
+      markRead,
+      markAllRead,
+      addNotification,
+    } = useAchievementNotifications(initial);
 
     return (
       <div>
-        <div data-testid="notification-count">{notifications.length}</div>
-        <div data-testid="is-active">{isActive ? 'true' : 'false'}</div>
-        <button onClick={() => notify(mockAchievement)}>Notify</button>
-        <button onClick={() => notify(mockGoldAchievement)}>Notify Gold</button>
-        <button onClick={() => dismiss(mockAchievement.id)}>Dismiss</button>
-        <button onClick={() => dismissAll()}>Dismiss All</button>
-        <AchievementNotificationStack notifications={notifications} onDismiss={dismiss} />
+        <span data-testid="notif-count">{notifications.length}</span>
+        <span data-testid="unread-count">{unreadCount}</span>
+        <button onClick={() => dismiss('notif-1')}>Dismiss</button>
+        <button onClick={() => markRead('notif-1')}>Mark Read</button>
+        <button onClick={markAllRead}>Mark All Read</button>
+        <button
+          onClick={() =>
+            addNotification({
+              id: 'notif-new',
+              achievementId: 'streak-100',
+              achievementName: '100 Day Streak',
+              achievementIcon: '💪',
+              type: 'unlock',
+              message: 'You earned the 100 Day Streak badge!',
+              timestamp: new Date().toISOString(),
+              read: false,
+            })
+          }
+        >
+          Add
+        </button>
       </div>
     );
   }
 
-  it('should start with empty notifications', () => {
-    render(<TestComponent />);
-    expect(screen.getByTestId('notification-count')).toHaveTextContent('0');
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('should add notification when notify called', () => {
-    render(<TestComponent />);
-    fireEvent.click(screen.getByText('Notify'));
-    expect(screen.getByTestId('notification-count')).toHaveTextContent('1');
+  it('initializes with notifications', () => {
+    render(<TestComponent initial={mockNotifications} />);
+    expect(screen.getByTestId('notif-count')).toHaveTextContent('4');
   });
 
-  it('should set isActive to true when notifications exist', () => {
-    render(<TestComponent />);
-    fireEvent.click(screen.getByText('Notify'));
-    expect(screen.getByTestId('is-active')).toHaveTextContent('true');
+  it('calculates unread count', () => {
+    render(<TestComponent initial={mockNotifications} />);
+    expect(screen.getByTestId('unread-count')).toHaveTextContent('2');
   });
 
-  it('should add multiple notifications to queue', () => {
-    render(<TestComponent />);
-    fireEvent.click(screen.getByText('Notify'));
-    fireEvent.click(screen.getByText('Notify Gold'));
-    expect(screen.getByTestId('notification-count')).toHaveTextContent('2');
-  });
-
-  it('should remove notification when dismiss called', () => {
-    render(<TestComponent />);
-    fireEvent.click(screen.getByText('Notify'));
-    expect(screen.getByTestId('notification-count')).toHaveTextContent('1');
+  it('dismisses notification', () => {
+    render(<TestComponent initial={mockNotifications} />);
     fireEvent.click(screen.getByText('Dismiss'));
-    expect(screen.getByTestId('notification-count')).toHaveTextContent('0');
+    expect(screen.getByTestId('notif-count')).toHaveTextContent('3');
   });
 
-  it('should remove all notifications when dismissAll called', () => {
-    render(<TestComponent />);
-    fireEvent.click(screen.getByText('Notify'));
-    fireEvent.click(screen.getByText('Notify Gold'));
-    expect(screen.getByTestId('notification-count')).toHaveTextContent('2');
-    fireEvent.click(screen.getByText('Dismiss All'));
-    expect(screen.getByTestId('notification-count')).toHaveTextContent('0');
+  it('marks notification as read', () => {
+    render(<TestComponent initial={mockNotifications} />);
+    fireEvent.click(screen.getByText('Mark Read'));
+    expect(screen.getByTestId('unread-count')).toHaveTextContent('1');
   });
 
-  it('should not add duplicate notifications', () => {
-    render(<TestComponent />);
-    fireEvent.click(screen.getByText('Notify'));
-    fireEvent.click(screen.getByText('Notify'));
-    expect(screen.getByTestId('notification-count')).toHaveTextContent('1');
+  it('marks all as read', () => {
+    render(<TestComponent initial={mockNotifications} />);
+    fireEvent.click(screen.getByText('Mark All Read'));
+    expect(screen.getByTestId('unread-count')).toHaveTextContent('0');
   });
 
-  it('should auto-dismiss notifications after timeout', () => {
-    render(<TestComponent />);
-    fireEvent.click(screen.getByText('Notify'));
-    expect(screen.getByTestId('notification-count')).toHaveTextContent('1');
-    act(() => {
-      vi.advanceTimersByTime(6000);
-    });
-    expect(screen.getByTestId('notification-count')).toHaveTextContent('0');
+  it('adds notification', () => {
+    render(<TestComponent initial={mockNotifications} />);
+    fireEvent.click(screen.getByText('Add'));
+    expect(screen.getByTestId('notif-count')).toHaveTextContent('5');
+    expect(screen.getByTestId('unread-count')).toHaveTextContent('3');
   });
 });
