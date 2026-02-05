@@ -47,10 +47,15 @@ export class SyncScheduler {
   private priceSyncTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(config: Partial<SchedulerConfig> = {}) {
+    // Read intervals from env vars (in seconds) or use sane defaults
+    const marketIntervalMs = (parseInt(process.env.MARKET_SYNC_INTERVAL_S || '0') || 30 * 60) * 1000; // default 30 min
+    const priceIntervalMs = (parseInt(process.env.PRICE_SYNC_INTERVAL_S || '0') || 5 * 60) * 1000; // default 5 min
+    const syncEnabled = process.env.SYNC_ENABLED !== 'false'; // kill switch
+
     this.config = {
-      marketSyncInterval: config.marketSyncInterval ?? 5 * 60 * 1000, // 5 minutes
-      priceSyncInterval: config.priceSyncInterval ?? 30 * 1000, // 30 seconds
-      syncOnStartup: config.syncOnStartup ?? true,
+      marketSyncInterval: config.marketSyncInterval ?? marketIntervalMs,
+      priceSyncInterval: config.priceSyncInterval ?? priceIntervalMs,
+      syncOnStartup: config.syncOnStartup ?? syncEnabled,
       onSyncComplete: config.onSyncComplete,
       onSyncError: config.onSyncError,
     };
@@ -77,6 +82,11 @@ export class SyncScheduler {
   async start(): Promise<void> {
     if (this.state.isRunning) {
       console.log('[Scheduler] Already running');
+      return;
+    }
+
+    if (process.env.SYNC_ENABLED === 'false') {
+      console.log('[Scheduler] Sync disabled via SYNC_ENABLED=false');
       return;
     }
 
@@ -161,7 +171,7 @@ export class SyncScheduler {
       console.log('[Scheduler] Syncing Polymarket...');
       const polymarketResult = await polymarketSync.syncMarkets({
         batchSize: 100,
-        maxPages: 20,
+        maxPages: 5, // ~500 markets max — was 20 (2,000) which burns data
         activeOnly: true,
       });
 
@@ -180,8 +190,8 @@ export class SyncScheduler {
       // Sync Limitless (API uses fixed page size of 25)
       console.log('[Scheduler] Syncing Limitless...');
       const limitlessResult = await limitlessSync.syncMarkets({
-        batchSize: 25, // Limitless API page size is fixed at 25
-        maxPages: 20,  // Enough for ~500 markets
+        batchSize: 25,
+        maxPages: 5, // ~125 markets — was 20 (500)
         activeOnly: true,
       });
 
