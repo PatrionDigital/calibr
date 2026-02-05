@@ -49,7 +49,7 @@ export class SyncScheduler {
   constructor(config: Partial<SchedulerConfig> = {}) {
     // Read intervals from env vars (in seconds) or use sane defaults
     const marketIntervalMs = (parseInt(process.env.MARKET_SYNC_INTERVAL_S || '0') || 30 * 60) * 1000; // default 30 min
-    const priceIntervalMs = (parseInt(process.env.PRICE_SYNC_INTERVAL_S || '0') || 5 * 60) * 1000; // default 5 min
+    const priceIntervalMs = (parseInt(process.env.PRICE_SYNC_INTERVAL_S || '0') || 15 * 60) * 1000; // default 15 min
     const syncEnabled = process.env.SYNC_ENABLED !== 'false'; // kill switch
 
     this.config = {
