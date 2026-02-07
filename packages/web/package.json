@@ -1,6 +1,6 @@
 {
   "name": "@calibr/web",
-  "version": "0.3.81",
+  "version": "0.3.82",
   "private": true,
   "description": "Calibr.xyz Next.js frontend",
   "scripts": {
