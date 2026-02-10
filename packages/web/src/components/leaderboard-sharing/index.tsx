@@ -63,7 +63,8 @@ export function AchievementCard({ achievement, onShare, compact = false }: Achie
           <button
             aria-label="share"
             onClick={() => onShare(achievement.id)}
-            className="border border-[var(--terminal-green)] text-[var(--terminal-green)] px-2 py-1 text-xs hover:bg-[var(--terminal-green)] hover:bg-opacity-20 transition-colors"
+            className="border border-[var(--terminal-green)] text-[var(--terminal-green)] px-2 py-1 text-xs transition-all duration-100 active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-[var(--terminal-green)] [@media(hover:hover)]:hover:bg-opacity-20"
+            style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
           >
             Share
           </button>
@@ -95,7 +96,8 @@ export function ShareButton({ onClick, label = 'Share', disabled = false, size =
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`border border-[var(--terminal-green)] text-[var(--terminal-green)] font-mono hover:bg-[var(--terminal-green)] hover:bg-opacity-20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${sizeClasses[size]}`}
+      className={`border border-[var(--terminal-green)] text-[var(--terminal-green)] font-mono transition-all duration-100 active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-[var(--terminal-green)] [@media(hover:hover)]:hover:bg-opacity-20 disabled:opacity-50 disabled:cursor-not-allowed ${sizeClasses[size]}`}
+      style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
     >
       {label}
     </button>
@@ -126,7 +128,8 @@ export function ShareModal({ isOpen, onClose, achievement, targets, onShare }: S
           <button
             aria-label="close"
             onClick={onClose}
-            className="text-[var(--terminal-green)] hover:text-white"
+            className="text-[var(--terminal-green)] transition-all duration-100 active:scale-[0.95] active:opacity-90 [@media(hover:hover)]:hover:text-white"
+            style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
           >
             [X]
           </button>
@@ -145,7 +148,8 @@ export function ShareModal({ isOpen, onClose, achievement, targets, onShare }: S
             <button
               key={target.id}
               onClick={() => onShare?.(target.id, achievement)}
-              className="w-full flex items-center gap-3 p-3 border border-[var(--terminal-green)] border-opacity-30 text-[var(--terminal-green)] hover:bg-[var(--terminal-green)] hover:bg-opacity-10 transition-colors"
+              className="w-full flex items-center gap-3 p-3 border border-[var(--terminal-green)] border-opacity-30 text-[var(--terminal-green)] transition-all duration-100 active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-[var(--terminal-green)] [@media(hover:hover)]:hover:bg-opacity-10"
+              style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
             >
               <span>{target.icon}</span>
               <span>{target.name}</span>
@@ -239,7 +243,8 @@ export function ShareableRankCard({
         <button
           aria-label="share"
           onClick={onShare}
-          className="w-full border border-[var(--terminal-green)] text-[var(--terminal-green)] py-2 text-sm hover:bg-[var(--terminal-green)] hover:bg-opacity-20 transition-colors"
+          className="w-full border border-[var(--terminal-green)] text-[var(--terminal-green)] py-2 text-sm transition-all duration-100 active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-[var(--terminal-green)] [@media(hover:hover)]:hover:bg-opacity-20"
+          style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
         >
           Share Rank
         </button>

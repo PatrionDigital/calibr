@@ -69,6 +69,62 @@ A simplified interface for tablet and mobile that maintains the terminal aesthet
 - Touch-friendly tap targets (minimum 44px)
 - Swipe gestures for panel navigation
 
+### 1.2.1 Mobile & Farcaster Button Active States
+
+On mobile and Farcaster Frame webviews, CSS `:active` and `:hover` states can persist after a tap, leaving buttons visually "stuck" in their active state. To ensure buttons return to their default state after touch interaction:
+
+**Required Button Classes:**
+
+All interactive buttons on touch-enabled interfaces MUST include:
+
+```css
+/* Tailwind classes for touch-safe buttons */
+touch-action-manipulation    /* Prevents 300ms delay */
+active:scale-[0.98]          /* Transform feedback that auto-resets */
+active:opacity-90            /* Opacity feedback that auto-resets */
+```
+
+**CSS Pattern:**
+
+```css
+.touch-safe-button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 100ms ease-out, opacity 100ms ease-out;
+}
+
+.touch-safe-button:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+```
+
+**Implementation Rules:**
+
+1. **Avoid background color changes on `:hover`** for buttons that will be used on mobile — use `active:` instead
+2. **Use transforms and opacity** for active states, as they reset more reliably than background colors
+3. **Include `-webkit-tap-highlight-color: transparent`** to remove default mobile tap highlight
+4. **Add `touch-action: manipulation`** to eliminate touch delay
+5. **For Farcaster Frame buttons**, apply the pattern above explicitly to ensure compatibility
+
+**Example Button Implementation:**
+
+```tsx
+<button
+  className={cn(
+    "px-4 py-2 border border-[var(--terminal-green)]",
+    "transition-all duration-100",
+    // Touch-safe active states
+    "active:scale-[0.98] active:opacity-90",
+    // Hover only on devices that support it
+    "[@media(hover:hover)]:hover:bg-[var(--terminal-green)]/20"
+  )}
+  style={{ WebkitTapHighlightColor: 'transparent' }}
+>
+  Button Text
+</button>
+```
+
 ### 1.3 Theming System (Post-MVP)
 
 Calibr.xyz will support three visual themes, each with Light and Dark variants:

@@ -98,13 +98,14 @@ export function ShareFormatSelector({
             key={format}
             data-testid={`format-${format}`}
             onClick={() => isAvailable && onSelect(format)}
-            className={`flex-1 p-3 rounded border transition-all ${
+            className={`flex-1 p-3 rounded border transition-all duration-100 active:scale-[0.98] active:opacity-90 ${
               isSelected
                 ? 'border-blue-400 bg-blue-400/10'
                 : isAvailable
-                ? 'border-zinc-700 hover:border-zinc-600'
+                ? 'border-zinc-700 [@media(hover:hover)]:hover:border-zinc-600'
                 : 'border-zinc-800 opacity-50 cursor-not-allowed'
             }`}
+            style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
           >
             <div className="text-center">
               <span className="text-xl">{info.icon}</span>
@@ -267,7 +268,8 @@ export function ShareLinkGenerator({
         <button
           onClick={onGenerate}
           disabled={isGenerating}
-          className="w-full px-4 py-2 font-mono bg-blue-400/20 text-blue-400 rounded hover:bg-blue-400/30 disabled:opacity-50"
+          className="w-full px-4 py-2 font-mono bg-blue-400/20 text-blue-400 rounded transition-all duration-100 active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-blue-400/30 disabled:opacity-50"
+          style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
         >
           {isGenerating ? (
             <span data-testid="generating-indicator" className="flex items-center justify-center gap-2">
@@ -288,7 +290,8 @@ export function ShareLinkGenerator({
             />
             <button
               onClick={() => navigator.clipboard.writeText(generatedLink)}
-              className="px-3 py-2 font-mono bg-blue-400/20 text-blue-400 rounded hover:bg-blue-400/30"
+              className="px-3 py-2 font-mono bg-blue-400/20 text-blue-400 rounded transition-all duration-100 active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-blue-400/30"
+              style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
             >
               Copy
             </button>
@@ -384,9 +387,10 @@ export function ShareSettingsPanel({ settings, onChange }: ShareSettingsPanelPro
               role="switch"
               aria-checked={settings[key]}
               onClick={() => onChange({ [key]: !settings[key] })}
-              className={`w-10 h-5 rounded-full transition-colors ${
+              className={`w-10 h-5 rounded-full transition-all duration-100 active:scale-[0.95] ${
                 settings[key] ? 'bg-blue-400/30' : 'bg-zinc-700'
               } relative`}
+              style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
             >
               <span
                 className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${
@@ -452,7 +456,8 @@ export function ReputationShareCard({ reputation, onShare }: ReputationShareCard
         </div>
         <button
           onClick={onShare}
-          className="px-4 py-2 font-mono bg-blue-400/20 text-blue-400 rounded hover:bg-blue-400/30"
+          className="px-4 py-2 font-mono bg-blue-400/20 text-blue-400 rounded transition-all duration-100 active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-blue-400/30"
+          style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
         >
           ↗ Share
         </button>
@@ -605,7 +610,8 @@ export function ReputationSharingDashboard({
         <div className="text-center">
           <button
             onClick={handleShare}
-            className="px-8 py-3 font-mono bg-blue-400 text-black rounded hover:bg-blue-300 font-bold"
+            className="px-8 py-3 font-mono bg-blue-400 text-black rounded transition-all duration-100 active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-blue-300 font-bold"
+            style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
           >
             ↗ Share to {destinations.find((d) => d.id === localDestination)?.name}
           </button>

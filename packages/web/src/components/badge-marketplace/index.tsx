@@ -72,7 +72,8 @@ export function BadgeShareCard({ badge, onShare }: BadgeShareCardProps) {
         <button
           data-testid="share-button"
           onClick={() => onShare(badge.id)}
-          className="w-full border border-[var(--terminal-green)] text-[var(--terminal-green)] py-1 text-sm hover:bg-[var(--terminal-green)] hover:text-black transition-colors"
+          className="w-full border border-[var(--terminal-green)] text-[var(--terminal-green)] py-1 text-sm transition-all duration-100 active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-[var(--terminal-green)] [@media(hover:hover)]:hover:text-black"
+          style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
         >
           Share Badge
         </button>
@@ -95,7 +96,8 @@ export function PlatformShareButton({ target, onClick }: PlatformShareButtonProp
     <button
       data-testid="platform-share-button"
       onClick={() => onClick(target.id)}
-      className="flex items-center gap-2 border border-[var(--terminal-green)] text-[var(--terminal-green)] px-3 py-2 font-mono text-sm hover:bg-[var(--terminal-green)] hover:text-black transition-colors w-full"
+      className="flex items-center gap-2 border border-[var(--terminal-green)] text-[var(--terminal-green)] px-3 py-2 font-mono text-sm transition-all duration-100 active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-[var(--terminal-green)] [@media(hover:hover)]:hover:text-black w-full"
+      style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
     >
       <span>{target.icon}</span>
       <span>{target.name}</span>
@@ -124,7 +126,8 @@ export function BadgeEmbedCode({ badge, onCopy }: BadgeEmbedCodeProps) {
       <button
         data-testid="copy-embed"
         onClick={onCopy}
-        className="mt-1 border border-[var(--terminal-green)] text-[var(--terminal-green)] px-2 py-0.5 text-xs hover:bg-[var(--terminal-green)] hover:text-black transition-colors"
+        className="mt-1 border border-[var(--terminal-green)] text-[var(--terminal-green)] px-2 py-0.5 text-xs transition-all duration-100 active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-[var(--terminal-green)] [@media(hover:hover)]:hover:text-black"
+        style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
       >
         Copy
       </button>
@@ -184,7 +187,8 @@ export function BadgeShareModal({ badge, targets, onClose, onShare }: BadgeShare
           <button
             data-testid="close-share-modal"
             onClick={onClose}
-            className="text-[var(--terminal-green)] hover:text-white text-xl leading-none"
+            className="text-[var(--terminal-green)] text-xl leading-none transition-all duration-100 active:scale-[0.95] active:opacity-90 [@media(hover:hover)]:hover:text-white"
+            style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
           >
             x
           </button>
