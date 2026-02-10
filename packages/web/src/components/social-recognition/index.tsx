@@ -229,7 +229,8 @@ export function ShoutoutCard({ data, onShare }: ShoutoutCardProps) {
       <button
         data-testid="shoutout-share-button"
         onClick={() => onShare?.(data)}
-        className="mt-3 w-full py-2 text-sm font-mono border border-[hsl(var(--border))] rounded hover:bg-[hsl(var(--accent))] transition-colors"
+        className="mt-3 w-full py-2 text-sm font-mono border border-[hsl(var(--border))] rounded transition-all duration-100 active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-[hsl(var(--accent))]"
+        style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
       >
         Share
       </button>
@@ -646,9 +647,11 @@ export function ShareButtons({
         className={cn(
           'flex items-center justify-center gap-2 px-4 py-2',
           'bg-[#1DA1F2]/10 text-[#1DA1F2] border border-[#1DA1F2]/30',
-          'rounded font-mono text-sm hover:bg-[#1DA1F2]/20 transition-colors',
+          'rounded font-mono text-sm transition-all duration-100',
+          'active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-[#1DA1F2]/20',
           variant === 'compact' && 'px-3 py-1.5'
         )}
+        style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
       >
         <span>𝕏</span>
         {variant !== 'compact' && <span>Twitter</span>}
@@ -660,9 +663,11 @@ export function ShareButtons({
         className={cn(
           'flex items-center justify-center gap-2 px-4 py-2',
           'bg-purple-500/10 text-purple-400 border border-purple-500/30',
-          'rounded font-mono text-sm hover:bg-purple-500/20 transition-colors',
+          'rounded font-mono text-sm transition-all duration-100',
+          'active:scale-[0.98] active:opacity-90 [@media(hover:hover)]:hover:bg-purple-500/20',
           variant === 'compact' && 'px-3 py-1.5'
         )}
+        style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
       >
         <span>🟣</span>
         {variant !== 'compact' && <span>Farcaster</span>}
@@ -675,9 +680,11 @@ export function ShareButtons({
           'flex items-center justify-center gap-2 px-4 py-2',
           'bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]',
           'border border-[hsl(var(--border))] rounded font-mono text-sm',
-          'hover:bg-[hsl(var(--accent))] transition-colors',
+          'transition-all duration-100 active:scale-[0.98] active:opacity-90',
+          '[@media(hover:hover)]:hover:bg-[hsl(var(--accent))]',
           variant === 'compact' && 'px-3 py-1.5'
         )}
+        style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
       >
         <span>📋</span>
         {variant !== 'compact' && <span>Copy Link</span>}
